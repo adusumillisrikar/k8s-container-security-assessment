@@ -1,0 +1,324 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1150" width="1600" height="1150" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#334155"/></marker>
+    <marker id="arrRed" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#B42318"/></marker>
+    <marker id="arrPur" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#6941C6"/></marker>
+    <style>
+      .title { font-size: 25px; font-weight: 700; fill: #0F172A; }
+      .subtitle { font-size: 14px; fill: #475569; }
+      .tb { fill: none; stroke: #B42318; stroke-width: 2.2; stroke-dasharray: 9 6; }
+      .tbl { font-size: 12.5px; font-weight: 700; fill: #B42318; letter-spacing: .3px; }
+      .zone { fill: #F8FAFC; stroke: #94A3B8; stroke-width: 1.4; stroke-dasharray: 4 4; }
+      .zl { font-size: 12px; font-weight: 700; fill: #475569; }
+      .np { fill: none; stroke: #12805C; stroke-width: 2; stroke-dasharray: 3 3; }
+      .npl { font-size: 12px; font-weight: 700; fill: #12805C; }
+      .box { rx: 9; stroke-width: 1.5; }
+      .dev { fill: #EEF4FF; stroke: #3B6FD8; }
+      .run { fill: #ECFDF3; stroke: #12805C; }
+      .sec { fill: #F4F0FF; stroke: #6941C6; }
+      .dat { fill: #FFF6E5; stroke: #B54708; }
+      .ext { fill: #FFFFFF; stroke: #64748B; }
+      .off { fill: #F1F5F9; stroke: #94A3B8; stroke-dasharray: 5 4; }
+      .h { font-size: 14px; font-weight: 700; fill: #0F172A; }
+      .t { font-size: 11.8px; fill: #334155; }
+      .m { font-size: 11.3px; fill: #334155; font-family: Consolas, Menlo, monospace; }
+      .flow { stroke: #334155; stroke-width: 1.8; fill: none; marker-end: url(#arr); }
+      .flowp { stroke: #6941C6; stroke-width: 1.6; fill: none; marker-end: url(#arrPur); stroke-dasharray: 6 4; }
+      .flowx { stroke: #B42318; stroke-width: 1.8; fill: none; marker-end: url(#arrRed); stroke-dasharray: 5 4; }
+      .tag { fill: #0F172A; }
+      .tagt { font-size: 11px; font-weight: 700; fill: #FFFFFF; text-anchor: middle; }
+      .lock { fill: #FEF3C7; stroke: #B54708; stroke-width: 1.2; }
+      .lockt { font-size: 10.5px; font-weight: 700; fill: #92400E; text-anchor: middle; }
+      .th { font-size: 12px; font-weight: 700; fill: #0F172A; }
+    </style>
+  </defs>
+
+  <rect width="1600" height="1150" fill="#FFFFFF"/>
+  <text class="title" x="24" y="40">Low-level design: citizen request → payments-api → database (production)</text>
+  <text class="subtitle" x="24" y="63">One representative slice of the HLD, at implementation detail. Letters on flows match the NetworkPolicy table. TLS / KMS badges show where encryption happens.</text>
+
+  <!-- ================= Internet ================= -->
+  <rect class="tb" x="16" y="84" width="222" height="340" rx="12"/>
+  <text class="tbl" x="30" y="104">INTERNET</text>
+  <rect class="box ext" x="30" y="116" width="194" height="58"/>
+  <text class="h" x="44" y="140">Citizen browser</text>
+  <text class="t" x="44" y="160">pay.agency.gov.sg (example)</text>
+  <rect class="box sec" x="30" y="196" width="194" height="212"/>
+  <text class="h" x="44" y="220">AWS WAF web ACL</text>
+  <text class="t" x="44" y="242">• AWS managed: core rule set,</text>
+  <text class="t" x="54" y="259">known bad inputs, SQLi</text>
+  <text class="t" x="44" y="278">• Rate limit per client IP</text>
+  <text class="t" x="44" y="297">• Geo / IP reputation lists</text>
+  <text class="t" x="44" y="316">• Virtual-patch rules for</text>
+  <text class="t" x="54" y="333">specific CVEs when needed</text>
+  <text class="t" x="44" y="356">Logs → log archive</text>
+  <text class="t" x="44" y="380">Shield Advanced (DDoS) on</text>
+  <text class="t" x="44" y="397">the ALB for citizen services</text>
+
+  <!-- ================= VPC ================= -->
+  <rect class="tb" x="252" y="84" width="1088" height="862" rx="14"/>
+  <text class="tbl" x="268" y="104">VPC 10.20.0.0/16 · PRODUCTION WORKLOAD ACCOUNT · 2 AZs</text>
+
+  <!-- public subnets -->
+  <rect class="zone" x="266" y="118" width="210" height="306" rx="10"/>
+  <text class="zl" x="278" y="137">PUBLIC SUBNETS</text>
+  <text class="m" x="278" y="153">10.20.100.0/24, .101.0/24</text>
+  <rect class="box ext" x="280" y="166" width="182" height="244"/>
+  <text class="h" x="294" y="190">Application LB</text>
+  <text class="t" x="294" y="211">AWS LB Controller,</text>
+  <text class="t" x="294" y="228">target-type: ip</text>
+  <text class="t" x="294" y="250">Listener 443, ACM cert,</text>
+  <text class="t" x="294" y="267">TLS 1.2+ security policy</text>
+  <text class="t" x="294" y="289">SG alb-public:</text>
+  <text class="m" x="294" y="306">in  443 from 0.0.0.0/0</text>
+  <text class="m" x="294" y="322">out 8443 to app subnets</text>
+  <text class="t" x="294" y="344">Re-encrypts to pod over</text>
+  <text class="t" x="294" y="361">HTTPS (cert-manager,</text>
+  <text class="t" x="294" y="378">internal CA)</text>
+  <text class="t" x="294" y="398">No NodePort anywhere</text>
+
+  <!-- egress -->
+  <rect class="zone" x="266" y="440" width="210" height="222" rx="10"/>
+  <text class="zl" x="278" y="459">EGRESS SUBNETS</text>
+  <rect class="box ext" x="280" y="470" width="182" height="178"/>
+  <text class="h" x="294" y="494">NAT + Network Firewall</text>
+  <text class="t" x="294" y="516">Stateful domain allowlist</text>
+  <text class="t" x="294" y="533">(TLS SNI), default drop:</text>
+  <text class="m" x="294" y="552">payments-provider.example</text>
+  <text class="m" x="294" y="568">(only for ns that need it)</text>
+  <text class="t" x="294" y="590">payments-api: none.</text>
+  <text class="t" x="294" y="609">All AWS APIs via VPC</text>
+  <text class="t" x="294" y="626">endpoints, not internet.</text>
+
+  <!-- private app subnets + cluster -->
+  <rect class="zone" x="490" y="118" width="598" height="816" rx="10"/>
+  <text class="zl" x="502" y="137">PRIVATE APP SUBNETS · 10.20.0.0/22, 10.20.4.0/22</text>
+
+  <rect class="tb" x="500" y="146" width="578" height="776" rx="12"/>
+  <text class="tbl" x="514" y="165">EKS CLUSTER prod-apps-1 · Kubernetes 1.33</text>
+
+  <!-- control plane -->
+  <rect class="box sec" x="514" y="176" width="550" height="112"/>
+  <text class="h" x="528" y="198">Control plane (AWS-managed)</text>
+  <text class="t" x="528" y="218">API endpoint: private only. API SG: 443 from admin SSM-bastion SG; no CI runner access.</text>
+  <text class="t" x="528" y="236">Admission: Pod Security Admission (namespace labels) → Kyverno webhooks</text>
+  <text class="t" x="542" y="253">(verifyImages + SBOM attestation, registry allowlist, no cluster-admin, limits)</text>
+  <text class="t" x="528" y="273">Logs: api, audit, authenticator, controllerManager, scheduler → CloudWatch</text>
+  <rect class="lock" x="988" y="186" width="68" height="20" rx="4"/><text class="lockt" x="1022" y="200">KMS etcd</text>
+
+  <!-- node group -->
+  <rect class="zone" x="514" y="302" width="550" height="456" rx="10" fill="#FFFFFF"/>
+  <text class="zl" x="526" y="320">MANAGED NODE GROUP ng-apps · Bottlerocket · 2 AZs</text>
+
+  <!-- namespace citizen-payments -->
+  <rect class="np" x="526" y="330" width="300" height="306" rx="10"/>
+  <text class="npl" x="538" y="348">ns citizen-payments · PSA restricted</text>
+  <text class="t" x="538" y="364">NetworkPolicy: default-deny in + out</text>
+
+  <rect class="box run" x="540" y="374" width="272" height="160"/>
+  <text class="h" x="554" y="396">Pod payments-api (×3, PDB 2)</text>
+  <text class="m" x="554" y="415">image: …/payments-api@sha256:…</text>
+  <text class="t" x="554" y="434">Listens 8443 (TLS); UID 10001</text>
+  <text class="t" x="554" y="452">runAsNonRoot · readOnlyRootFilesystem</text>
+  <text class="t" x="554" y="470">drop ALL caps · seccomp RuntimeDefault</text>
+  <text class="t" x="554" y="488">requests 250m/256Mi · limit 512Mi</text>
+  <text class="t" x="554" y="510">Secret file: /etc/secrets (tmpfs, ro)</text>
+  <text class="t" x="554" y="526">No env-var secrets. No SA token.</text>
+
+  <rect class="box sec" x="540" y="542" width="272" height="86"/>
+  <text class="h" x="554" y="564">SA payments-api</text>
+  <text class="t" x="554" y="582">Pod Identity → IAM role payments-api-prod</text>
+  <text class="m" x="554" y="600">rds-db:connect (dbuser payments_app)</text>
+  <text class="t" x="554" y="619">Nothing else. No K8s RBAC bindings.</text>
+
+  <!-- external-secrets + argocd -->
+  <rect class="np" x="838" y="330" width="214" height="146" rx="10"/>
+  <text class="npl" x="850" y="348">ns external-secrets</text>
+  <rect class="box sec" x="850" y="358" width="190" height="108"/>
+  <text class="h" x="862" y="378">ESO controller</text>
+  <text class="t" x="862" y="397">SecretStore in citizen-payments</text>
+  <text class="t" x="862" y="413">→ role eso-citizen-payments:</text>
+  <text class="m" x="862" y="430">secretsmanager:GetSecret</text>
+  <text class="m" x="862" y="445">Value on /prod/payments/*</text>
+  <text class="t" x="862" y="460">refresh 1h → K8s Secret</text>
+
+  <rect class="np" x="838" y="486" width="214" height="144" rx="10"/>
+  <text class="npl" x="850" y="504">ns argocd</text>
+  <rect class="box sec" x="850" y="514" width="190" height="106"/>
+  <text class="h" x="862" y="534">Argo CD</text>
+  <text class="t" x="862" y="553">Pulls env repo (HTTPS 443)</text>
+  <text class="t" x="862" y="570">AppProject payments: only</text>
+  <text class="t" x="862" y="586">ns citizen-payments, no</text>
+  <text class="t" x="862" y="602">cluster-scoped resources</text>
+
+  <!-- daemonsets -->
+  <rect class="box sec" x="526" y="642" width="526" height="104"/>
+  <text class="h" x="540" y="662">On every node (DaemonSets, ns platform-node-agents)</text>
+  <text class="t" x="540" y="682">• Falco (modern eBPF) → Falcosidekick → SIEM   • Fluent Bit → CloudWatch Logs</text>
+  <text class="t" x="540" y="700">• VPC CNI + network policy agent (eBPF)   • Pod Identity agent 169.254.170.23:80</text>
+  <text class="t" x="540" y="718">Node: IMDSv2 required, hop limit 1 · no SSH (SSM only) · EBS encrypted (KMS)</text>
+  <text class="t" x="540" y="736">Node role: AmazonEKSWorkerNodePolicy + ECR pull-only. Nothing else.</text>
+
+  <!-- cots node group -->
+  <rect class="box off" x="514" y="772" width="550" height="54"/>
+  <text class="h" x="528" y="794">Node group ng-cots (taint workload=cots:NoSchedule)</text>
+  <text class="t" x="528" y="814">Isolated COTS slice. Not part of this diagram (see Module 7).</text>
+
+  <!-- IMDS blocked -->
+  <rect class="box off" x="514" y="842" width="250" height="66"/>
+  <text class="h" x="528" y="864">IMDS 169.254.169.254</text>
+  <text class="t" x="528" y="884">Unreachable from pods (hop limit 1</text>
+  <text class="t" x="528" y="900">+ default-deny egress)</text>
+
+  <rect class="box off" x="780" y="842" width="284" height="66"/>
+  <text class="h" x="794" y="864">CoreDNS (kube-system)</text>
+  <text class="t" x="794" y="884">Only egress every pod gets by default:</text>
+  <text class="m" x="794" y="900">UDP/TCP 53</text>
+
+  <!-- data subnets -->
+  <rect class="zone" x="1102" y="118" width="226" height="330" rx="10"/>
+  <text class="zl" x="1114" y="137">PRIVATE DATA SUBNETS</text>
+  <text class="m" x="1114" y="153">10.20.8.0/24, .9.0/24</text>
+  <rect class="box dat" x="1114" y="164" width="202" height="270"/>
+  <text class="h" x="1128" y="188">RDS PostgreSQL</text>
+  <text class="t" x="1128" y="207">Multi-AZ, private only</text>
+  <text class="t" x="1128" y="228">SG rds-payments:</text>
+  <text class="m" x="1128" y="245">in 5432 from ng-apps SG</text>
+  <text class="t" x="1128" y="266">rds.force_ssl = 1</text>
+  <text class="t" x="1128" y="285">IAM DB authentication:</text>
+  <text class="t" x="1128" y="302">no stored DB password</text>
+  <text class="t" x="1128" y="323">Storage, snapshots and</text>
+  <text class="t" x="1128" y="340">backups: KMS rds-prod</text>
+  <text class="t" x="1128" y="361">PITR 35 days; AWS Backup</text>
+  <text class="t" x="1128" y="378">copy to DR region</text>
+  <text class="t" x="1128" y="399">DB audit log → log archive</text>
+  <rect class="lock" x="1262" y="172" width="46" height="20" rx="4"/><text class="lockt" x="1285" y="186">KMS</text>
+
+  <!-- vpc endpoints -->
+  <rect class="zone" x="1102" y="462" width="226" height="250" rx="10"/>
+  <text class="zl" x="1114" y="481">VPC ENDPOINTS</text>
+  <rect class="box ext" x="1114" y="492" width="202" height="206"/>
+  <text class="t" x="1128" y="514">Interface: ecr.api, ecr.dkr,</text>
+  <text class="t" x="1128" y="531">sts, secretsmanager, kms,</text>
+  <text class="t" x="1128" y="548">logs, eks-auth</text>
+  <text class="t" x="1128" y="567">Gateway: s3 (ECR layers)</text>
+  <text class="t" x="1128" y="589">SG vpce: 443 from app</text>
+  <text class="t" x="1128" y="606">subnets only</text>
+  <text class="t" x="1128" y="628">Endpoint policies restrict</text>
+  <text class="t" x="1128" y="645">to this org's resources</text>
+  <text class="t" x="1128" y="667">(aws:ResourceOrgID)</text>
+  <rect class="lock" x="1262" y="674" width="46" height="18" rx="4"/><text class="lockt" x="1285" y="687">TLS</text>
+
+  <!-- ================= AWS regional services ================= -->
+  <rect class="zone" x="1354" y="84" width="230" height="862" rx="12"/>
+  <text class="zl" x="1366" y="104">AWS REGIONAL SERVICES</text>
+
+  <rect class="box dat" x="1366" y="118" width="206" height="128"/>
+  <text class="h" x="1380" y="142">Secrets Manager</text>
+  <text class="m" x="1380" y="162">/prod/payments/*</text>
+  <text class="t" x="1380" y="182">Encrypted with KMS</text>
+  <text class="m" x="1380" y="199">secretsmanager-prod</text>
+  <text class="t" x="1380" y="219">Rotation: 30 days,</text>
+  <text class="t" x="1380" y="236">alternating users</text>
+
+  <rect class="box dat" x="1366" y="262" width="206" height="196"/>
+  <text class="h" x="1380" y="286">KMS (customer-managed)</text>
+  <text class="m" x="1380" y="306">eks-secrets-prod</text>
+  <text class="m" x="1380" y="322">secretsmanager-prod</text>
+  <text class="m" x="1380" y="338">rds-prod · ebs-prod</text>
+  <text class="m" x="1380" y="354">ci-image-signing</text>
+  <text class="t" x="1380" y="376">Admins ≠ users; rotation</text>
+  <text class="t" x="1380" y="393">on; deletion alarmed</text>
+  <text class="t" x="1380" y="414">Every use in CloudTrail</text>
+
+  <rect class="box dat" x="1366" y="474" width="206" height="128"/>
+  <text class="h" x="1380" y="498">ECR</text>
+  <text class="t" x="1380" y="518">Immutable tags</text>
+  <text class="t" x="1380" y="535">Cosign signature + SBOM</text>
+  <text class="t" x="1380" y="552">attestation per digest</text>
+  <text class="t" x="1380" y="569">Push: CI role only</text>
+  <text class="t" x="1380" y="586">Pull: node role only</text>
+
+  <rect class="box sec" x="1366" y="618" width="206" height="150"/>
+  <text class="h" x="1380" y="642">CloudWatch Logs</text>
+  <text class="t" x="1380" y="662">Control-plane, app,</text>
+  <text class="t" x="1380" y="679">Falco, WAF, flow logs</text>
+  <text class="t" x="1380" y="700">Subscription → security</text>
+  <text class="t" x="1380" y="717">account log archive</text>
+  <text class="t" x="1380" y="734">(S3 Object Lock) + SIEM</text>
+
+  <rect class="box sec" x="1366" y="784" width="206" height="146"/>
+  <text class="h" x="1380" y="808">GuardDuty</text>
+  <text class="t" x="1380" y="828">EKS audit + runtime</text>
+  <text class="t" x="1380" y="845">monitoring; findings to</text>
+  <text class="t" x="1380" y="862">Security Hub → SIEM</text>
+  <text class="t" x="1380" y="884">Second opinion beside</text>
+  <text class="t" x="1380" y="901">Falco (Module 3)</text>
+
+  <!-- ================= Delivery (left column) ================= -->
+  <rect class="tb" x="16" y="440" width="222" height="506" rx="12"/>
+  <text class="tbl" x="30" y="460">DELIVERY ZONE · CI VPC</text>
+  <text class="t" x="30" y="478">Separate VPC, joined via TGW</text>
+  <rect class="box dev" x="30" y="490" width="194" height="196"/>
+  <text class="h" x="44" y="512">GitLab runners</text>
+  <text class="t" x="44" y="532">Ephemeral, unprivileged</text>
+  <text class="t" x="44" y="552">OIDC → role gitlab-ci-push:</text>
+  <text class="m" x="44" y="570">ecr:PutImage</text>
+  <text class="m" x="44" y="586">  (payments-api repo)</text>
+  <text class="m" x="44" y="602">kms:Sign</text>
+  <text class="m" x="44" y="618">  (ci-image-signing)</text>
+  <text class="t" x="44" y="640">Routes: ECR endpoint only</text>
+  <text class="t" x="44" y="658" fill="#B42318" font-weight="700">✕ No route to the EKS API</text>
+  <text class="t" x="44" y="676" fill="#B42318" font-weight="700">✕ No Kubernetes credentials</text>
+  <rect class="box dev" x="30" y="706" width="194" height="150"/>
+  <text class="h" x="44" y="728">GitLab env repo</text>
+  <text class="t" x="44" y="748">prod/payments-api.yaml:</text>
+  <text class="t" x="44" y="766">digest bumped by CI after</text>
+  <text class="t" x="44" y="784">protected-env approval</text>
+  <text class="t" x="44" y="806">Argo CD pulls it (flow E)</text>
+  <text class="t" x="44" y="824">with a read-only deploy</text>
+  <text class="t" x="44" y="842">token</text>
+  <text class="t" x="30" y="880">Pipeline gates (Module 2) run</text>
+  <text class="t" x="30" y="898">here, before anything reaches</text>
+  <text class="t" x="30" y="916">ECR. Admission re-checks</text>
+  <text class="t" x="30" y="934">signatures in the cluster.</text>
+
+  <!-- ================= NetworkPolicy table ================= -->
+  <rect x="16" y="962" width="1568" height="176" rx="10" fill="#FFFFFF" stroke="#CBD5E1"/>
+  <text class="th" x="32" y="984">Flow</text>
+  <text class="th" x="90" y="984">From → To</text>
+  <text class="th" x="560" y="984">Port / protocol</text>
+  <text class="th" x="730" y="984">Allowed by</text>
+  <text class="th" x="1150" y="984">Encryption</text>
+  <line x1="26" y1="992" x2="1574" y2="992" stroke="#CBD5E1"/>
+  <text class="m" x="32" y="1010">A</text><text class="t" x="90" y="1010">ALB subnets 10.20.100.0/23 → payments-api pods</text><text class="m" x="560" y="1010">TCP 8443</text><text class="m" x="730" y="1010">NP payments-api-ingress-alb + SG alb-public</text><text class="t" x="1150" y="1010">TLS (internal CA cert via cert-manager)</text>
+  <text class="m" x="32" y="1028">B</text><text class="t" x="90" y="1028">payments-api → RDS 10.20.8.0/23</text><text class="m" x="560" y="1028">TCP 5432</text><text class="m" x="730" y="1028">NP payments-api-egress-db + SG rds-payments</text><text class="t" x="1150" y="1028">TLS enforced (rds.force_ssl), IAM auth token</text>
+  <text class="m" x="32" y="1046">C</text><text class="t" x="90" y="1046">payments-api → Pod Identity agent 169.254.170.23</text><text class="m" x="560" y="1046">TCP 80 (node-local)</text><text class="m" x="730" y="1046">NP allow-pod-identity-agent</text><text class="t" x="1150" y="1046">Node-local link; returns short-lived creds</text>
+  <text class="m" x="32" y="1064">D</text><text class="t" x="90" y="1064">all pods in ns → CoreDNS (kube-system)</text><text class="m" x="560" y="1064">UDP/TCP 53</text><text class="m" x="730" y="1064">NP allow-dns (namespace template)</text><text class="t" x="1150" y="1064">n/a (in-cluster DNS)</text>
+  <text class="m" x="32" y="1082">E</text><text class="t" x="90" y="1082">ESO, nodes, Argo CD → VPC endpoints / GitLab (TGW)</text><text class="m" x="560" y="1082">TCP 443</text><text class="m" x="730" y="1082">NP in platform namespaces only</text><text class="t" x="1150" y="1082">TLS</text>
+  <text class="m" x="32" y="1100">F</text><text class="t" x="90" y="1100">GitLab runners (CI VPC) → TGW → ECR endpoint → ECR (push)</text><text class="m" x="560" y="1100">TCP 443</text><text class="m" x="730" y="1100">TGW route table + SG vpce; ECR repo policy</text><text class="t" x="1150" y="1100">TLS; image signed with KMS key</text>
+  <text class="m" x="32" y="1120" fill="#B42318">✕</text><text class="t" x="90" y="1120" fill="#B42318">payments-api → anything else (IMDS, internet, other namespaces)</text><text class="m" x="560" y="1120" fill="#B42318">any</text><text class="m" x="730" y="1120" fill="#B42318">dropped by default-deny-all</text>
+
+  <!-- ================= Flows ================= -->
+  <path class="flow" d="M127,174 L127,194"/>
+  <path class="flow" d="M224,300 L278,300"/>
+  <rect class="lock" x="226" y="272" width="44" height="18" rx="4"/><text class="lockt" x="248" y="285">TLS</text>
+  <path class="flow" d="M462,250 C500,250 500,430 538,430"/>
+  <circle class="tag" cx="486" cy="340" r="10"/><text class="tagt" x="486" y="344">A</text>
+  <rect class="lock" x="476" y="356" width="44" height="18" rx="4"/><text class="lockt" x="498" y="369">TLS</text>
+  <path class="flow" d="M812,420 L832,420 L832,295 L1112,295"/>
+  <circle class="tag" cx="960" cy="295" r="10"/><text class="tagt" x="960" y="299">B</text>
+  <rect class="lock" x="1010" y="299" width="44" height="18" rx="4"/><text class="lockt" x="1032" y="312">TLS</text>
+  <path class="flow" d="M676,630 L676,640"/>
+  <circle class="tag" cx="700" cy="636" r="9"/><text class="tagt" x="700" y="640">C</text>
+  <path class="flowp" d="M1040,400 C1080,400 1076,560 1112,560"/>
+  <path class="flowp" d="M1316,560 C1340,560 1340,180 1364,180"/>
+  <circle class="tag" cx="1076" cy="480" r="10"/><text class="tagt" x="1076" y="484">E</text>
+  <path class="flowp" d="M850,440 C830,440 830,505 814,505"/>
+  <path class="flow" d="M1364,540 C1345,540 1345,620 1318,620"/>
+  <path class="flow" d="M1114,640 C1085,640 1085,700 1054,700"/>
+  <path class="flowp" d="M1052,728 C1085,728 1090,684 1112,684"/>
+  <path class="flowp" d="M1316,684 L1364,684"/>
+  <path class="flow" d="M224,600 L244,600 L244,953 L1347,953 L1347,520 L1364,520"/>
+  <circle class="tag" cx="700" cy="953" r="10"/><text class="tagt" x="700" y="957">F</text>
+</svg>
