@@ -1,0 +1,107 @@
+# Programme-specific Falco rules, loaded after the default ruleset.
+# Uses macros from falco_rules.yaml (container, spawned_process, open_read, outbound)
+# and fields from the k8saudit plugin. Each rule is tagged with the Module 1
+# finding it watches for, so an alert links back to the register.
+#
+# Rollout: priority is the *target* tier. During the two-week baseline every
+# rule here is routed to the SIEM only (Falcosidekick minimumpriority), not paging.
+
+- list: platform_namespaces
+  items: [kube-system, falco, kyverno, argocd, amazon-cloudwatch]
+
+# Processes that legitimately read their own SA token (API clients, controllers).
+# Kept short on purpose; additions go through PR review with an owner.
+- list: sa_token_readers
+  items: [argocd-application-controller, kyverno, external-secrets, aws-load-balancer-controller]
+
+# Controllers that legitimately list/watch secrets, as audit-log usernames.
+# Note: app service accounts are also "system:serviceaccount:...", so a blanket
+# "system:" exclusion would hide exactly the case this rule is for.
+- list: allowed_secret_listers
+  items:
+    - system:serviceaccount:external-secrets:external-secrets
+    - system:serviceaccount:argocd:argocd-application-controller
+    - system:serviceaccount:kyverno:kyverno-admission-controller
+
+# ---------------------------------------------------------------- credential access
+
+- rule: Pod Contacted Cloud Metadata Service
+  desc: >
+    An application pod connected to the instance metadata endpoint. With IMDSv2
+    hop limit 1 this should fail, so any attempt means either the hop limit is
+    missing on that node group or something is probing for node credentials (F-09, F-19).
+  condition: >
+    outbound and container
+    and fd.sip = "169.254.169.254"
+    and not k8s.ns.name in (platform_namespaces)
+  output: >
+    Pod contacted cloud metadata service (ns=%k8s.ns.name pod=%k8s.pod.name
+    proc=%proc.cmdline image=%container.image.repository@%container.image.digest)
+  priority: CRITICAL
+  tags: [credential_access, F-09, F-19, T1552.005]
+
+- rule: Unexpected Read of Service Account Token
+  desc: >
+    A process other than a known API client read the pod's service account token.
+    Typical first step after a shell is obtained in a pod (F-01, F-08, F-27).
+  condition: >
+    open_read and container
+    and fd.name startswith /var/run/secrets/kubernetes.io/serviceaccount/token
+    and not proc.name in (sa_token_readers)
+    and not k8s.ns.name in (platform_namespaces)
+  output: >
+    SA token read by unexpected process (ns=%k8s.ns.name pod=%k8s.pod.name
+    proc=%proc.name parent=%proc.pname cmdline=%proc.cmdline)
+  priority: WARNING
+  tags: [credential_access, F-08, F-27, T1528]
+
+# ---------------------------------------------------------------- dropper pattern
+
+- rule: Download Piped To Shell In Container
+  desc: >
+    curl or wget output piped into a shell inside a container. This is how the
+    batch-check image's hidden script (F-24) and most commodity miners install themselves.
+  condition: >
+    spawned_process and container
+    and proc.name in (sh, bash, ash, dash)
+    and proc.pname in (curl, wget)
+  output: >
+    Download piped to shell (ns=%k8s.ns.name pod=%k8s.pod.name
+    cmdline=%proc.cmdline parent=%proc.pcmdline)
+  priority: CRITICAL
+  tags: [execution, F-24, T1059]
+
+# ---------------------------------------------------------------- control plane (audit)
+
+- rule: Binding To cluster-admin Created
+  desc: >
+    Someone created a RoleBinding or ClusterRoleBinding to cluster-admin.
+    Admission policy should block this, so a hit means either break-glass use
+    (expected, ticketed) or the policy was bypassed (F-01).
+  condition: >
+    ka.verb = create
+    and ka.target.resource in (clusterrolebindings, rolebindings)
+    and ka.req.binding.role = cluster-admin
+  output: >
+    cluster-admin binding created (user=%ka.user.name groups=%ka.user.groups
+    binding=%ka.target.name subjects=%ka.req.binding.subjects)
+  priority: CRITICAL
+  source: k8s_audit
+  tags: [privilege_escalation, F-01, T1078]
+
+- rule: Secrets Listed By Non-System Identity
+  desc: >
+    A human or workload identity listed secrets. Controllers do this; applications
+    and people rarely should (F-08).
+  condition: >
+    ka.verb in (list, watch)
+    and ka.target.resource = secrets
+    and not ka.user.name startswith "system:serviceaccount:kube-system:"
+    and not ka.user.name in (system:kube-controller-manager, system:kube-scheduler)
+    and not ka.user.name in (allowed_secret_listers)
+  output: >
+    Secrets listed (user=%ka.user.name ns=%ka.target.namespace
+    useragent=%ka.useragent sourceips=%ka.sourceips)
+  priority: WARNING
+  source: k8s_audit
+  tags: [credential_access, F-08, T1552.007]
