@@ -183,3 +183,31 @@ spec:
         failureAction: Enforce
         message: "Workloads must run in their own namespace, not default (F-27)."
         deny: {}
+---
+# PSA rejects non-compliant *Pods*, but accepts the Deployment and fails later at
+# ReplicaSet level, which is confusing for teams. This rule applies the same
+# Pod Security Standard and, through Kyverno's auto-generated controller rules,
+# rejects the Deployment/StatefulSet/Job itself with a clear message at apply time.
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: pod-security-restricted
+  annotations:
+    policies.kyverno.io/title: Pod Security Standard restricted (F-02, F-03, F-07, F-20)
+spec:
+  background: true
+  rules:
+    - name: restricted
+      match:
+        any:
+          - resources:
+              kinds: [Pod]
+      exclude:
+        any:
+          - resources:
+              namespaces: [kube-system, platform-node-agents]
+      validate:
+        failureAction: Enforce
+        podSecurity:
+          level: restricted
+          version: latest
