@@ -1,0 +1,111 @@
+# Default-deny plus explicit allows (F-12, F-09, F-13). Standard networking.k8s.io/v1
+# only, so the same files work on EKS (VPC CNI policy agent), AKS (Azure CNI/Cilium)
+# and GKE (Dataplane V2). Design: 04-network-mesh/zero-trust-design.md.
+#
+# Slice shown: internal-proxy (internal-api, the SSRF finding) and cache-store (Redis).
+# ------------------------------------------------------------------ baseline
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-all
+  namespace: internal-proxy
+spec:
+  podSelector: {}
+  policyTypes: [Ingress, Egress]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-dns
+  namespace: internal-proxy
+spec:
+  podSelector: {}
+  policyTypes: [Egress]
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels: { kubernetes.io/metadata.name: kube-system }
+          podSelector:
+            matchLabels: { k8s-app: kube-dns }
+      ports:
+        - { protocol: UDP, port: 53 }
+        - { protocol: TCP, port: 53 }
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: quarantine
+  namespace: internal-proxy
+spec:
+  podSelector:
+    matchLabels: { quarantine: "true" }
+  policyTypes: [Ingress, Egress]
+# ------------------------------------------------------------------ internal-api
+---
+# Ingress only from the internal ALB's subnets, only on the app port.
+# (ALB uses target-type: ip, so traffic arrives from the ALB ENIs in these subnets.)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: internal-api-ingress-from-alb
+  namespace: internal-proxy
+spec:
+  podSelector:
+    matchLabels: { app: internal-api }
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - ipBlock: { cidr: 10.20.0.0/24 }   # private-subnet-a, internal ALB
+        - ipBlock: { cidr: 10.20.1.0/24 }   # private-subnet-b, internal ALB
+      ports:
+        - { protocol: TCP, port: 3000 }
+---
+# Egress only to the one backend it legitimately calls. Everything else, including
+# 169.254.169.254 and the internet, is dropped by default-deny. This turns the SSRF
+# (F-09) from "reach anything" into "reach metadata-db:80", while the code fix lands.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: internal-api-egress
+  namespace: internal-proxy
+spec:
+  podSelector:
+    matchLabels: { app: internal-api }
+  policyTypes: [Egress]
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels: { kubernetes.io/metadata.name: metadata-db }
+          podSelector:
+            matchLabels: { app.kubernetes.io/name: metadata-db }
+      ports:
+        - { protocol: TCP, port: 80 }
+# ------------------------------------------------------------------ cache-store
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-all
+  namespace: secure-middleware
+spec:
+  podSelector: {}
+  policyTypes: [Ingress, Egress]
+---
+# Redis accepts connections only from named client workloads, never `podSelector: {}`.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: cache-store-ingress
+  namespace: secure-middleware
+spec:
+  podSelector:
+    matchLabels: { app: cache-store }
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels: { kubernetes.io/metadata.name: internal-proxy }
+          podSelector:
+            matchLabels: { app: internal-api }
+      ports:
+        - { protocol: TCP, port: 6379 }

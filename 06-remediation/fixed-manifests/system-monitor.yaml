@@ -1,0 +1,115 @@
+# Replaces scenarios/system-monitor/deployment.yaml (F-02, F-11, F-20, F-27).
+#
+# What changed and why:
+#   - No privileged, hostPID, hostIPC or hostPath: the app no longer has root on the node.
+#   - No gotty web shell in the image (Dockerfile change): ops access is `kubectl exec`
+#     under RBAC, which is audit-logged.
+#   - Secret comes from the secrets store via ExternalSecret and is mounted as a file,
+#     not committed to Git or injected as an env var.
+#   - Own namespace and ServiceAccount, no API token mounted.
+#   - Image from programme ECR, pinned by digest (CI writes the real digest).
+#
+# If host-level metrics are genuinely needed, that's the platform's node-exporter
+# in the `platform-node-agents` namespace (read-only /proc and /sys), not this app.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: system-monitor
+  labels:
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/enforce-version: latest
+    pod-security.kubernetes.io/warn: restricted
+    pod-security.kubernetes.io/audit: restricted
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: system-monitor
+  namespace: system-monitor
+automountServiceAccountToken: false
+---
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: goatvault
+  namespace: system-monitor
+spec:
+  refreshInterval: 1h
+  secretStoreRef:
+    kind: SecretStore
+    name: system-monitor
+  target:
+    name: goatvault
+  data:
+    - secretKey: vault-key
+      remoteRef:
+        key: /prod/system-monitor/vault-key
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: system-monitor
+  namespace: system-monitor
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: system-monitor
+  template:
+    metadata:
+      labels:
+        app: system-monitor
+    spec:
+      serviceAccountName: system-monitor
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: system-monitor
+          # Digest written by CI (bump-digest.sh); zeros are a placeholder.
+          image: 111122223333.dkr.ecr.ap-southeast-1.amazonaws.com/system-monitor@sha256:0000000000000000000000000000000000000000000000000000000000000000
+          ports:
+            - containerPort: 8080
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            requests: { cpu: 20m, memory: 32Mi }
+            limits: { memory: 64Mi }
+          readinessProbe:
+            httpGet: { path: /healthz, port: 8080 }
+          livenessProbe:
+            httpGet: { path: /healthz, port: 8080 }
+          volumeMounts:
+            - name: goatvault
+              mountPath: /etc/secrets
+              readOnly: true
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: goatvault
+          secret:
+            secretName: goatvault
+        - name: tmp
+          emptyDir: { sizeLimit: 16Mi }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: system-monitor
+  namespace: system-monitor
+spec:
+  type: ClusterIP
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+  selector:
+    app: system-monitor

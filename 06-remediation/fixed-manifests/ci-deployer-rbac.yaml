@@ -1,0 +1,55 @@
+# Replaces scenarios/insecure-rbac/setup.yaml (F-01).
+#
+# Interim state (until GitOps is live): the CI identity can manage the workload
+# objects it deploys, in the namespaces it deploys to, and nothing else.
+# No Secrets, no RBAC objects, no cluster-scoped resources, no exec.
+#
+# Identity: no ServiceAccount token at all. The GitLab job gets a short-lived AWS
+# role via OIDC (pinned to this project + protected branch), and an EKS access
+# entry maps that role to the Kubernetes group below:
+#
+#   aws eks create-access-entry --cluster-name <cluster> \
+#     --principal-arn arn:aws:iam::111122223333:role/gitlab-deploy-internal-proxy \
+#     --kubernetes-groups ci-deploy:internal-proxy --type STANDARD
+#
+# Target state: CI has no cluster access at all. Argo CD applies changes from Git,
+# and this Role is bound to Argo CD's per-project identity instead.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: ci-deployer
+  namespace: internal-proxy
+rules:
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    verbs: ["get", "list", "watch", "create", "update", "patch"]
+  - apiGroups: [""]
+    resources: ["services", "configmaps"]
+    verbs: ["get", "list", "watch", "create", "update", "patch"]
+  - apiGroups: ["networking.k8s.io"]
+    resources: ["ingresses", "networkpolicies"]
+    verbs: ["get", "list", "watch", "create", "update", "patch"]
+  - apiGroups: ["external-secrets.io"]
+    resources: ["externalsecrets"]
+    verbs: ["get", "list", "watch", "create", "update", "patch"]
+  # Read-only, to let the pipeline wait for a rollout and report status.
+  - apiGroups: [""]
+    resources: ["pods", "events"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["apps"]
+    resources: ["replicasets"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: ci-deployer
+  namespace: internal-proxy
+subjects:
+  - kind: Group
+    apiGroup: rbac.authorization.k8s.io
+    name: ci-deploy:internal-proxy
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: ci-deployer

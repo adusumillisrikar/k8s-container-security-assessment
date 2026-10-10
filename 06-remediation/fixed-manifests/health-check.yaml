@@ -1,0 +1,84 @@
+# Replaces scenarios/health-check/deployment.yaml (F-03, F-17, F-20, F-27).
+#
+# What changed and why:
+#   - No container runtime socket and no hostPath: the pod can no longer start
+#     containers on the host.
+#   - No privileged init container (the socket-detection step is gone with the socket).
+#   - No capabilities at all. Ping normally wants NET_RAW, which neither PSA
+#     `baseline` nor `restricted` allows. Instead the pod enables unprivileged ICMP
+#     sockets via `net.ipv4.ping_group_range`, a namespaced sysctl on Kubernetes'
+#     "safe" list, so the namespace can stay at PSA `restricted`.
+#   - The command injection is fixed in code (see remediation-advisory.md, item 3).
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: health-check
+  labels:
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/enforce-version: latest
+    pod-security.kubernetes.io/warn: restricted
+    pod-security.kubernetes.io/audit: restricted
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: health-check
+  namespace: health-check
+automountServiceAccountToken: false
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: health-check
+  namespace: health-check
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: health-check
+  template:
+    metadata:
+      labels:
+        app: health-check
+    spec:
+      serviceAccountName: health-check
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+        sysctls:
+          - name: net.ipv4.ping_group_range
+            value: "10001 10001"
+      containers:
+        - name: health-check
+          # Digest written by CI (bump-digest.sh); zeros are a placeholder.
+          image: 111122223333.dkr.ecr.ap-southeast-1.amazonaws.com/health-check@sha256:0000000000000000000000000000000000000000000000000000000000000000
+          ports:
+            - containerPort: 8080   # non-root can't bind :80; Service maps 80 -> 8080
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            requests: { cpu: 20m, memory: 32Mi }
+            limits: { memory: 100Mi }
+          readinessProbe:
+            httpGet: { path: /, port: 8080 }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: health-check
+  namespace: health-check
+spec:
+  type: ClusterIP
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
+  selector:
+    app: health-check
