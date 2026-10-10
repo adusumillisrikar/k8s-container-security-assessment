@@ -1,0 +1,185 @@
+# Admission-time guardrails (Kyverno >= 1.13, per-rule failureAction syntax).
+#
+# These are the runtime twin of policies/conftest/kubernetes.rego. CI catches
+# problems before merge; admission catches anything that bypasses CI
+# (kubectl from a laptop, a Helm install, a compromised deploy identity).
+#
+# Pod-level hardening (privileged, hostPath, host namespaces, capabilities,
+# runAsNonRoot, seccomp) is enforced by Pod Security Admission via namespace
+# labels instead, because PSA is built into Kubernetes and behaves the same
+# on EKS, AKS and GKE. See 06-remediation/fixed-manifests/namespaces.yaml.
+#
+# Rollout: every rule starts as `Audit` for one week, violations are fixed,
+# then flipped to `Enforce`. The values below are the target state.
+---
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: disallow-cluster-admin-bindings
+  annotations:
+    policies.kyverno.io/title: Disallow cluster-admin bindings (F-01)
+    policies.kyverno.io/description: >-
+      Blocks any RoleBinding or ClusterRoleBinding to cluster-admin, except
+      when created by the platform break-glass group.
+spec:
+  background: true
+  rules:
+    - name: no-cluster-admin
+      match:
+        any:
+          - resources:
+              kinds: [ClusterRoleBinding, RoleBinding]
+      exclude:
+        any:
+          - subjects:
+              - kind: Group
+                name: platform-breakglass
+      validate:
+        failureAction: Enforce
+        message: "cluster-admin bindings are not allowed (F-01). Raise a platform change for cluster-scoped access."
+        pattern:
+          roleRef:
+            name: "!cluster-admin"
+---
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: restrict-image-registries
+  annotations:
+    policies.kyverno.io/title: Only programme registries (F-14, F-17)
+spec:
+  background: true
+  rules:
+    - name: programme-ecr-only
+      match:
+        any:
+          - resources:
+              kinds: [Pod]
+      exclude:
+        any:
+          - resources:
+              namespaces: [kube-system]
+      validate:
+        failureAction: Enforce
+        message: "Images must come from the programme ECR registry (F-14, F-17)."
+        foreach:
+          - list: "request.object.spec.[ephemeralContainers, initContainers, containers][]"
+            pattern:
+              image: "111122223333.dkr.ecr.ap-southeast-1.amazonaws.com/*"
+---
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: verify-image-signatures
+  annotations:
+    policies.kyverno.io/title: Verify Cosign signature and SBOM attestation (F-17, F-24)
+    policies.kyverno.io/description: >-
+      Admits only images signed by the CI signing key (private half held in AWS KMS) and
+      carrying a CycloneDX SBOM attestation. Tags are resolved and rewritten to
+      digests so the running image can't change underneath us.
+spec:
+  webhookTimeoutSeconds: 15
+  background: false
+  rules:
+    - name: signed-by-ci
+      match:
+        any:
+          - resources:
+              kinds: [Pod]
+      exclude:
+        any:
+          - resources:
+              namespaces: [kube-system]
+      verifyImages:
+        - imageReferences:
+            - "111122223333.dkr.ecr.ap-southeast-1.amazonaws.com/*"
+          failureAction: Enforce
+          mutateDigest: true
+          verifyDigest: true
+          required: true
+          attestors:
+            - entries:
+                - keys:
+                    # Public half of the KMS key alias/ci-image-signing, exported with
+                    # `cosign public-key --key awskms:///alias/ci-image-signing`.
+                    # Distributing the public key in the policy means admission never
+                    # calls KMS, so it works in any cloud and survives a KMS outage.
+                    publicKeys: |-
+                      -----BEGIN PUBLIC KEY-----
+                      <exported-public-key>
+                      -----END PUBLIC KEY-----
+                    rekor:
+                      ignoreTlog: true   # private signing; no public transparency log (see pipeline-design.md)
+                    ctlog:
+                      ignoreSCT: true
+          attestations:
+            - type: https://cyclonedx.org/bom
+              attestors:
+                - entries:
+                    - keys:
+                        publicKeys: |-
+                          -----BEGIN PUBLIC KEY-----
+                          <exported-public-key>
+                          -----END PUBLIC KEY-----
+                        rekor:
+                          ignoreTlog: true
+                        ctlog:
+                          ignoreSCT: true
+---
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: require-requests-limits
+  annotations:
+    policies.kyverno.io/title: Require requests and memory limits (F-21)
+spec:
+  background: true
+  rules:
+    - name: requests-and-memory-limit
+      match:
+        any:
+          - resources:
+              kinds: [Pod]
+      validate:
+        failureAction: Enforce
+        message: "Every container needs CPU/memory requests and a memory limit (F-21)."
+        foreach:
+          - list: "request.object.spec.[initContainers, containers][]"
+            pattern:
+              resources:
+                requests:
+                  cpu: "?*"
+                  memory: "?*"
+                limits:
+                  memory: "?*"
+---
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: disallow-nodeport-and-default-namespace
+  annotations:
+    policies.kyverno.io/title: No NodePort services, nothing in default (F-10, F-27)
+spec:
+  background: true
+  rules:
+    - name: no-nodeport
+      match:
+        any:
+          - resources:
+              kinds: [Service]
+      validate:
+        failureAction: Enforce
+        message: "NodePort services are not allowed; use ClusterIP behind the ingress controller (F-10)."
+        pattern:
+          spec:
+            =(type): "!NodePort"
+    - name: no-default-namespace
+      match:
+        any:
+          - resources:
+              kinds: [Pod]
+              namespaces: [default]
+      validate:
+        failureAction: Enforce
+        message: "Workloads must run in their own namespace, not default (F-27)."
+        deny: {}

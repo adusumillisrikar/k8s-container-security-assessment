@@ -1,0 +1,227 @@
+# Illustrative GitLab CI for an application repo on the programme's platform.
+# Design rationale: pipeline-design.md (same folder).
+#
+# Principles this file is built around:
+#   1. CI never holds cluster credentials. Deploy = commit a new image digest to
+#      the environment repo; Argo CD in the cluster pulls it. A compromised job
+#      can't reach the API server, which is the F-01 lesson.
+#   2. Cloud access via GitLab OIDC id_tokens -> short-lived role. No stored keys.
+#   3. Every tool image is pinned by digest. In 2026 the Trivy and KICS Docker
+#      Hub tags were repointed to credential stealers; a tag is not a version.
+#   4. Hard-fail gates block the merge. Soft-fail gates report and are tracked,
+#      then ratchet to hard-fail on a published date.
+
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_COMMIT_TAG
+
+stages:
+  - secrets
+  - validate
+  - static-analysis
+  - build
+  - image-scan
+  - sign-attest
+  - deploy-staging
+  - deploy-production
+
+variables:
+  # Tool images: digest-pinned, bumped only by Renovate MRs that a human reviews.
+  # Digests below are illustrative placeholders; the evidence/ folder records the
+  # digests actually verified and used for this assessment.
+  GITLEAKS_IMAGE: "docker.io/zricethezav/gitleaks:v8.24.0@sha256:<digest>"
+  KUBECONFORM_IMAGE: "ghcr.io/yannh/kubeconform:v0.6.7@sha256:<digest>"
+  CONFTEST_IMAGE: "docker.io/openpolicyagent/conftest:v0.56.0@sha256:<digest>"
+  CHECKOV_IMAGE: "docker.io/bridgecrew/checkov:3.2.400@sha256:<digest>"
+  KUBESCORE_IMAGE: "docker.io/zegl/kube-score:v1.19.0@sha256:<digest>"
+  SEMGREP_IMAGE: "docker.io/semgrep/semgrep:1.100.0@sha256:<digest>"
+  TRIVY_IMAGE: "docker.io/aquasec/trivy:0.69.3@sha256:<digest>"   # 0.69.4-0.69.6 were malicious
+  # Platform-built image (buildah, aws-cli, syft, cosign, crane, yq, git), every
+  # binary checksum-verified at build time, rebuilt weekly, itself signed.
+  CI_TOOLS_IMAGE: "111122223333.dkr.ecr.ap-southeast-1.amazonaws.com/platform/ci-tools@sha256:<digest>"
+
+  AWS_REGION: ap-southeast-1
+  ECR_REGISTRY: 111122223333.dkr.ecr.ap-southeast-1.amazonaws.com
+  IMAGE: $ECR_REGISTRY/$CI_PROJECT_NAME
+  COSIGN_KEY: awskms:///alias/ci-image-signing
+  MANIFEST_DIR: deploy/
+
+default:
+  # Ephemeral, unprivileged runners only. No Docker-in-Docker, no privileged mode.
+  tags: [k8s-runner-unprivileged]
+  interruptible: true
+
+# Reusable: short-lived AWS credentials from the GitLab OIDC token.
+# The AWS SDK (used by Trivy, Cosign's awskms provider and the AWS CLI) reads
+# AWS_ROLE_ARN + AWS_WEB_IDENTITY_TOKEN_FILE and assumes the role itself, so no
+# access keys are ever stored in GitLab. The IAM role trust policy pins `sub` to
+# this project and to protected refs, so a feature branch or a fork can't
+# assume the push/signing role.
+.aws-oidc:
+  id_tokens:
+    AWS_ID_TOKEN:
+      aud: sts.amazonaws.com
+  variables:
+    AWS_ROLE_ARN: $CI_ROLE_ARN
+    AWS_WEB_IDENTITY_TOKEN_FILE: /tmp/aws-web-identity-token
+    AWS_ROLE_SESSION_NAME: gitlab-$CI_PROJECT_ID-$CI_PIPELINE_ID
+  before_script:
+    - printf '%s' "$AWS_ID_TOKEN" > "$AWS_WEB_IDENTITY_TOKEN_FILE"
+
+# ----------------------------------------------------------------- secrets
+gitleaks:
+  stage: secrets
+  image: { name: $GITLEAKS_IMAGE, entrypoint: [""] }
+  script:
+    # Full history on MRs: a secret added then deleted in the same MR is still leaked.
+    - gitleaks git --redact --verbose --log-opts="${CI_MERGE_REQUEST_DIFF_BASE_SHA:-HEAD~1}..HEAD" .
+  # HARD FAIL (F-05, F-11)
+
+# ---------------------------------------------------------------- validate
+kubeconform:
+  stage: validate
+  image: { name: $KUBECONFORM_IMAGE, entrypoint: [""] }
+  script:
+    # Rejects malformed YAML and APIs removed in the target EKS version (F-29).
+    - kubeconform -strict -summary -kubernetes-version 1.33.0 -ignore-missing-schemas $MANIFEST_DIR
+  # HARD FAIL
+
+# --------------------------------------------------------- static-analysis
+conftest-policy:
+  stage: static-analysis
+  image: { name: $CONFTEST_IMAGE, entrypoint: [""] }
+  script:
+    # The gate that would have stopped the cluster-admin ClusterRoleBinding (F-01).
+    # Policies come from a central, CODEOWNERS-protected repo, pulled at a pinned ref,
+    # so an app team can't weaken the rule in the same MR that breaks it.
+    - conftest pull "git::https://gitlab.internal/platform/policies.git//conftest?ref=${POLICY_REF}" --policy policy/
+    - conftest test --policy policy/ --all-namespaces --output junit $MANIFEST_DIR > conftest.xml || (cat conftest.xml; exit 1)
+  artifacts:
+    when: always
+    reports: { junit: conftest.xml }
+  # HARD FAIL on `deny`, report-only on `warn`
+
+checkov-iac:
+  stage: static-analysis
+  image: { name: $CHECKOV_IMAGE, entrypoint: [""] }
+  script:
+    # Hard-fail on a curated list of high-impact checks; everything else soft.
+    - >
+      checkov -d . --framework terraform kubernetes helm
+      --hard-fail-on CKV_AWS_39,CKV_AWS_38,CKV_AWS_37,CKV_AWS_58,CKV_AWS_51,CKV_AWS_136,CKV_K8S_16,CKV_K8S_17,CKV_K8S_19,CKV_K8S_20,CKV_K8S_27,CKV_K8S_155
+      --soft-fail
+      --output cli --output junitxml --output-file-path console,checkov.xml
+  artifacts:
+    when: always
+    reports: { junit: checkov.xml }
+  # CKV_AWS_39/38 public EKS endpoint (F-15), CKV_AWS_37 control-plane logging (F-16),
+  # CKV_AWS_58 secrets encryption (F-23), CKV_AWS_51/136 ECR immutable/KMS (F-25),
+  # CKV_K8S_16/17/19/20 privileged/hostPID/hostNetwork/privesc (F-02),
+  # CKV_K8S_27 docker socket (F-03), CKV_K8S_155 cluster-admin binding (F-01).
+
+kube-score:
+  stage: static-analysis
+  image: { name: $KUBESCORE_IMAGE, entrypoint: [""] }
+  script:
+    - kube-score score $MANIFEST_DIR*.yaml --output-format ci
+  allow_failure: true
+  # SOFT FAIL: reliability hygiene (probes, PDBs, anti-affinity). Useful, not a security gate.
+
+semgrep-sast:
+  stage: static-analysis
+  image: $SEMGREP_IMAGE
+  script:
+    # Includes rules for shell injection (F-03), SSRF (F-09), Flask debug (F-10).
+    - semgrep scan --config p/ci --config p/command-injection --config p/flask --error --severity ERROR --junit-xml -o semgrep.xml
+  artifacts:
+    when: always
+    reports: { junit: semgrep.xml }
+  # HARD FAIL on ERROR severity; WARNING findings are reported in the MR only
+
+# ------------------------------------------------------------------- build
+build-image:
+  stage: build
+  extends: .aws-oidc
+  image: $CI_TOOLS_IMAGE
+  variables:
+    STORAGE_DRIVER: vfs
+    BUILDAH_ISOLATION: chroot
+  script:
+    - aws ecr get-login-password | buildah login --username AWS --password-stdin $ECR_REGISTRY
+    - buildah bud --layers --label "org.opencontainers.image.revision=$CI_COMMIT_SHA" -t $IMAGE:$CI_COMMIT_SHA .
+    - buildah push --digestfile image.digest $IMAGE:$CI_COMMIT_SHA
+    - echo "IMAGE_DIGEST=$(cat image.digest)" >> build.env
+  artifacts:
+    reports: { dotenv: build.env }
+  # Push goes to a `staging/` ECR path. Only signed images are promoted (copied)
+  # to the release path, and ECR tags are IMMUTABLE (F-25).
+
+# -------------------------------------------------------------- image-scan
+trivy-image:
+  stage: image-scan
+  extends: .aws-oidc
+  image: { name: $TRIVY_IMAGE, entrypoint: [""] }
+  script:
+    # Vulnerabilities AND secrets inside the image layers (F-05, F-26).
+    - trivy image --scanners vuln,secret --ignore-unfixed --severity CRITICAL,HIGH --exit-code 0 --format template --template "@/contrib/gitlab.tpl" -o gl-container-scanning-report.json $IMAGE@$IMAGE_DIGEST
+    - trivy image --scanners vuln --ignore-unfixed --severity CRITICAL --exit-code 1 $IMAGE@$IMAGE_DIGEST
+    - trivy image --scanners secret --exit-code 1 $IMAGE@$IMAGE_DIGEST
+  artifacts:
+    reports: { container_scanning: gl-container-scanning-report.json }
+  # HARD FAIL: fixable CRITICAL CVEs, any secret. HIGH = reported, ratchets to hard-fail.
+
+# ------------------------------------------------------------- sign-attest
+sbom-sign-attest:
+  stage: sign-attest
+  extends: .aws-oidc
+  image: $CI_TOOLS_IMAGE
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH   # only protected-branch builds get signed
+  script:
+    # SBOM (CycloneDX) generated from the built image, not the source tree,
+    # so it lists what actually ships.
+    - syft $IMAGE@$IMAGE_DIGEST -o cyclonedx-json=sbom.cdx.json
+    # Sign with a KMS-held key: the private key never exists on the runner.
+    - cosign sign --yes --tlog-upload=false --key $COSIGN_KEY $IMAGE@$IMAGE_DIGEST
+    - cosign attest --yes --tlog-upload=false --key $COSIGN_KEY --type cyclonedx --predicate sbom.cdx.json $IMAGE@$IMAGE_DIGEST
+    # SBOM also goes to Dependency-Track so new CVEs against already-deployed
+    # images raise alerts without waiting for the next build.
+    - 'curl -sf -X POST "$DTRACK_URL/api/v1/bom" -H "X-Api-Key: $DTRACK_API_KEY" -F "projectName=$CI_PROJECT_NAME" -F "projectVersion=$IMAGE_DIGEST" -F "bom=@sbom.cdx.json"'
+  artifacts:
+    paths: [sbom.cdx.json]
+    expire_in: 1 year
+  # SLSA provenance: GitLab runner-generated provenance (RUNNER_GENERATE_ARTIFACTS_METADATA)
+  # is enabled at group level and attested alongside the SBOM. See pipeline-design.md
+  # for why Build L2 now and L3 later.
+
+# ---------------------------------------------------------- deploy-staging
+deploy-staging:
+  stage: deploy-staging
+  image: $CI_TOOLS_IMAGE
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  environment: { name: staging }
+  script:
+    # GitOps: bump the digest in the environment repo; Argo CD syncs it.
+    # This job's token can only write to the staging path (project access token,
+    # protected variable, scoped to that repo).
+    - ./ci/bump-digest.sh staging "$IMAGE@$IMAGE_DIGEST"
+
+# ------------------------------------------------------- deploy-production
+deploy-production:
+  stage: deploy-production
+  image: $CI_TOOLS_IMAGE
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      when: manual
+  environment:
+    name: production
+    deployment_tier: production
+  # `production` is a GitLab protected environment with a required approval rule:
+  # one approver from @platform-security and one from the service owner group,
+  # and the person who triggered the pipeline can't approve their own deployment.
+  # The approver sees the pipeline's security report and SBOM before approving.
+  script:
+    - ./ci/bump-digest.sh production "$IMAGE@$IMAGE_DIGEST"
