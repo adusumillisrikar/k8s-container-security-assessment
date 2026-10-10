@@ -1,0 +1,17 @@
+# Never commit credentials or local cluster state
+*.pem
+*.key
+*.kubeconfig
+kubeconfig*
+.env
+.env.*
+*.tfstate
+*.tfstate.*
+.terraform/
+# Raw scanner output can be large; curated copies live in 01-findings/evidence
+scan-raw/
+# Editor / OS
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store
