@@ -1,0 +1,62 @@
+# Admission-time signature + SBOM attestation verification (Kyverno >= 1.13).
+# Needs network access to the registry at admission time, so it can't be
+# exercised in the offline test harness (tools/run-scans.sh).
+---
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: verify-image-signatures
+  annotations:
+    policies.kyverno.io/title: Verify Cosign signature and SBOM attestation (F-17, F-24)
+    policies.kyverno.io/description: >-
+      Admits only images signed by the CI signing key (private half held in AWS KMS) and
+      carrying a CycloneDX SBOM attestation. Tags are resolved and rewritten to
+      digests so the running image can't change underneath us.
+spec:
+  webhookTimeoutSeconds: 15
+  background: false
+  rules:
+    - name: signed-by-ci
+      match:
+        any:
+          - resources:
+              kinds: [Pod]
+      exclude:
+        any:
+          - resources:
+              namespaces: [kube-system]
+      verifyImages:
+        - imageReferences:
+            - "111122223333.dkr.ecr.ap-southeast-1.amazonaws.com/*"
+          failureAction: Enforce
+          mutateDigest: true
+          verifyDigest: true
+          required: true
+          attestors:
+            - entries:
+                - keys:
+                    # Public half of the KMS key alias/ci-image-signing, exported with
+                    # `cosign public-key --key awskms:///alias/ci-image-signing`.
+                    # Distributing the public key in the policy means admission never
+                    # calls KMS, so it works in any cloud and survives a KMS outage.
+                    publicKeys: |-
+                      -----BEGIN PUBLIC KEY-----
+                      <exported-public-key>
+                      -----END PUBLIC KEY-----
+                    rekor:
+                      ignoreTlog: true   # private signing; no public transparency log (see pipeline-design.md)
+                    ctlog:
+                      ignoreSCT: true
+          attestations:
+            - type: https://cyclonedx.org/bom
+              attestors:
+                - entries:
+                    - keys:
+                        publicKeys: |-
+                          -----BEGIN PUBLIC KEY-----
+                          <exported-public-key>
+                          -----END PUBLIC KEY-----
+                        rekor:
+                          ignoreTlog: true
+                        ctlog:
+                          ignoreSCT: true

@@ -9,6 +9,9 @@
 # labels instead, because PSA is built into Kubernetes and behaves the same
 # on EKS, AKS and GKE. See 06-remediation/fixed-manifests/namespaces.yaml.
 #
+# Image signature verification is in verify-images.yaml (it needs registry
+# access, so it's kept separate from the policies that can be tested offline).
+#
 # Rollout: every rule starts as `Audit` for one week, violations are fixed,
 # then flipped to `Enforce`. The values below are the target state.
 ---
@@ -22,7 +25,10 @@ metadata:
       Blocks any RoleBinding or ClusterRoleBinding to cluster-admin, except
       when created by the platform break-glass group.
 spec:
-  background: true
+  # Admission-only: Kyverno can't evaluate the requesting user's group in
+  # background scans, and with background: true the whole policy is skipped.
+  # Existing bindings are covered by the audit-log Falco rule (Module 3).
+  background: false
   rules:
     - name: no-cluster-admin
       match:
@@ -66,65 +72,6 @@ spec:
           - list: "request.object.spec.[ephemeralContainers, initContainers, containers][]"
             pattern:
               image: "111122223333.dkr.ecr.ap-southeast-1.amazonaws.com/*"
----
-apiVersion: kyverno.io/v1
-kind: ClusterPolicy
-metadata:
-  name: verify-image-signatures
-  annotations:
-    policies.kyverno.io/title: Verify Cosign signature and SBOM attestation (F-17, F-24)
-    policies.kyverno.io/description: >-
-      Admits only images signed by the CI signing key (private half held in AWS KMS) and
-      carrying a CycloneDX SBOM attestation. Tags are resolved and rewritten to
-      digests so the running image can't change underneath us.
-spec:
-  webhookTimeoutSeconds: 15
-  background: false
-  rules:
-    - name: signed-by-ci
-      match:
-        any:
-          - resources:
-              kinds: [Pod]
-      exclude:
-        any:
-          - resources:
-              namespaces: [kube-system]
-      verifyImages:
-        - imageReferences:
-            - "111122223333.dkr.ecr.ap-southeast-1.amazonaws.com/*"
-          failureAction: Enforce
-          mutateDigest: true
-          verifyDigest: true
-          required: true
-          attestors:
-            - entries:
-                - keys:
-                    # Public half of the KMS key alias/ci-image-signing, exported with
-                    # `cosign public-key --key awskms:///alias/ci-image-signing`.
-                    # Distributing the public key in the policy means admission never
-                    # calls KMS, so it works in any cloud and survives a KMS outage.
-                    publicKeys: |-
-                      -----BEGIN PUBLIC KEY-----
-                      <exported-public-key>
-                      -----END PUBLIC KEY-----
-                    rekor:
-                      ignoreTlog: true   # private signing; no public transparency log (see pipeline-design.md)
-                    ctlog:
-                      ignoreSCT: true
-          attestations:
-            - type: https://cyclonedx.org/bom
-              attestors:
-                - entries:
-                    - keys:
-                        publicKeys: |-
-                          -----BEGIN PUBLIC KEY-----
-                          <exported-public-key>
-                          -----END PUBLIC KEY-----
-                        rekor:
-                          ignoreTlog: true
-                        ctlog:
-                          ignoreSCT: true
 ---
 apiVersion: kyverno.io/v1
 kind: ClusterPolicy
