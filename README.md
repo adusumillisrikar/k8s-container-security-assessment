@@ -6,7 +6,7 @@ Security review and target-state design for a government programme's Kubernetes 
 
 **Overall posture: not ready for go-live as it stands. Ready within the window if four platform controls go in first.**
 
-The review found **29 issues: 4 Critical, 14 High, 10 Medium, 1 Low** ([findings register](01-findings/findings-register.md)). In plain terms:
+The review found **31 issues: 4 Critical, 14 High, 11 Medium, 2 Low** ([findings register](01-findings/findings-register.md)). In plain terms:
 
 1. **Too much power in the wrong places.** A build pipeline account holds the cluster's master key (the same pattern as the internal audit finding), and several applications run with full control of the servers underneath them. Any one of these, if misused, gives an attacker the whole cluster.
 2. **Nothing checks what goes in.** There's no automatic gate that stops a dangerous configuration from being deployed, and no check that the software running is the software we built.
@@ -55,7 +55,7 @@ flowchart LR
   A --> DR[12 · DR<br/>rebuild it if needed]
 ```
 
-- Every finding ID (F-01 to F-29) is used consistently: in the pipeline policies (each rule names the finding it prevents), the Falco rules, the threat model, the compliance mapping and the diagrams.
+- Every finding ID (F-01 to F-31) is used consistently: in the pipeline policies (each rule names the finding it prevents), the Falco rules, the threat model, the compliance mapping and the diagrams.
 - The **COTS recommendation (Module 7)** reuses the admission, network and runtime designs rather than inventing separate controls.
 - The **threat model (Module 8)** checks the earlier designs against one workload and states openly where they fall short.
 
@@ -63,8 +63,8 @@ flowchart LR
 
 | Folder | Module | Contents |
 |---|---|---|
-| [`01-findings/`](01-findings/) | 1 | [Findings register](01-findings/findings-register.md) (29 findings, attack chains), [severity methodology](01-findings/severity-methodology.md), [scanner evidence](01-findings/evidence/) |
-| [`02-pipeline-supply-chain/`](02-pipeline-supply-chain/) | 2 | [Pipeline design](02-pipeline-supply-chain/pipeline-design.md), [`.gitlab-ci-example.yml`](02-pipeline-supply-chain/.gitlab-ci-example.yml), [Conftest policy](02-pipeline-supply-chain/policies/conftest/kubernetes.rego), [Kyverno policies](02-pipeline-supply-chain/policies/kyverno/cluster-guardrails.yaml) |
+| [`01-findings/`](01-findings/) | 1 | [Findings register](01-findings/findings-register.md) (31 findings, attack chains), [severity methodology](01-findings/severity-methodology.md), [scanner evidence](01-findings/evidence/) |
+| [`02-pipeline-supply-chain/`](02-pipeline-supply-chain/) | 2 | [Pipeline design](02-pipeline-supply-chain/pipeline-design.md), [`.gitlab-ci-example.yml`](02-pipeline-supply-chain/.gitlab-ci-example.yml), [Conftest policy](02-pipeline-supply-chain/policies/conftest/kubernetes.rego), [Kyverno policies](02-pipeline-supply-chain/policies/kyverno/cluster-guardrails.yaml), [image verification](02-pipeline-supply-chain/policies/kyverno/verify-images.yaml) |
 | [`03-runtime-security/`](03-runtime-security/) | 3 | [Detection and IR plan](03-runtime-security/runtime-detection-ir-plan.md), [custom Falco rules](03-runtime-security/falco-rules-custom.yaml) |
 | [`04-network-mesh/`](04-network-mesh/) | 4 | [Zero-trust network design and mesh decision](04-network-mesh/zero-trust-design.md) |
 | [`05-secrets-keys/`](05-secrets-keys/) | 5 | [Secrets and key architecture](05-secrets-keys/secrets-architecture.md) |
@@ -74,10 +74,12 @@ flowchart LR
 | [`09-architecture/`](09-architecture/) | 10, 11 | [HLD](09-architecture/hld-diagram.svg), [LLD](09-architecture/lld-diagram.svg), [narrative](09-architecture/architecture-narrative.md) |
 | [`10-resilience-dr/`](10-resilience-dr/) | 12 | [DR plan](10-resilience-dr/dr-plan.md) |
 | [`11-presentation/`](11-presentation/) | | Slides (PDF) for the panel |
+| [`tools/`](tools/) | | Scripts that reproduce all the scanner and live-cluster evidence |
 
 ## How the review was done, and how it was done safely
 
 - **Manual review first.** Every manifest, Dockerfile, script and the relevant application code was read line by line. Scanners were used afterwards to cross-check, and the coverage note in [`01-findings/evidence/`](01-findings/evidence/) shows what each one caught and missed.
+- **Policies and fixes were tested, not just written.** The pipeline and admission policies were run against the real goat manifests and against the corrected manifests, and the Module 6 fixes were checked on a throwaway local cluster. Testing caught two bugs in my own policies and two findings the manual review missed; all are listed in the [evidence README](01-findings/evidence/README.md#what-testing-changed-in-the-submission).
 - **The vulnerable workloads were never deployed.** kubernetes-goat's setup scripts deploy privileged pods and web shells, and its access script exposes them on all network interfaces. None of that was needed for this review, so none of it was run. The repo was cloned into an isolated folder with Git hooks disabled.
 - **Scanners were treated as untrusted too.** In March and April 2026, the Trivy and KICS Docker Hub images were replaced with credential-stealing versions. So every scanner here ran from an image **pinned by digest**, against a **read-only** mount of the public reference repo, with **no network access** and **no credentials** in reach. Exact images and commands are in the evidence folder.
 - **No secrets in this repo.** The reference repo contains fake credentials; this repo cites their locations only and never copies the values.

@@ -90,7 +90,7 @@ The panel brief asks for both sides. Here they are for *this* estate: about 18 E
 - Uniform security across EKS, AKS and GKE once they exist.
 
 **The case against, right now**
-- **Operational load lands on the team least able to absorb it.** Istio upgrades, CRDs, certificate rotation and sidecar injection failures are a real support burden. The current team already has 29 findings to close.
+- **Operational load lands on the team least able to absorb it.** Istio upgrades, CRDs, certificate rotation and sidecar injection failures are a real support burden. The current team already has 31 findings to close.
 - **The COTS image:** sidecar injection changes the pod; the vendor may treat that as unsupported, and some COTS software breaks behind a transparent proxy.
 - **Latency and cost:** sidecars add per-hop latency (typically low single-digit milliseconds at p99) and CPU/memory on every pod. Bearable, but not free for spiky citizen-facing traffic.
 - **The biggest risks are elsewhere.** None of the Critical findings is fixed by a mesh. RBAC, admission, privileged pods and secrets are. A mesh before those is effort spent in the wrong order.

@@ -6,7 +6,7 @@
 
 **Assumption:** the goat workloads are treated as if they were programme workloads on a shared EKS cluster. That's the point of the exercise. Where a finding only exists because goat is a training lab, I say so.
 
-**Evidence:** every finding was found by manual review first. Scanner output that confirms it is in [`evidence/`](evidence/); see the coverage note at the bottom for what scanners caught and what they missed.
+**Evidence:** F-01 to F-29 were found by manual review first, then cross-checked with scanners. F-30 and F-31 were found by Checkov and missed by the manual review. Scanner output is in [`evidence/`](evidence/); the coverage note at the bottom summarises what each approach caught and missed.
 
 **Secret handling:** the reference repo contains fake credentials. This register cites their *location* only and never reproduces a value, so this repo stays clean under a secret scan.
 
@@ -47,10 +47,12 @@ Location links: `kg:` = [kubernetes-goat@723a0db](https://github.com/madhuakula/
 | F-27 | Most workloads in `default` namespace on the default SA with auto-mounted tokens | Medium | 2×3 | RBAC / Tenancy | P2 | 2 ed |
 | F-28 | Access script exposes vulnerable services on all interfaces (`--address 0.0.0.0`) | Medium | 2×3 | Engineer tooling | P2 | 0.5 ed |
 | F-29 | Removed Kubernetes API (`extensions/v1beta1` Ingress); Helm 2 / Tiller remnants | Low | 1×2 | Lifecycle | P3 | 0.5 ed |
+| F-30 | VPC flow logs not enabled on the EKS VPC *(found by Checkov)* | Medium | 2×2 ↑ | Logging | P1 | 0.5 ed |
+| F-31 | Default security group of the EKS VPC not restricted *(found by Checkov)* | Low | 1×2 | Network | P2 | 0.5 ed |
 
 ↑ = raised one tier under the methodology's adjustment rule; reason given in the finding.
 
-**Totals:** 4 Critical, 14 High, 10 Medium, 1 Low.
+**Totals:** 31 findings: 4 Critical, 14 High, 11 Medium, 2 Low.
 
 **Go-live view:** 10 findings are P0 (block). All of them are fixable inside the window with roughly 12 engineer-days of effort. Most of the rest are closed by four platform controls (admission policy, default-deny networking, workload identity, signed and pinned images) rather than workload-by-workload fixes. That is the argument for doing the platform work first.
 
@@ -304,6 +306,29 @@ Individual ratings understate how these combine. The three chains below drive th
 
 ---
 
+### F-30: VPC flow logs not enabled *(found by Checkov, missed in manual review)*
+- **Location:** [tg: `terraform/aws/eks.tf:44-60`](https://github.com/bridgecrewio/terragoat/blob/729f8da62c6a85ce4af5ad3d123de97776d954c4/terraform/aws/eks.tf#L44-L60): `aws_vpc.eks_vpc` has no `aws_flow_log`. Checkov `CKV2_AWS_11`.
+- **Severity:** Medium (I2 × E2, raised one tier). Raised because it's a detective gap: Module 3's incident response relies on flow logs to answer "did data leave, and where to?", and Module 4's default-deny rollout builds its allow-lists from two weeks of flow logs.
+- **Domain:** Logging and monitoring.
+- **Risk:** There's no record of which systems talked to which over the network, so after an incident we couldn't tell whether data was sent out.
+- **Remediation:** `aws_flow_log` on the VPC (all traffic), delivered to the log archive account; Athena table for queries. In the landing zone, enforce through an SCP or AWS Config rule so new VPCs can't skip it.
+- **Effort:** 0.5 ed.
+
+### F-31: Default security group not restricted *(found by Checkov, missed in manual review)*
+- **Location:** [tg: `terraform/aws/eks.tf:44-60`](https://github.com/bridgecrewio/terragoat/blob/729f8da62c6a85ce4af5ad3d123de97776d954c4/terraform/aws/eks.tf#L44-L60): no `aws_default_security_group` resource, so the VPC's default SG keeps AWS's default rules (all traffic between members, all egress). Checkov `CKV2_AWS_12`.
+- **Severity:** Low (I1 × E2). Nothing in the reviewed code uses the default SG, but anything launched without an explicit SG lands in it.
+- **Domain:** Network.
+- **Risk:** A resource created by mistake without a firewall rule set gets an open one by default.
+- **Remediation:** Manage `aws_default_security_group` in Terraform with no rules, so it denies everything.
+- **Effort:** 0.5 ed.
+
+---
+
 ## Coverage note: manual review vs scanners
 
-See [`evidence/README.md`](evidence/README.md) for scanner versions, digests, how they were run, and a per-finding cross-reference.
+See [`evidence/README.md`](evidence/README.md) for scanner versions, digests, how they were run, and the per-finding table. In short:
+
+- Scanners reliably caught configuration issues (privileged pods, missing limits, public endpoints, unpinned images).
+- None of them found the SSRF, the command injection, the unauthenticated Redis and registry, the secret left in a deleted image layer, the `.git` history shipped in an image, or the dormant download-and-run script. Those came from reading the code, and several are among the highest-impact findings.
+- On the audit finding itself (F-01), Checkov reported nothing and Trivy rated it Medium. Only the organisation's own Conftest rule failed it outright.
+- Checkov found two infrastructure items (F-30, F-31) that the manual review missed.
