@@ -6,6 +6,7 @@ Everything here was produced by two scripts in [`tools/`](../../tools/). Anyone 
 |---|---|
 | [`tools/run-scans.sh`](../../tools/run-scans.sh) | Runs Conftest, Checkov, kube-score, Trivy and the Kyverno CLI against kubernetes-goat `723a0db`, terragoat `729f8da` (`eks.tf`, `ecr.tf`), and this repo's fixed manifests |
 | [`tools/psa-rbac-test.sh`](../../tools/psa-rbac-test.sh) | Creates a throwaway local kind cluster, checks the Module 6 claims live (Pod Security and RBAC before/after), then deletes the cluster |
+| [`tools/validate-falco.sh`](../../tools/validate-falco.sh) | Validates the custom Falco rules (Module 3) with Falco 0.45.0 and the signature-verified k8saudit/json plugins, offline |
 
 Run on 2026-10-12.
 
@@ -30,6 +31,8 @@ The 2026 Trivy and KICS Docker Hub compromises showed that a security scanner is
 | Trivy | 0.74.0 | `aquasec/trivy@sha256:62b1e65e8869bc4b4c6aa4fa2b21595256c7c2f6018a9d9ad61caf87187c1969` |
 | Kyverno CLI | v1.19.1 | `ghcr.io/kyverno/kyverno-cli@sha256:ced7b2be0b04250cabfe695f15307f69eb715fe23234816388af4f3812915b2a` |
 | kind | v0.32.0, Kubernetes v1.36.1 | kind's default node image |
+| Falco | 0.45.0 | `falcosecurity/falco@sha256:788f1129c542171813083d4afc61b16730a47dde8c23d9c39370acef996349b6` |
+| falcoctl | 0.14.2 | `falcosecurity/falcoctl@sha256:90ba9627886e8f26b746fa52465d755b28ee49b76eb1d047a0fefd8cadb21907` (plugin signatures verified on install) |
 
 ## Headline results
 
@@ -46,6 +49,7 @@ The 2026 Trivy and KICS Docker Hub compromises showed that a security scanner is
 | 9 | Live Pod Security: goat's original deployments in the same namespaces | Warning on apply; **pods refused** (`FailedCreate ... violates PodSecurity "restricted:latest"`) | [psa-rbac-live-test.txt](psa-rbac-live-test.txt) |
 | 10 | Live RBAC: F-01 before/after | Before: superadmin SA has `*.*`. After: CI identity can patch Deployments in its own namespace only; can't read Secrets, `exec`, or create ClusterRoleBindings | [psa-rbac-live-test.txt](psa-rbac-live-test.txt) |
 | 11 | Checkov vs terragoat EKS/ECR | 11 failures, confirming F-15, F-16, F-22, F-23, F-25, plus two items the manual review missed (now F-30, F-31) | [checkov-terragoat.txt](checkov-terragoat.txt) |
+| 12 | Custom Falco rules (Module 3) through Falco's own validator, with the `k8saudit` plugin loaded | `falco-rules-custom.yaml: Ok`. All 5 rules (3 syscall, 2 audit-log) load without errors or warnings | [falco-rules-validation.txt](falco-rules-validation.txt) |
 
 ## What testing changed in the submission
 

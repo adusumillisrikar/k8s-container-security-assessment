@@ -1,0 +1,9 @@
+plugins:
+  - name: container
+    library_path: libcontainer.so
+  - name: k8saudit
+    library_path: /plugins/libk8saudit.so
+    open_params: "http://:9765/k8s-audit"
+  - name: json
+    library_path: /plugins/libjson.so
+load_plugins: [container, k8saudit, json]
