@@ -1,0 +1,134 @@
+# Trivy 0.74.0 (offline, embedded checks): summary table + two excerpts. Full output not committed (435 KB).
+# Secret values printed by Trivy are redacted.
+
+2026-10-12T00:22:18Z	INFO	[misconfig] Misconfiguration scanning is enabled
+2026-10-12T00:22:18Z	INFO	[checks-client] No downloadable checks were loaded as --skip-check-update is enabled, loading from existing cache...
+2026-10-12T00:22:18Z	ERROR	[misconfig] Falling back to embedded checks	err="failed to check cache: cache does not exist at \"/tmp/trivy/policy/content\""
+2026-10-12T00:22:19Z	INFO	[secret] Secret scanning is enabled
+2026-10-12T00:22:19Z	INFO	[secret] If your scanning is slow, please try '--scanners misconfig' to disable secret scanning
+2026-10-12T00:22:19Z	INFO	[secret] Please see https://trivy.dev/docs/v0.74/guide/scanner/secret#recommendation for faster secret detection
+2026-10-12T00:22:26Z	WARN	[pip] Unable to find python `site-packages` directory. License detection is skipped.	err="unable to find path to Python executable"
+2026-10-12T00:22:26Z	INFO	[npm] Run "npm install" to collect the license information of packages	dir="infrastructure/internal-api/code/node_modules"
+2026-10-12T00:22:28Z	INFO	Suppressing dependencies for development and testing. To display them, try the '--include-dev-deps' flag.
+2026-10-12T00:22:28Z	INFO	Number of language-specific files	num=5
+2026-10-12T00:22:28Z	INFO	Detected config files	num=34
+
+Report Summary
+
+┌─────────────────────────────────────────────────────────────────────────────────┬────────────┬───────────────────┬─────────┐
+│                                     Target                                      │    Type    │ Misconfigurations │ Secrets │
+├─────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────┼─────────┤
+│ guide/yarn.lock                                                                 │    yarn    │         -         │    -    │
+├─────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────┼─────────┤
+│ infrastructure/health-check/go.mod                                              │   gomod    │         -         │    -    │
+├─────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────┼─────────┤
+│ infrastructure/internal-api/code/package-lock.json                              │    npm     │         -         │    -    │
+├─────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────┼─────────┤
+│ infrastructure/metadata-db/go.mod                                               │   gomod    │         -         │    -    │
+├─────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────┼─────────┤
+│ platforms/aws-setup/aws-kind-ec2-cdk/requirements.txt                           │    pip     │         -         │    -    │
+├─────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────┼─────────┤
+│ infrastructure/batch-check/Dockerfile                                           │ dockerfile │         3         │    -    │
+├─────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────┼─────────┤
+│ infrastructure/build-code/Dockerfile                                            │ dockerfile │         3         │    -    │
+├─────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────┼─────────┤
+│ infrastructure/cache-store/Dockerfile                                           │ dockerfile │         2         │    -    │
+├─────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────┼─────────┤
+│ infrastructure/goat-home/Dockerfile                                             │ dockerfile │         4         │    -    │
+├─────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────┼─────────┤
+│ infrastructure/health-check/Dockerfile                                          │ dockerfile │         3         │    -    │
+├─────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────┼─────────┤
+│ infrastructure/helm-tiller/Dockerfile                                           │ dockerfile │         2         │    -    │
+├─────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────┼─────────┤
+│ infrastructure/helm-tiller/pwnchart/templates/clusterrole.yaml                  │ kubernetes │         2         │    -    │
+├─────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────┼─────────┤
+│ infrastructure/helm-tiller/pwnchart/templates/clusterrolebinding.yaml           │    helm    │         0         │    -    │
+├─────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────┼─────────┤
+│ infrastructure/hidden-in-layers/Dockerfile                                      │ dockerfile │         4         │    -    │
+├─────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────┼─────────┤
+│ infrastructure/hunger-check/Dockerfile                                          │ dockerfile │         3         │    -    │
+├─────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────┼─────────┤
+│ infrastructure/info-app/Dockerfile                                              │ dockerfile │         2         │    -    │
+├─────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────┼─────────┤
+│ infrastructure/internal-api/Dockerfile                                          │ dockerfile │         2         │    -    │
+├─────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────┼─────────┤
+│ infrastructure/metadata-db/Dockerfile                                           │ dockerfile │         2         │    -    │
+├─────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────┼─────────┤
+│ infrastructure/poor-registry/Dockerfile                                         │ dockerfile │         2         │    -    │
+├─────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────┼─────────┤
+│ infrastructure/system-monitor/Dockerfile                                        │ dockerfile │         4         │    -    │
+├─────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────┼─────────┤
+│ infrastructure/users-repo/Dockerfile                                            │ dockerfile │         3         │    -    │
+├─────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────┼─────────┤
+│ scenarios/batch-check/job.yaml                                                  │ kubernetes │        19         │    -    │
+├─────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────┼─────────┤
+│ scenarios/build-code/deployment.yaml                                            │ kubernetes │        17         │    -    │
+├─────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────┼─────────┤
+│ scenarios/cache-store/deployment.yaml                                           │ kubernetes │        18         │    -    │
+├─────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────┼─────────┤
+│ scenarios/docker-bench-security/deployment.yaml                                 │ kubernetes │        40         │    -    │
+├─────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────┼─────────┤
+│ scenarios/health-check/deployment-simple-alternative.yaml                       │ kubernetes │        20         │    -    │
+├─────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────┼─────────┤
+│ scenarios/health-check/deployment.yaml                                          │ kubernetes │        37         │    -    │
+├─────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────┼─────────┤
+│ scenarios/hidden-in-layers/deployment.yaml                                      │ kubernetes │        19         │    -    │
+├─────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────┼─────────┤
+│ scenarios/hunger-check/deployment.yaml                                          │ kubernetes │        19         │    -    │
+├─────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────┼─────────┤
+│ scenarios/insecure-rbac/setup.yaml                                              │ kubernetes │         1         │    -    │
+├─────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────┼─────────┤
+│ scenarios/internal-proxy/deployment.yaml                                        │ kubernetes │        28         │    -    │
+├─────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────┼─────────┤
+│ scenarios/kube-bench-security/master-job.yaml                                   │ kubernetes │        21         │    -    │
+├─────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────┼─────────┤
+│ scenarios/kube-bench-security/node-job.yaml                                     │ kubernetes │        21         │    -    │
+├─────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────┼─────────┤
+│ scenarios/kubernetes-goat-home/deployment.yaml                                  │ kubernetes │        18         │    -    │
+├─────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────┼─────────┤
+│ scenarios/kyverno-namespace-exec-block/kyverno-block-pod-exec-by-namespace.yaml │ kubernetes │         0         │    -    │
+├─────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────┼─────────┤
+│ scenarios/metadata-db/templates/deployment.yaml                                 │    helm    │        16         │    -    │
+├─────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────┼─────────┤
+│ scenarios/metadata-db/templates/service.yaml                                    │    helm    │         0         │    -    │
+├─────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────┼─────────┤
+│ scenarios/poor-registry/deployment.yaml                                         │ kubernetes │        17         │    -    │
+├─────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────┼─────────┤
+│ scenarios/system-monitor/deployment.yaml                                        │ kubernetes │        21         │    -    │
+└─────────────────────────────────────────────────────────────────────────────────┴────────────┴───────────────────┴─────────┘
+
+## Excerpt: scenarios/insecure-rbac/setup.yaml
+scenarios/insecure-rbac/setup.yaml (kubernetes)
+===============================================
+Tests: 116 (SUCCESSES: 115, FAILURES: 1)
+Failures: 1 (UNKNOWN: 0, LOW: 0, MEDIUM: 1, HIGH: 0, CRITICAL: 0)
+
+KSV-0111 (MEDIUM): ClusterRoleBinding 'superadmin' should not bind to roles ["cluster-admin", "admin", "edit"]
+════════════════════════════════════════
+Either cluster-admin or those granted powerful permissions.
+
+See https://avd.aquasec.com/misconfig/ksv-0111
+────────────────────────────────────────
+ scenarios/insecure-rbac/setup.yaml:8-9
+────────────────────────────────────────
+   8 ┌ kind: ClusterRoleBinding
+   9 └ metadata:
+────────────────────────────────────────
+
+
+## Excerpt: infrastructure/users-repo/Dockerfile
+
+
+DS-0031 (CRITICAL): Possible exposure of secret env "API_KEY" in ENV
+════════════════════════════════════════
+Passing secrets via `build-args` or envs or copying secret files can leak them out
+
+See https://avd.aquasec.com/misconfig/ds-0031
+────────────────────────────────────────
+ infrastructure/users-repo/Dockerfile:4
+────────────────────────────────────────
+   4 [ ENV API_KEY="k8s-goat-[REDACTED]"
+────────────────────────────────────────
+
+
+

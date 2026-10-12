@@ -1,0 +1,162 @@
+Warning: /repo/02-pipeline-supply-chain/policies/kyverno/cluster-guardrails.yaml: kyverno.io/v1 ClusterPolicy is deprecated and will be removed in a future release; migrate to ValidatingPolicy, MutatingPolicy, GeneratingPolicy or ImageValidatingPolicy (policies.kyverno.io), see https://kyverno.io/docs/guides/migration-to-cel/
+Warning: /repo/02-pipeline-supply-chain/policies/kyverno/cluster-guardrails.yaml: kyverno.io/v1 ClusterPolicy is deprecated and will be removed in a future release; migrate to ValidatingPolicy, MutatingPolicy, GeneratingPolicy or ImageValidatingPolicy (policies.kyverno.io), see https://kyverno.io/docs/guides/migration-to-cel/
+Warning: /repo/02-pipeline-supply-chain/policies/kyverno/cluster-guardrails.yaml: kyverno.io/v1 ClusterPolicy is deprecated and will be removed in a future release; migrate to ValidatingPolicy, MutatingPolicy, GeneratingPolicy or ImageValidatingPolicy (policies.kyverno.io), see https://kyverno.io/docs/guides/migration-to-cel/
+Warning: /repo/02-pipeline-supply-chain/policies/kyverno/cluster-guardrails.yaml: kyverno.io/v1 ClusterPolicy is deprecated and will be removed in a future release; migrate to ValidatingPolicy, MutatingPolicy, GeneratingPolicy or ImageValidatingPolicy (policies.kyverno.io), see https://kyverno.io/docs/guides/migration-to-cel/
+Warning: /repo/02-pipeline-supply-chain/policies/kyverno/cluster-guardrails.yaml: kyverno.io/v1 ClusterPolicy is deprecated and will be removed in a future release; migrate to ValidatingPolicy, MutatingPolicy, GeneratingPolicy or ImageValidatingPolicy (policies.kyverno.io), see https://kyverno.io/docs/guides/migration-to-cel/
+apiVersion: openreports.io/v1alpha1
+kind: ClusterReport
+metadata:
+  name: merged
+results:
+- message: validation rule 'no-cluster-admin' passed.
+  policy: disallow-cluster-admin-bindings
+  properties:
+    process: admission review
+  resources:
+  - apiVersion: rbac.authorization.k8s.io/v1
+    kind: RoleBinding
+    name: ci-deployer
+    namespace: internal-proxy
+  result: pass
+  rule: no-cluster-admin
+  scored: true
+  source: kyverno
+  timestamp:
+    nanos: 0
+    seconds: 1791764549
+- message: rule passed
+  policy: restrict-image-registries
+  properties:
+    process: background scan
+  resources:
+  - apiVersion: apps/v1
+    kind: Deployment
+    name: health-check
+    namespace: health-check
+  result: pass
+  rule: autogen-programme-ecr-only
+  scored: true
+  source: kyverno
+  timestamp:
+    nanos: 0
+    seconds: 1791764549
+- message: rule passed
+  policy: require-requests-limits
+  properties:
+    process: background scan
+  resources:
+  - apiVersion: apps/v1
+    kind: Deployment
+    name: health-check
+    namespace: health-check
+  result: pass
+  rule: autogen-requests-and-memory-limit
+  scored: true
+  source: kyverno
+  timestamp:
+    nanos: 0
+    seconds: 1791764549
+- message: rule passed
+  policy: restrict-image-registries
+  properties:
+    process: background scan
+  resources:
+  - apiVersion: apps/v1
+    kind: Deployment
+    name: system-monitor
+    namespace: system-monitor
+  result: pass
+  rule: autogen-programme-ecr-only
+  scored: true
+  source: kyverno
+  timestamp:
+    nanos: 0
+    seconds: 1791764549
+- message: rule passed
+  policy: require-requests-limits
+  properties:
+    process: background scan
+  resources:
+  - apiVersion: apps/v1
+    kind: Deployment
+    name: system-monitor
+    namespace: system-monitor
+  result: pass
+  rule: autogen-requests-and-memory-limit
+  scored: true
+  source: kyverno
+  timestamp:
+    nanos: 0
+    seconds: 1791764549
+- message: Validation rule 'autogen-restricted' passed.
+  policy: pod-security-restricted
+  properties:
+    process: background scan
+  resources:
+  - apiVersion: apps/v1
+    kind: Deployment
+    name: system-monitor
+    namespace: system-monitor
+  result: pass
+  rule: autogen-restricted
+  scored: true
+  source: kyverno
+  timestamp:
+    nanos: 0
+    seconds: 1791764549
+- message: Validation rule 'autogen-restricted' passed.
+  policy: pod-security-restricted
+  properties:
+    process: background scan
+  resources:
+  - apiVersion: apps/v1
+    kind: Deployment
+    name: health-check
+    namespace: health-check
+  result: pass
+  rule: autogen-restricted
+  scored: true
+  source: kyverno
+  timestamp:
+    nanos: 0
+    seconds: 1791764549
+- message: validation rule 'no-nodeport' passed.
+  policy: disallow-nodeport-and-default-namespace
+  properties:
+    process: background scan
+  resources:
+  - apiVersion: v1
+    kind: Service
+    name: health-check
+    namespace: health-check
+  result: pass
+  rule: no-nodeport
+  scored: true
+  source: kyverno
+  timestamp:
+    nanos: 0
+    seconds: 1791764549
+- message: validation rule 'no-nodeport' passed.
+  policy: disallow-nodeport-and-default-namespace
+  properties:
+    process: background scan
+  resources:
+  - apiVersion: v1
+    kind: Service
+    name: system-monitor
+    namespace: system-monitor
+  result: pass
+  rule: no-nodeport
+  scored: true
+  source: kyverno
+  timestamp:
+    nanos: 0
+    seconds: 1791764549
+source: ""
+summary:
+  error: 0
+  fail: 0
+  pass: 9
+  skip: 0
+  warn: 0
+

@@ -1,0 +1,3 @@
+FAIL - scenarios/insecure-rbac/setup.yaml - main - [F-01] ClusterRoleBinding/superadmin binds cluster-admin. Use a namespace-scoped Role; cluster-scoped changes go through the platform pipeline.
+
+34 tests, 33 passed, 0 warnings, 1 failure, 0 exceptions

@@ -1,0 +1,37 @@
+terraform scan results:
+
+Passed checks: 20, Failed checks: 11, Skipped checks: 0
+
+Check: CKV_AWS_163: "Ensure ECR image scanning on push is enabled"
+	FAILED for resource: aws_ecr_repository.repository
+	File: /ecr.tf:1-18
+Check: CKV_AWS_136: "Ensure that ECR repositories are encrypted using KMS"
+	FAILED for resource: aws_ecr_repository.repository
+	File: /ecr.tf:1-18
+Check: CKV_AWS_51: "Ensure ECR Image Tags are immutable"
+	FAILED for resource: aws_ecr_repository.repository
+	File: /ecr.tf:1-18
+Check: CKV_AWS_130: "Ensure VPC subnets do not assign public IP by default"
+	FAILED for resource: aws_subnet.eks_subnet1
+	File: /eks.tf:62-88
+Check: CKV_AWS_130: "Ensure VPC subnets do not assign public IP by default"
+	FAILED for resource: aws_subnet.eks_subnet2
+	File: /eks.tf:90-116
+Check: CKV_AWS_38: "Ensure Amazon EKS public endpoint not accessible to 0.0.0.0/0"
+	FAILED for resource: aws_eks_cluster.eks_cluster
+	File: /eks.tf:118-141
+Check: CKV_AWS_37: "Ensure Amazon EKS control plane logging is enabled for all log types"
+	FAILED for resource: aws_eks_cluster.eks_cluster
+	File: /eks.tf:118-141
+Check: CKV_AWS_39: "Ensure Amazon EKS public endpoint disabled"
+	FAILED for resource: aws_eks_cluster.eks_cluster
+	File: /eks.tf:118-141
+Check: CKV_AWS_58: "Ensure EKS Cluster has Secrets Encryption Enabled"
+	FAILED for resource: aws_eks_cluster.eks_cluster
+	File: /eks.tf:118-141
+Check: CKV2_AWS_12: "Ensure the default security group of every VPC restricts all traffic"
+	FAILED for resource: aws_vpc.eks_vpc
+	File: /eks.tf:44-60
+Check: CKV2_AWS_11: "Ensure VPC flow logging is enabled in all VPCs"
+	FAILED for resource: aws_vpc.eks_vpc
+	File: /eks.tf:44-60

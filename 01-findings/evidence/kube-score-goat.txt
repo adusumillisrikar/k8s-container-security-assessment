@@ -1,0 +1,394 @@
+[OK] docker-bench-security apps/v1/DaemonSet
+[OK] docker-bench-security apps/v1/DaemonSet
+[OK] docker-bench-security apps/v1/DaemonSet
+[SKIPPED] docker-bench-security apps/v1/DaemonSet: Skipped because container-ports-check is ignored
+[SKIPPED] docker-bench-security apps/v1/DaemonSet: Skipped because container-seccomp-profile is ignored
+[CRITICAL] docker-bench-security apps/v1/DaemonSet: (verify-runtime-socket) The container is privileged
+[CRITICAL] docker-bench-security apps/v1/DaemonSet: (docker-bench) The container is privileged
+[CRITICAL] docker-bench-security apps/v1/DaemonSet: (verify-runtime-socket) The pod has a container with a writable root filesystem
+[CRITICAL] docker-bench-security apps/v1/DaemonSet: (docker-bench) The pod has a container with a writable root filesystem
+[CRITICAL] docker-bench-security apps/v1/DaemonSet: (verify-runtime-socket) CPU limit is not set
+[CRITICAL] docker-bench-security apps/v1/DaemonSet: (verify-runtime-socket) Memory limit is not set
+[CRITICAL] docker-bench-security apps/v1/DaemonSet: (verify-runtime-socket) CPU request is not set
+[CRITICAL] docker-bench-security apps/v1/DaemonSet: (verify-runtime-socket) Memory request is not set
+[SKIPPED] docker-bench-security apps/v1/DaemonSet: Skipped because container-ephemeral-storage-request-equals-limit is ignored
+[OK] docker-bench-security apps/v1/DaemonSet
+[SKIPPED] docker-bench-security apps/v1/DaemonSet: The pod is not targeted by a service, skipping probe checks.
+[OK] docker-bench-security apps/v1/DaemonSet
+[OK] docker-bench-security apps/v1/DaemonSet: Pod Topology Spread Constraints
+[SKIPPED] docker-bench-security apps/v1/DaemonSet: Skipped because container-resource-requests-equal-limits is ignored
+[SKIPPED] docker-bench-security apps/v1/DaemonSet: Skipped because container-cpu-requests-equal-limits is ignored
+[SKIPPED] docker-bench-security apps/v1/DaemonSet: Skipped because container-memory-requests-equal-limits is ignored
+[CRITICAL] docker-bench-security apps/v1/DaemonSet: The pod does not have a matching NetworkPolicy
+[CRITICAL] docker-bench-security apps/v1/DaemonSet: (verify-runtime-socket) The container is running with a low user ID
+[CRITICAL] docker-bench-security apps/v1/DaemonSet: (verify-runtime-socket) The container running with a low group ID
+[CRITICAL] docker-bench-security apps/v1/DaemonSet: (docker-bench) The container is running with a low user ID
+[CRITICAL] docker-bench-security apps/v1/DaemonSet: (docker-bench) The container running with a low group ID
+[CRITICAL] docker-bench-security apps/v1/DaemonSet: (verify-runtime-socket) Image with latest tag
+[CRITICAL] docker-bench-security apps/v1/DaemonSet: (docker-bench) Image with latest tag
+[CRITICAL] docker-bench-security apps/v1/DaemonSet: (verify-runtime-socket) Ephemeral Storage limit is not set
+[CRITICAL] docker-bench-security apps/v1/DaemonSet: (verify-runtime-socket) Ephemeral Storage request is not set
+[CRITICAL] docker-bench-security apps/v1/DaemonSet: (docker-bench) Ephemeral Storage limit is not set
+[CRITICAL] docker-bench-security apps/v1/DaemonSet: (docker-bench) Ephemeral Storage request is not set
+[OK] health-check-deployment apps/v1/Deployment
+[OK] health-check-deployment apps/v1/Deployment
+[OK] health-check-deployment apps/v1/Deployment
+[SKIPPED] health-check-deployment apps/v1/Deployment: Skipped because container-ports-check is ignored
+[SKIPPED] health-check-deployment apps/v1/Deployment: Skipped because container-seccomp-profile is ignored
+[OK] health-check-deployment apps/v1/Deployment
+[CRITICAL] health-check-deployment apps/v1/Deployment: (detect-runtime-socket) The container is privileged
+[CRITICAL] health-check-deployment apps/v1/Deployment: (health-check) The container is privileged
+[CRITICAL] health-check-deployment apps/v1/Deployment: (detect-runtime-socket) The pod has a container with a writable root filesystem
+[CRITICAL] health-check-deployment apps/v1/Deployment: (health-check) The pod has a container with a writable root filesystem
+[CRITICAL] health-check-deployment apps/v1/Deployment: (detect-runtime-socket) CPU limit is not set
+[CRITICAL] health-check-deployment apps/v1/Deployment: (detect-runtime-socket) Memory limit is not set
+[CRITICAL] health-check-deployment apps/v1/Deployment: (detect-runtime-socket) CPU request is not set
+[CRITICAL] health-check-deployment apps/v1/Deployment: (detect-runtime-socket) Memory request is not set
+[CRITICAL] health-check-deployment apps/v1/Deployment: (health-check) CPU request is not set
+[CRITICAL] health-check-deployment apps/v1/Deployment: (health-check) Memory request is not set
+[SKIPPED] health-check-deployment apps/v1/Deployment: Skipped because container-ephemeral-storage-request-equals-limit is ignored
+[OK] health-check-deployment apps/v1/Deployment
+[CRITICAL] health-check-deployment apps/v1/Deployment: Container is missing a readinessProbe
+[CRITICAL] health-check-deployment apps/v1/Deployment: (detect-runtime-socket) The container is running with a low user ID
+[CRITICAL] health-check-deployment apps/v1/Deployment: (detect-runtime-socket) The container running with a low group ID
+[CRITICAL] health-check-deployment apps/v1/Deployment: (health-check) The container is running with a low user ID
+[CRITICAL] health-check-deployment apps/v1/Deployment: (health-check) The container running with a low group ID
+[OK] health-check-deployment apps/v1/Deployment: Pod Topology Spread Constraints
+[SKIPPED] health-check-deployment apps/v1/Deployment: Skipped because container-resource-requests-equal-limits is ignored
+[SKIPPED] health-check-deployment apps/v1/Deployment: Skipped because container-cpu-requests-equal-limits is ignored
+[SKIPPED] health-check-deployment apps/v1/Deployment: Skipped because container-memory-requests-equal-limits is ignored
+[CRITICAL] health-check-deployment apps/v1/Deployment: The pod does not have a matching NetworkPolicy
+[CRITICAL] health-check-deployment apps/v1/Deployment: (detect-runtime-socket) Image with latest tag
+[CRITICAL] health-check-deployment apps/v1/Deployment: (health-check) Image with latest tag
+[CRITICAL] health-check-deployment apps/v1/Deployment: (detect-runtime-socket) Ephemeral Storage limit is not set
+[CRITICAL] health-check-deployment apps/v1/Deployment: (detect-runtime-socket) Ephemeral Storage request is not set
+[CRITICAL] health-check-deployment apps/v1/Deployment: (health-check) Ephemeral Storage limit is not set
+[CRITICAL] health-check-deployment apps/v1/Deployment: (health-check) Ephemeral Storage request is not set
+[OK] health-check-deployment apps/v1/Deployment
+[WARNING] health-check-deployment apps/v1/Deployment: Deployment few replicas
+[CRITICAL] health-check-deployment apps/v1/Deployment: No matching PodDisruptionBudget was found
+[WARNING] health-check-deployment apps/v1/Deployment: Deployment does not have a host podAntiAffinity set
+[SKIPPED] health-check-deployment apps/v1/Deployment: Skipped because the deployment is not targeted by a HorizontalPodAutoscaler
+[OK] health-check-deployment apps/v1/Deployment
+[OK] health-check-deployment-simple apps/v1/Deployment
+[OK] health-check-deployment-simple apps/v1/Deployment
+[CRITICAL] health-check-deployment-simple apps/v1/Deployment: (health-check) Image with latest tag
+[CRITICAL] health-check-deployment-simple apps/v1/Deployment: (health-check) Ephemeral Storage limit is not set
+[CRITICAL] health-check-deployment-simple apps/v1/Deployment: (health-check) Ephemeral Storage request is not set
+[OK] health-check-deployment-simple apps/v1/Deployment
+[SKIPPED] health-check-deployment-simple apps/v1/Deployment: Skipped because container-ports-check is ignored
+[SKIPPED] health-check-deployment-simple apps/v1/Deployment: Skipped because container-seccomp-profile is ignored
+[CRITICAL] health-check-deployment-simple apps/v1/Deployment: Container is missing a readinessProbe
+[OK] health-check-deployment-simple apps/v1/Deployment
+[CRITICAL] health-check-deployment-simple apps/v1/Deployment: (health-check) The container is privileged
+[CRITICAL] health-check-deployment-simple apps/v1/Deployment: (health-check) The pod has a container with a writable root filesystem
+[WARNING] health-check-deployment-simple apps/v1/Deployment: (health-check) CPU request is not set
+[WARNING] health-check-deployment-simple apps/v1/Deployment: (health-check) Memory request is not set
+[SKIPPED] health-check-deployment-simple apps/v1/Deployment: Skipped because container-ephemeral-storage-request-equals-limit is ignored
+[OK] health-check-deployment-simple apps/v1/Deployment
+[CRITICAL] health-check-deployment-simple apps/v1/Deployment: The pod does not have a matching NetworkPolicy
+[CRITICAL] health-check-deployment-simple apps/v1/Deployment: (health-check) The container is running with a low user ID
+[CRITICAL] health-check-deployment-simple apps/v1/Deployment: (health-check) The container running with a low group ID
+[OK] health-check-deployment-simple apps/v1/Deployment: Pod Topology Spread Constraints
+[SKIPPED] health-check-deployment-simple apps/v1/Deployment: Skipped because container-resource-requests-equal-limits is ignored
+[SKIPPED] health-check-deployment-simple apps/v1/Deployment: Skipped because container-cpu-requests-equal-limits is ignored
+[SKIPPED] health-check-deployment-simple apps/v1/Deployment: Skipped because container-memory-requests-equal-limits is ignored
+[OK] health-check-deployment-simple apps/v1/Deployment
+[WARNING] health-check-deployment-simple apps/v1/Deployment: Deployment few replicas
+[CRITICAL] health-check-deployment-simple apps/v1/Deployment: No matching PodDisruptionBudget was found
+[WARNING] health-check-deployment-simple apps/v1/Deployment: Deployment does not have a host podAntiAffinity set
+[SKIPPED] health-check-deployment-simple apps/v1/Deployment: Skipped because the deployment is not targeted by a HorizontalPodAutoscaler
+[OK] health-check-deployment-simple apps/v1/Deployment
+[OK] hunger-check-deployment/big-monolith apps/v1/Deployment
+[OK] hunger-check-deployment/big-monolith apps/v1/Deployment
+[CRITICAL] hunger-check-deployment/big-monolith apps/v1/Deployment: (hunger-check) Image with latest tag
+[CRITICAL] hunger-check-deployment/big-monolith apps/v1/Deployment: (hunger-check) Ephemeral Storage limit is not set
+[CRITICAL] hunger-check-deployment/big-monolith apps/v1/Deployment: (hunger-check) Ephemeral Storage request is not set
+[OK] hunger-check-deployment/big-monolith apps/v1/Deployment
+[SKIPPED] hunger-check-deployment/big-monolith apps/v1/Deployment: Skipped because container-ports-check is ignored
+[SKIPPED] hunger-check-deployment/big-monolith apps/v1/Deployment: Skipped because container-seccomp-profile is ignored
+[OK] hunger-check-deployment/big-monolith apps/v1/Deployment
+[CRITICAL] hunger-check-deployment/big-monolith apps/v1/Deployment: (hunger-check) Container has no configured security context
+[CRITICAL] hunger-check-deployment/big-monolith apps/v1/Deployment: (hunger-check) CPU limit is not set
+[CRITICAL] hunger-check-deployment/big-monolith apps/v1/Deployment: (hunger-check) Memory limit is not set
+[CRITICAL] hunger-check-deployment/big-monolith apps/v1/Deployment: (hunger-check) CPU request is not set
+[CRITICAL] hunger-check-deployment/big-monolith apps/v1/Deployment: (hunger-check) Memory request is not set
+[SKIPPED] hunger-check-deployment/big-monolith apps/v1/Deployment: Skipped because container-ephemeral-storage-request-equals-limit is ignored
+[OK] hunger-check-deployment/big-monolith apps/v1/Deployment
+[CRITICAL] hunger-check-deployment/big-monolith apps/v1/Deployment: Container is missing a readinessProbe
+[OK] hunger-check-deployment/big-monolith apps/v1/Deployment
+[OK] hunger-check-deployment/big-monolith apps/v1/Deployment: Pod Topology Spread Constraints
+[SKIPPED] hunger-check-deployment/big-monolith apps/v1/Deployment: Skipped because container-resource-requests-equal-limits is ignored
+[SKIPPED] hunger-check-deployment/big-monolith apps/v1/Deployment: Skipped because container-cpu-requests-equal-limits is ignored
+[SKIPPED] hunger-check-deployment/big-monolith apps/v1/Deployment: Skipped because container-memory-requests-equal-limits is ignored
+[CRITICAL] hunger-check-deployment/big-monolith apps/v1/Deployment: The pod does not have a matching NetworkPolicy
+[CRITICAL] hunger-check-deployment/big-monolith apps/v1/Deployment: (hunger-check) Container has no configured security context
+[OK] hunger-check-deployment/big-monolith apps/v1/Deployment
+[WARNING] hunger-check-deployment/big-monolith apps/v1/Deployment: Deployment few replicas
+[CRITICAL] hunger-check-deployment/big-monolith apps/v1/Deployment: No matching PodDisruptionBudget was found
+[WARNING] hunger-check-deployment/big-monolith apps/v1/Deployment: Deployment does not have a host podAntiAffinity set
+[SKIPPED] hunger-check-deployment/big-monolith apps/v1/Deployment: Skipped because the deployment is not targeted by a HorizontalPodAutoscaler
+[OK] hunger-check-deployment/big-monolith apps/v1/Deployment
+[OK] build-code-deployment/default apps/v1/Deployment
+[OK] build-code-deployment/default apps/v1/Deployment
+[OK] build-code-deployment/default apps/v1/Deployment
+[SKIPPED] build-code-deployment/default apps/v1/Deployment: Skipped because container-ports-check is ignored
+[SKIPPED] build-code-deployment/default apps/v1/Deployment: Skipped because container-seccomp-profile is ignored
+[CRITICAL] build-code-deployment/default apps/v1/Deployment: Container is missing a readinessProbe
+[OK] build-code-deployment/default apps/v1/Deployment
+[OK] build-code-deployment/default apps/v1/Deployment
+[CRITICAL] build-code-deployment/default apps/v1/Deployment: (build-code) Container has no configured security context
+[WARNING] build-code-deployment/default apps/v1/Deployment: (build-code) CPU request is not set
+[WARNING] build-code-deployment/default apps/v1/Deployment: (build-code) Memory request is not set
+[SKIPPED] build-code-deployment/default apps/v1/Deployment: Skipped because container-ephemeral-storage-request-equals-limit is ignored
+[OK] build-code-deployment/default apps/v1/Deployment
+[CRITICAL] build-code-deployment/default apps/v1/Deployment: The pod does not have a matching NetworkPolicy
+[CRITICAL] build-code-deployment/default apps/v1/Deployment: (build-code) Container has no configured security context
+[OK] build-code-deployment/default apps/v1/Deployment: Pod Topology Spread Constraints
+[SKIPPED] build-code-deployment/default apps/v1/Deployment: Skipped because container-resource-requests-equal-limits is ignored
+[SKIPPED] build-code-deployment/default apps/v1/Deployment: Skipped because container-cpu-requests-equal-limits is ignored
+[SKIPPED] build-code-deployment/default apps/v1/Deployment: Skipped because container-memory-requests-equal-limits is ignored
+[CRITICAL] build-code-deployment/default apps/v1/Deployment: (build-code) Image with latest tag
+[CRITICAL] build-code-deployment/default apps/v1/Deployment: (build-code) Ephemeral Storage limit is not set
+[CRITICAL] build-code-deployment/default apps/v1/Deployment: (build-code) Ephemeral Storage request is not set
+[WARNING] build-code-deployment/default apps/v1/Deployment: Deployment few replicas
+[CRITICAL] build-code-deployment/default apps/v1/Deployment: No matching PodDisruptionBudget was found
+[WARNING] build-code-deployment/default apps/v1/Deployment: Deployment does not have a host podAntiAffinity set
+[SKIPPED] build-code-deployment/default apps/v1/Deployment: Skipped because the deployment is not targeted by a HorizontalPodAutoscaler
+[OK] build-code-deployment/default apps/v1/Deployment
+[OK] build-code-deployment/default apps/v1/Deployment
+[OK] internal-proxy-deployment/default apps/v1/Deployment
+[OK] internal-proxy-deployment/default apps/v1/Deployment
+[CRITICAL] internal-proxy-deployment/default apps/v1/Deployment: (internal-api) Image with latest tag
+[CRITICAL] internal-proxy-deployment/default apps/v1/Deployment: (info-app) Image with latest tag
+[CRITICAL] internal-proxy-deployment/default apps/v1/Deployment: (internal-api) Ephemeral Storage limit is not set
+[CRITICAL] internal-proxy-deployment/default apps/v1/Deployment: (internal-api) Ephemeral Storage request is not set
+[CRITICAL] internal-proxy-deployment/default apps/v1/Deployment: (info-app) Ephemeral Storage limit is not set
+[CRITICAL] internal-proxy-deployment/default apps/v1/Deployment: (info-app) Ephemeral Storage request is not set
+[OK] internal-proxy-deployment/default apps/v1/Deployment
+[SKIPPED] internal-proxy-deployment/default apps/v1/Deployment: Skipped because container-ports-check is ignored
+[SKIPPED] internal-proxy-deployment/default apps/v1/Deployment: Skipped because container-seccomp-profile is ignored
+[CRITICAL] internal-proxy-deployment/default apps/v1/Deployment: (internal-api) Container has no configured security context
+[CRITICAL] internal-proxy-deployment/default apps/v1/Deployment: (info-app) Container has no configured security context
+[OK] internal-proxy-deployment/default apps/v1/Deployment
+[SKIPPED] internal-proxy-deployment/default apps/v1/Deployment: Skipped because container-ephemeral-storage-request-equals-limit is ignored
+[OK] internal-proxy-deployment/default apps/v1/Deployment
+[CRITICAL] internal-proxy-deployment/default apps/v1/Deployment: Container is missing a readinessProbe
+[OK] internal-proxy-deployment/default apps/v1/Deployment
+[OK] internal-proxy-deployment/default apps/v1/Deployment
+[SKIPPED] internal-proxy-deployment/default apps/v1/Deployment: Skipped because container-resource-requests-equal-limits is ignored
+[SKIPPED] internal-proxy-deployment/default apps/v1/Deployment: Skipped because container-cpu-requests-equal-limits is ignored
+[SKIPPED] internal-proxy-deployment/default apps/v1/Deployment: Skipped because container-memory-requests-equal-limits is ignored
+[CRITICAL] internal-proxy-deployment/default apps/v1/Deployment: The pod does not have a matching NetworkPolicy
+[CRITICAL] internal-proxy-deployment/default apps/v1/Deployment: (internal-api) Container has no configured security context
+[CRITICAL] internal-proxy-deployment/default apps/v1/Deployment: (info-app) Container has no configured security context
+[OK] internal-proxy-deployment/default apps/v1/Deployment: Pod Topology Spread Constraints
+[CRITICAL] internal-proxy-deployment/default apps/v1/Deployment: No matching PodDisruptionBudget was found
+[WARNING] internal-proxy-deployment/default apps/v1/Deployment: Deployment does not have a host podAntiAffinity set
+[SKIPPED] internal-proxy-deployment/default apps/v1/Deployment: Skipped because the deployment is not targeted by a HorizontalPodAutoscaler
+[OK] internal-proxy-deployment/default apps/v1/Deployment
+[OK] internal-proxy-deployment/default apps/v1/Deployment
+[WARNING] internal-proxy-deployment/default apps/v1/Deployment: Deployment few replicas
+[OK] kubernetes-goat-home-deployment/default apps/v1/Deployment
+[OK] kubernetes-goat-home-deployment/default apps/v1/Deployment
+[CRITICAL] kubernetes-goat-home-deployment/default apps/v1/Deployment: (kubernetes-goat-home) Image with latest tag
+[CRITICAL] kubernetes-goat-home-deployment/default apps/v1/Deployment: (kubernetes-goat-home) Ephemeral Storage limit is not set
+[CRITICAL] kubernetes-goat-home-deployment/default apps/v1/Deployment: (kubernetes-goat-home) Ephemeral Storage request is not set
+[OK] kubernetes-goat-home-deployment/default apps/v1/Deployment
+[SKIPPED] kubernetes-goat-home-deployment/default apps/v1/Deployment: Skipped because container-ports-check is ignored
+[SKIPPED] kubernetes-goat-home-deployment/default apps/v1/Deployment: Skipped because container-seccomp-profile is ignored
+[WARNING] kubernetes-goat-home-deployment/default apps/v1/Deployment: (kubernetes-goat-home) CPU request is not set
+[WARNING] kubernetes-goat-home-deployment/default apps/v1/Deployment: (kubernetes-goat-home) Memory request is not set
+[SKIPPED] kubernetes-goat-home-deployment/default apps/v1/Deployment: Skipped because container-ephemeral-storage-request-equals-limit is ignored
+[OK] kubernetes-goat-home-deployment/default apps/v1/Deployment
+[CRITICAL] kubernetes-goat-home-deployment/default apps/v1/Deployment: Container is missing a readinessProbe
+[OK] kubernetes-goat-home-deployment/default apps/v1/Deployment
+[OK] kubernetes-goat-home-deployment/default apps/v1/Deployment
+[CRITICAL] kubernetes-goat-home-deployment/default apps/v1/Deployment: (kubernetes-goat-home) Container has no configured security context
+[SKIPPED] kubernetes-goat-home-deployment/default apps/v1/Deployment: Skipped because container-resource-requests-equal-limits is ignored
+[SKIPPED] kubernetes-goat-home-deployment/default apps/v1/Deployment: Skipped because container-cpu-requests-equal-limits is ignored
+[SKIPPED] kubernetes-goat-home-deployment/default apps/v1/Deployment: Skipped because container-memory-requests-equal-limits is ignored
+[CRITICAL] kubernetes-goat-home-deployment/default apps/v1/Deployment: The pod does not have a matching NetworkPolicy
+[CRITICAL] kubernetes-goat-home-deployment/default apps/v1/Deployment: (kubernetes-goat-home) Container has no configured security context
+[OK] kubernetes-goat-home-deployment/default apps/v1/Deployment: Pod Topology Spread Constraints
+[OK] kubernetes-goat-home-deployment/default apps/v1/Deployment
+[WARNING] kubernetes-goat-home-deployment/default apps/v1/Deployment: Deployment few replicas
+[CRITICAL] kubernetes-goat-home-deployment/default apps/v1/Deployment: No matching PodDisruptionBudget was found
+[WARNING] kubernetes-goat-home-deployment/default apps/v1/Deployment: Deployment does not have a host podAntiAffinity set
+[SKIPPED] kubernetes-goat-home-deployment/default apps/v1/Deployment: Skipped because the deployment is not targeted by a HorizontalPodAutoscaler
+[OK] kubernetes-goat-home-deployment/default apps/v1/Deployment
+[OK] poor-registry-deployment/default apps/v1/Deployment
+[OK] poor-registry-deployment/default apps/v1/Deployment
+[SKIPPED] poor-registry-deployment/default apps/v1/Deployment: Skipped because container-seccomp-profile is ignored
+[OK] poor-registry-deployment/default apps/v1/Deployment
+[SKIPPED] poor-registry-deployment/default apps/v1/Deployment: Skipped because container-ports-check is ignored
+[OK] poor-registry-deployment/default apps/v1/Deployment
+[CRITICAL] poor-registry-deployment/default apps/v1/Deployment: Container is missing a readinessProbe
+[OK] poor-registry-deployment/default apps/v1/Deployment
+[OK] poor-registry-deployment/default apps/v1/Deployment
+[CRITICAL] poor-registry-deployment/default apps/v1/Deployment: (poor-registry) Container has no configured security context
+[WARNING] poor-registry-deployment/default apps/v1/Deployment: (poor-registry) CPU request is not set
+[WARNING] poor-registry-deployment/default apps/v1/Deployment: (poor-registry) Memory request is not set
+[SKIPPED] poor-registry-deployment/default apps/v1/Deployment: Skipped because container-ephemeral-storage-request-equals-limit is ignored
+[SKIPPED] poor-registry-deployment/default apps/v1/Deployment: Skipped because container-memory-requests-equal-limits is ignored
+[CRITICAL] poor-registry-deployment/default apps/v1/Deployment: The pod does not have a matching NetworkPolicy
+[CRITICAL] poor-registry-deployment/default apps/v1/Deployment: (poor-registry) Container has no configured security context
+[OK] poor-registry-deployment/default apps/v1/Deployment: Pod Topology Spread Constraints
+[SKIPPED] poor-registry-deployment/default apps/v1/Deployment: Skipped because container-resource-requests-equal-limits is ignored
+[SKIPPED] poor-registry-deployment/default apps/v1/Deployment: Skipped because container-cpu-requests-equal-limits is ignored
+[CRITICAL] poor-registry-deployment/default apps/v1/Deployment: (poor-registry) Image with latest tag
+[CRITICAL] poor-registry-deployment/default apps/v1/Deployment: (poor-registry) Ephemeral Storage limit is not set
+[CRITICAL] poor-registry-deployment/default apps/v1/Deployment: (poor-registry) Ephemeral Storage request is not set
+[OK] poor-registry-deployment/default apps/v1/Deployment
+[OK] poor-registry-deployment/default apps/v1/Deployment
+[WARNING] poor-registry-deployment/default apps/v1/Deployment: Deployment few replicas
+[CRITICAL] poor-registry-deployment/default apps/v1/Deployment: No matching PodDisruptionBudget was found
+[WARNING] poor-registry-deployment/default apps/v1/Deployment: Deployment does not have a host podAntiAffinity set
+[SKIPPED] poor-registry-deployment/default apps/v1/Deployment: Skipped because the deployment is not targeted by a HorizontalPodAutoscaler
+[OK] system-monitor-deployment/default apps/v1/Deployment
+[OK] system-monitor-deployment/default apps/v1/Deployment
+[SKIPPED] system-monitor-deployment/default apps/v1/Deployment: Skipped because container-ephemeral-storage-request-equals-limit is ignored
+[OK] system-monitor-deployment/default apps/v1/Deployment
+[CRITICAL] system-monitor-deployment/default apps/v1/Deployment: Container is missing a readinessProbe
+[OK] system-monitor-deployment/default apps/v1/Deployment
+[CRITICAL] system-monitor-deployment/default apps/v1/Deployment: (system-monitor) The container is privileged
+[CRITICAL] system-monitor-deployment/default apps/v1/Deployment: (system-monitor) The pod has a container with a writable root filesystem
+[WARNING] system-monitor-deployment/default apps/v1/Deployment: (system-monitor) CPU request is not set
+[WARNING] system-monitor-deployment/default apps/v1/Deployment: (system-monitor) Memory request is not set
+[SKIPPED] system-monitor-deployment/default apps/v1/Deployment: Skipped because container-cpu-requests-equal-limits is ignored
+[SKIPPED] system-monitor-deployment/default apps/v1/Deployment: Skipped because container-memory-requests-equal-limits is ignored
+[CRITICAL] system-monitor-deployment/default apps/v1/Deployment: The pod does not have a matching NetworkPolicy
+[CRITICAL] system-monitor-deployment/default apps/v1/Deployment: (system-monitor) The container is running with a low user ID
+[CRITICAL] system-monitor-deployment/default apps/v1/Deployment: (system-monitor) The container running with a low group ID
+[OK] system-monitor-deployment/default apps/v1/Deployment: Pod Topology Spread Constraints
+[SKIPPED] system-monitor-deployment/default apps/v1/Deployment: Skipped because container-resource-requests-equal-limits is ignored
+[CRITICAL] system-monitor-deployment/default apps/v1/Deployment: (system-monitor) Ephemeral Storage limit is not set
+[CRITICAL] system-monitor-deployment/default apps/v1/Deployment: (system-monitor) Ephemeral Storage request is not set
+[CRITICAL] system-monitor-deployment/default apps/v1/Deployment: (system-monitor) Image with latest tag
+[SKIPPED] system-monitor-deployment/default apps/v1/Deployment: Skipped because container-ports-check is ignored
+[SKIPPED] system-monitor-deployment/default apps/v1/Deployment: Skipped because container-seccomp-profile is ignored
+[OK] system-monitor-deployment/default apps/v1/Deployment
+[OK] system-monitor-deployment/default apps/v1/Deployment
+[OK] system-monitor-deployment/default apps/v1/Deployment
+[WARNING] system-monitor-deployment/default apps/v1/Deployment: Deployment few replicas
+[CRITICAL] system-monitor-deployment/default apps/v1/Deployment: No matching PodDisruptionBudget was found
+[WARNING] system-monitor-deployment/default apps/v1/Deployment: Deployment does not have a host podAntiAffinity set
+[SKIPPED] system-monitor-deployment/default apps/v1/Deployment: Skipped because the deployment is not targeted by a HorizontalPodAutoscaler
+[OK] cache-store-deployment/secure-middleware apps/v1/Deployment
+[OK] cache-store-deployment/secure-middleware apps/v1/Deployment
+[SKIPPED] cache-store-deployment/secure-middleware apps/v1/Deployment: Skipped because container-resource-requests-equal-limits is ignored
+[SKIPPED] cache-store-deployment/secure-middleware apps/v1/Deployment: Skipped because container-cpu-requests-equal-limits is ignored
+[SKIPPED] cache-store-deployment/secure-middleware apps/v1/Deployment: Skipped because container-memory-requests-equal-limits is ignored
+[CRITICAL] cache-store-deployment/secure-middleware apps/v1/Deployment: The pod does not have a matching NetworkPolicy
+[CRITICAL] cache-store-deployment/secure-middleware apps/v1/Deployment: (cache-store) Container has no configured security context
+[OK] cache-store-deployment/secure-middleware apps/v1/Deployment: Pod Topology Spread Constraints
+[CRITICAL] cache-store-deployment/secure-middleware apps/v1/Deployment: (cache-store) Image with latest tag
+[CRITICAL] cache-store-deployment/secure-middleware apps/v1/Deployment: (cache-store) Ephemeral Storage limit is not set
+[CRITICAL] cache-store-deployment/secure-middleware apps/v1/Deployment: (cache-store) Ephemeral Storage request is not set
+[OK] cache-store-deployment/secure-middleware apps/v1/Deployment
+[SKIPPED] cache-store-deployment/secure-middleware apps/v1/Deployment: Skipped because container-ports-check is ignored
+[SKIPPED] cache-store-deployment/secure-middleware apps/v1/Deployment: Skipped because container-seccomp-profile is ignored
+[CRITICAL] cache-store-deployment/secure-middleware apps/v1/Deployment: (cache-store) CPU limit is not set
+[CRITICAL] cache-store-deployment/secure-middleware apps/v1/Deployment: (cache-store) Memory limit is not set
+[CRITICAL] cache-store-deployment/secure-middleware apps/v1/Deployment: (cache-store) CPU request is not set
+[CRITICAL] cache-store-deployment/secure-middleware apps/v1/Deployment: (cache-store) Memory request is not set
+[SKIPPED] cache-store-deployment/secure-middleware apps/v1/Deployment: Skipped because container-ephemeral-storage-request-equals-limit is ignored
+[OK] cache-store-deployment/secure-middleware apps/v1/Deployment
+[CRITICAL] cache-store-deployment/secure-middleware apps/v1/Deployment: Container is missing a readinessProbe
+[OK] cache-store-deployment/secure-middleware apps/v1/Deployment
+[OK] cache-store-deployment/secure-middleware apps/v1/Deployment
+[CRITICAL] cache-store-deployment/secure-middleware apps/v1/Deployment: (cache-store) Container has no configured security context
+[OK] cache-store-deployment/secure-middleware apps/v1/Deployment
+[WARNING] cache-store-deployment/secure-middleware apps/v1/Deployment: Deployment few replicas
+[CRITICAL] cache-store-deployment/secure-middleware apps/v1/Deployment: No matching PodDisruptionBudget was found
+[WARNING] cache-store-deployment/secure-middleware apps/v1/Deployment: Deployment does not have a host podAntiAffinity set
+[SKIPPED] cache-store-deployment/secure-middleware apps/v1/Deployment: Skipped because the deployment is not targeted by a HorizontalPodAutoscaler
+[OK] cache-store-deployment/secure-middleware apps/v1/Deployment
+[OK] batch-check-job batch/v1/Job
+[OK] batch-check-job batch/v1/Job
+[OK] batch-check-job batch/v1/Job
+[CRITICAL] batch-check-job batch/v1/Job: (batch-check) Container has no configured security context
+[CRITICAL] batch-check-job batch/v1/Job: (batch-check) CPU limit is not set
+[CRITICAL] batch-check-job batch/v1/Job: (batch-check) Memory limit is not set
+[CRITICAL] batch-check-job batch/v1/Job: (batch-check) CPU request is not set
+[CRITICAL] batch-check-job batch/v1/Job: (batch-check) Memory request is not set
+[SKIPPED] batch-check-job batch/v1/Job: Skipped because container-ephemeral-storage-request-equals-limit is ignored
+[OK] batch-check-job batch/v1/Job
+[OK] batch-check-job batch/v1/Job
+[OK] batch-check-job batch/v1/Job
+[OK] batch-check-job batch/v1/Job: Pod Topology Spread Constraints
+[SKIPPED] batch-check-job batch/v1/Job: Skipped because container-resource-requests-equal-limits is ignored
+[SKIPPED] batch-check-job batch/v1/Job: Skipped because container-cpu-requests-equal-limits is ignored
+[SKIPPED] batch-check-job batch/v1/Job: Skipped because container-memory-requests-equal-limits is ignored
+[CRITICAL] batch-check-job batch/v1/Job: The pod does not have a matching NetworkPolicy
+[CRITICAL] batch-check-job batch/v1/Job: (batch-check) Container has no configured security context
+[CRITICAL] batch-check-job batch/v1/Job: (batch-check) Image with latest tag
+[CRITICAL] batch-check-job batch/v1/Job: (batch-check) Ephemeral Storage limit is not set
+[CRITICAL] batch-check-job batch/v1/Job: (batch-check) Ephemeral Storage request is not set
+[OK] batch-check-job batch/v1/Job
+[SKIPPED] batch-check-job batch/v1/Job: Skipped because container-ports-check is ignored
+[SKIPPED] batch-check-job batch/v1/Job: Skipped because container-seccomp-profile is ignored
+[OK] hidden-in-layers batch/v1/Job
+[OK] hidden-in-layers batch/v1/Job
+[SKIPPED] hidden-in-layers batch/v1/Job: Skipped because container-ports-check is ignored
+[SKIPPED] hidden-in-layers batch/v1/Job: Skipped because container-seccomp-profile is ignored
+[OK] hidden-in-layers batch/v1/Job
+[SKIPPED] hidden-in-layers batch/v1/Job: Skipped because container-ephemeral-storage-request-equals-limit is ignored
+[OK] hidden-in-layers batch/v1/Job
+[OK] hidden-in-layers batch/v1/Job
+[OK] hidden-in-layers batch/v1/Job
+[OK] hidden-in-layers batch/v1/Job
+[CRITICAL] hidden-in-layers batch/v1/Job: (hidden-in-layers) Container has no configured security context
+[CRITICAL] hidden-in-layers batch/v1/Job: (hidden-in-layers) CPU limit is not set
+[CRITICAL] hidden-in-layers batch/v1/Job: (hidden-in-layers) Memory limit is not set
+[CRITICAL] hidden-in-layers batch/v1/Job: (hidden-in-layers) CPU request is not set
+[CRITICAL] hidden-in-layers batch/v1/Job: (hidden-in-layers) Memory request is not set
+[SKIPPED] hidden-in-layers batch/v1/Job: Skipped because container-cpu-requests-equal-limits is ignored
+[SKIPPED] hidden-in-layers batch/v1/Job: Skipped because container-memory-requests-equal-limits is ignored
+[CRITICAL] hidden-in-layers batch/v1/Job: The pod does not have a matching NetworkPolicy
+[CRITICAL] hidden-in-layers batch/v1/Job: (hidden-in-layers) Container has no configured security context
+[OK] hidden-in-layers batch/v1/Job: Pod Topology Spread Constraints
+[SKIPPED] hidden-in-layers batch/v1/Job: Skipped because container-resource-requests-equal-limits is ignored
+[CRITICAL] hidden-in-layers batch/v1/Job: (hidden-in-layers) Ephemeral Storage limit is not set
+[CRITICAL] hidden-in-layers batch/v1/Job: (hidden-in-layers) Ephemeral Storage request is not set
+[CRITICAL] hidden-in-layers batch/v1/Job: (hidden-in-layers) Image with latest tag
+[OK] health-check-service v1/Service
+[OK] health-check-service v1/Service
+[OK] health-check-service v1/Service
+[OK] health-check-service v1/Service
+[OK] health-check-service v1/Service
+[OK] health-check-service v1/Service
+[OK] health-check-service v1/Service
+[OK] health-check-service v1/Service
+[OK] hunger-check-service/big-monolith v1/Service
+[OK] hunger-check-service/big-monolith v1/Service
+[OK] hunger-check-service/big-monolith v1/Service
+[OK] hunger-check-service/big-monolith v1/Service
+[OK] build-code-service/default v1/Service
+[OK] build-code-service/default v1/Service
+[OK] build-code-service/default v1/Service
+[OK] build-code-service/default v1/Service
+[OK] internal-proxy-api-service/default v1/Service
+[OK] internal-proxy-api-service/default v1/Service
+[OK] internal-proxy-api-service/default v1/Service
+[OK] internal-proxy-api-service/default v1/Service
+[OK] internal-proxy-info-app-service/default v1/Service
+[OK] internal-proxy-info-app-service/default v1/Service
+[OK] internal-proxy-info-app-service/default v1/Service
+[WARNING] internal-proxy-info-app-service/default v1/Service: The service is of type NodePort
+[OK] kubernetes-goat-home-service/default v1/Service
+[OK] kubernetes-goat-home-service/default v1/Service
+[OK] kubernetes-goat-home-service/default v1/Service
+[OK] kubernetes-goat-home-service/default v1/Service
+[OK] poor-registry-service/default v1/Service
+[OK] poor-registry-service/default v1/Service
+[OK] poor-registry-service/default v1/Service
+[OK] poor-registry-service/default v1/Service
+[OK] system-monitor-service/default v1/Service
+[OK] system-monitor-service/default v1/Service
+[OK] system-monitor-service/default v1/Service
+[OK] system-monitor-service/default v1/Service
+[OK] cache-store-service/secure-middleware v1/Service
+[OK] cache-store-service/secure-middleware v1/Service
+[OK] cache-store-service/secure-middleware v1/Service
+[OK] cache-store-service/secure-middleware v1/Service

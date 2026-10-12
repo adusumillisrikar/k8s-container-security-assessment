@@ -1,0 +1,802 @@
+kubernetes scan results:
+
+Passed checks: 994, Failed checks: 266, Skipped checks: 0
+
+Check: CKV_K8S_12: "Memory requests should be set"
+	FAILED for resource: Job.default.batch-check-job
+	File: /batch-check/job.yaml:1-17
+Check: CKV_K8S_20: "Containers should not run with allowPrivilegeEscalation"
+	FAILED for resource: Job.default.batch-check-job
+	File: /batch-check/job.yaml:1-17
+Check: CKV_K8S_38: "Ensure that Service Account Tokens are only mounted where necessary"
+	FAILED for resource: Job.default.batch-check-job
+	File: /batch-check/job.yaml:1-17
+Check: CKV_K8S_37: "Minimize the admission of containers with capabilities assigned"
+	FAILED for resource: Job.default.batch-check-job
+	File: /batch-check/job.yaml:1-17
+Check: CKV_K8S_11: "CPU limits should be set"
+	FAILED for resource: Job.default.batch-check-job
+	File: /batch-check/job.yaml:1-17
+Check: CKV_K8S_14: "Image Tag should be fixed - not latest or blank"
+	FAILED for resource: Job.default.batch-check-job
+	File: /batch-check/job.yaml:1-17
+Check: CKV_K8S_30: "Apply security context to your containers"
+	FAILED for resource: Job.default.batch-check-job
+	File: /batch-check/job.yaml:1-17
+Check: CKV_K8S_29: "Apply security context to your pods and containers"
+	FAILED for resource: Job.default.batch-check-job
+	File: /batch-check/job.yaml:1-17
+Check: CKV_K8S_22: "Use read-only filesystem for containers where possible"
+	FAILED for resource: Job.default.batch-check-job
+	File: /batch-check/job.yaml:1-17
+Check: CKV_K8S_13: "Memory limits should be set"
+	FAILED for resource: Job.default.batch-check-job
+	File: /batch-check/job.yaml:1-17
+Check: CKV_K8S_40: "Containers should run as a high UID to avoid host conflict"
+	FAILED for resource: Job.default.batch-check-job
+	File: /batch-check/job.yaml:1-17
+Check: CKV_K8S_21: "The default namespace should not be used"
+	FAILED for resource: Job.default.batch-check-job
+	File: /batch-check/job.yaml:1-17
+Check: CKV_K8S_10: "CPU requests should be set"
+	FAILED for resource: Job.default.batch-check-job
+	File: /batch-check/job.yaml:1-17
+Check: CKV_K8S_28: "Minimize the admission of containers with the NET_RAW capability"
+	FAILED for resource: Job.default.batch-check-job
+	File: /batch-check/job.yaml:1-17
+Check: CKV_K8S_31: "Ensure that the seccomp profile is set to docker/default or runtime/default"
+	FAILED for resource: Job.default.batch-check-job
+	File: /batch-check/job.yaml:1-17
+Check: CKV_K8S_43: "Image should use digest"
+	FAILED for resource: Job.default.batch-check-job
+	File: /batch-check/job.yaml:1-17
+Check: CKV_K8S_23: "Minimize the admission of root containers"
+	FAILED for resource: Job.default.batch-check-job
+	File: /batch-check/job.yaml:1-17
+Check: CKV_K8S_12: "Memory requests should be set"
+	FAILED for resource: Deployment.secure-middleware.cache-store-deployment
+	File: /cache-store/deployment.yaml:19-39
+Check: CKV_K8S_20: "Containers should not run with allowPrivilegeEscalation"
+	FAILED for resource: Deployment.secure-middleware.cache-store-deployment
+	File: /cache-store/deployment.yaml:19-39
+Check: CKV_K8S_38: "Ensure that Service Account Tokens are only mounted where necessary"
+	FAILED for resource: Deployment.secure-middleware.cache-store-deployment
+	File: /cache-store/deployment.yaml:19-39
+Check: CKV_K8S_8: "Liveness Probe Should be Configured"
+	FAILED for resource: Deployment.secure-middleware.cache-store-deployment
+	File: /cache-store/deployment.yaml:19-39
+Check: CKV_K8S_37: "Minimize the admission of containers with capabilities assigned"
+	FAILED for resource: Deployment.secure-middleware.cache-store-deployment
+	File: /cache-store/deployment.yaml:19-39
+Check: CKV_K8S_11: "CPU limits should be set"
+	FAILED for resource: Deployment.secure-middleware.cache-store-deployment
+	File: /cache-store/deployment.yaml:19-39
+Check: CKV_K8S_14: "Image Tag should be fixed - not latest or blank"
+	FAILED for resource: Deployment.secure-middleware.cache-store-deployment
+	File: /cache-store/deployment.yaml:19-39
+Check: CKV_K8S_30: "Apply security context to your containers"
+	FAILED for resource: Deployment.secure-middleware.cache-store-deployment
+	File: /cache-store/deployment.yaml:19-39
+Check: CKV_K8S_29: "Apply security context to your pods and containers"
+	FAILED for resource: Deployment.secure-middleware.cache-store-deployment
+	File: /cache-store/deployment.yaml:19-39
+Check: CKV_K8S_22: "Use read-only filesystem for containers where possible"
+	FAILED for resource: Deployment.secure-middleware.cache-store-deployment
+	File: /cache-store/deployment.yaml:19-39
+Check: CKV_K8S_13: "Memory limits should be set"
+	FAILED for resource: Deployment.secure-middleware.cache-store-deployment
+	File: /cache-store/deployment.yaml:19-39
+Check: CKV_K8S_40: "Containers should run as a high UID to avoid host conflict"
+	FAILED for resource: Deployment.secure-middleware.cache-store-deployment
+	File: /cache-store/deployment.yaml:19-39
+Check: CKV_K8S_10: "CPU requests should be set"
+	FAILED for resource: Deployment.secure-middleware.cache-store-deployment
+	File: /cache-store/deployment.yaml:19-39
+Check: CKV_K8S_9: "Readiness Probe Should be Configured"
+	FAILED for resource: Deployment.secure-middleware.cache-store-deployment
+	File: /cache-store/deployment.yaml:19-39
+Check: CKV_K8S_28: "Minimize the admission of containers with the NET_RAW capability"
+	FAILED for resource: Deployment.secure-middleware.cache-store-deployment
+	File: /cache-store/deployment.yaml:19-39
+Check: CKV_K8S_31: "Ensure that the seccomp profile is set to docker/default or runtime/default"
+	FAILED for resource: Deployment.secure-middleware.cache-store-deployment
+	File: /cache-store/deployment.yaml:19-39
+Check: CKV_K8S_43: "Image should use digest"
+	FAILED for resource: Deployment.secure-middleware.cache-store-deployment
+	File: /cache-store/deployment.yaml:19-39
+Check: CKV_K8S_23: "Minimize the admission of root containers"
+	FAILED for resource: Deployment.secure-middleware.cache-store-deployment
+	File: /cache-store/deployment.yaml:19-39
+Check: CKV_K8S_20: "Containers should not run with allowPrivilegeEscalation"
+	FAILED for resource: Deployment.default.health-check-deployment-simple
+	File: /health-check/deployment-simple-alternative.yaml:5-63
+Check: CKV_K8S_38: "Ensure that Service Account Tokens are only mounted where necessary"
+	FAILED for resource: Deployment.default.health-check-deployment-simple
+	File: /health-check/deployment-simple-alternative.yaml:5-63
+Check: CKV_K8S_8: "Liveness Probe Should be Configured"
+	FAILED for resource: Deployment.default.health-check-deployment-simple
+	File: /health-check/deployment-simple-alternative.yaml:5-63
+Check: CKV_K8S_37: "Minimize the admission of containers with capabilities assigned"
+	FAILED for resource: Deployment.default.health-check-deployment-simple
+	File: /health-check/deployment-simple-alternative.yaml:5-63
+Check: CKV_K8S_14: "Image Tag should be fixed - not latest or blank"
+	FAILED for resource: Deployment.default.health-check-deployment-simple
+	File: /health-check/deployment-simple-alternative.yaml:5-63
+Check: CKV_K8S_29: "Apply security context to your pods and containers"
+	FAILED for resource: Deployment.default.health-check-deployment-simple
+	File: /health-check/deployment-simple-alternative.yaml:5-63
+Check: CKV_K8S_16: "Container should not be privileged"
+	FAILED for resource: Deployment.default.health-check-deployment-simple
+	File: /health-check/deployment-simple-alternative.yaml:5-63
+Check: CKV_K8S_22: "Use read-only filesystem for containers where possible"
+	FAILED for resource: Deployment.default.health-check-deployment-simple
+	File: /health-check/deployment-simple-alternative.yaml:5-63
+Check: CKV_K8S_40: "Containers should run as a high UID to avoid host conflict"
+	FAILED for resource: Deployment.default.health-check-deployment-simple
+	File: /health-check/deployment-simple-alternative.yaml:5-63
+Check: CKV_K8S_21: "The default namespace should not be used"
+	FAILED for resource: Deployment.default.health-check-deployment-simple
+	File: /health-check/deployment-simple-alternative.yaml:5-63
+Check: CKV_K8S_9: "Readiness Probe Should be Configured"
+	FAILED for resource: Deployment.default.health-check-deployment-simple
+	File: /health-check/deployment-simple-alternative.yaml:5-63
+Check: CKV_K8S_28: "Minimize the admission of containers with the NET_RAW capability"
+	FAILED for resource: Deployment.default.health-check-deployment-simple
+	File: /health-check/deployment-simple-alternative.yaml:5-63
+Check: CKV_K8S_31: "Ensure that the seccomp profile is set to docker/default or runtime/default"
+	FAILED for resource: Deployment.default.health-check-deployment-simple
+	File: /health-check/deployment-simple-alternative.yaml:5-63
+Check: CKV_K8S_43: "Image should use digest"
+	FAILED for resource: Deployment.default.health-check-deployment-simple
+	File: /health-check/deployment-simple-alternative.yaml:5-63
+Check: CKV_K8S_27: "Do not expose the docker daemon socket to containers"
+	FAILED for resource: Deployment.default.health-check-deployment-simple
+	File: /health-check/deployment-simple-alternative.yaml:5-63
+Check: CKV_K8S_23: "Minimize the admission of root containers"
+	FAILED for resource: Deployment.default.health-check-deployment-simple
+	File: /health-check/deployment-simple-alternative.yaml:5-63
+Check: CKV_K8S_21: "The default namespace should not be used"
+	FAILED for resource: Service.default.health-check-service
+	File: /health-check/deployment-simple-alternative.yaml:64-74
+Check: CKV_K8S_12: "Memory requests should be set"
+	FAILED for resource: Job.default.hidden-in-layers
+	File: /hidden-in-layers/deployment.yaml:1-17
+Check: CKV_K8S_20: "Containers should not run with allowPrivilegeEscalation"
+	FAILED for resource: Job.default.hidden-in-layers
+	File: /hidden-in-layers/deployment.yaml:1-17
+Check: CKV_K8S_38: "Ensure that Service Account Tokens are only mounted where necessary"
+	FAILED for resource: Job.default.hidden-in-layers
+	File: /hidden-in-layers/deployment.yaml:1-17
+Check: CKV_K8S_37: "Minimize the admission of containers with capabilities assigned"
+	FAILED for resource: Job.default.hidden-in-layers
+	File: /hidden-in-layers/deployment.yaml:1-17
+Check: CKV_K8S_11: "CPU limits should be set"
+	FAILED for resource: Job.default.hidden-in-layers
+	File: /hidden-in-layers/deployment.yaml:1-17
+Check: CKV_K8S_14: "Image Tag should be fixed - not latest or blank"
+	FAILED for resource: Job.default.hidden-in-layers
+	File: /hidden-in-layers/deployment.yaml:1-17
+Check: CKV_K8S_30: "Apply security context to your containers"
+	FAILED for resource: Job.default.hidden-in-layers
+	File: /hidden-in-layers/deployment.yaml:1-17
+Check: CKV_K8S_29: "Apply security context to your pods and containers"
+	FAILED for resource: Job.default.hidden-in-layers
+	File: /hidden-in-layers/deployment.yaml:1-17
+Check: CKV_K8S_22: "Use read-only filesystem for containers where possible"
+	FAILED for resource: Job.default.hidden-in-layers
+	File: /hidden-in-layers/deployment.yaml:1-17
+Check: CKV_K8S_13: "Memory limits should be set"
+	FAILED for resource: Job.default.hidden-in-layers
+	File: /hidden-in-layers/deployment.yaml:1-17
+Check: CKV_K8S_40: "Containers should run as a high UID to avoid host conflict"
+	FAILED for resource: Job.default.hidden-in-layers
+	File: /hidden-in-layers/deployment.yaml:1-17
+Check: CKV_K8S_21: "The default namespace should not be used"
+	FAILED for resource: Job.default.hidden-in-layers
+	File: /hidden-in-layers/deployment.yaml:1-17
+Check: CKV_K8S_10: "CPU requests should be set"
+	FAILED for resource: Job.default.hidden-in-layers
+	File: /hidden-in-layers/deployment.yaml:1-17
+Check: CKV_K8S_28: "Minimize the admission of containers with the NET_RAW capability"
+	FAILED for resource: Job.default.hidden-in-layers
+	File: /hidden-in-layers/deployment.yaml:1-17
+Check: CKV_K8S_31: "Ensure that the seccomp profile is set to docker/default or runtime/default"
+	FAILED for resource: Job.default.hidden-in-layers
+	File: /hidden-in-layers/deployment.yaml:1-17
+Check: CKV_K8S_43: "Image should use digest"
+	FAILED for resource: Job.default.hidden-in-layers
+	File: /hidden-in-layers/deployment.yaml:1-17
+Check: CKV_K8S_23: "Minimize the admission of root containers"
+	FAILED for resource: Job.default.hidden-in-layers
+	File: /hidden-in-layers/deployment.yaml:1-17
+Check: CKV_K8S_12: "Memory requests should be set"
+	FAILED for resource: Job.default.kube-bench-master
+	File: /kube-bench-security/master-job.yaml:2-113
+Check: CKV_K8S_20: "Containers should not run with allowPrivilegeEscalation"
+	FAILED for resource: Job.default.kube-bench-master
+	File: /kube-bench-security/master-job.yaml:2-113
+Check: CKV_K8S_38: "Ensure that Service Account Tokens are only mounted where necessary"
+	FAILED for resource: Job.default.kube-bench-master
+	File: /kube-bench-security/master-job.yaml:2-113
+Check: CKV_K8S_17: "Containers should not share the host process ID namespace"
+	FAILED for resource: Job.default.kube-bench-master
+	File: /kube-bench-security/master-job.yaml:2-113
+Check: CKV_K8S_37: "Minimize the admission of containers with capabilities assigned"
+	FAILED for resource: Job.default.kube-bench-master
+	File: /kube-bench-security/master-job.yaml:2-113
+Check: CKV_K8S_11: "CPU limits should be set"
+	FAILED for resource: Job.default.kube-bench-master
+	File: /kube-bench-security/master-job.yaml:2-113
+Check: CKV_K8S_14: "Image Tag should be fixed - not latest or blank"
+	FAILED for resource: Job.default.kube-bench-master
+	File: /kube-bench-security/master-job.yaml:2-113
+Check: CKV_K8S_30: "Apply security context to your containers"
+	FAILED for resource: Job.default.kube-bench-master
+	File: /kube-bench-security/master-job.yaml:2-113
+Check: CKV_K8S_29: "Apply security context to your pods and containers"
+	FAILED for resource: Job.default.kube-bench-master
+	File: /kube-bench-security/master-job.yaml:2-113
+Check: CKV_K8S_22: "Use read-only filesystem for containers where possible"
+	FAILED for resource: Job.default.kube-bench-master
+	File: /kube-bench-security/master-job.yaml:2-113
+Check: CKV_K8S_13: "Memory limits should be set"
+	FAILED for resource: Job.default.kube-bench-master
+	File: /kube-bench-security/master-job.yaml:2-113
+Check: CKV_K8S_40: "Containers should run as a high UID to avoid host conflict"
+	FAILED for resource: Job.default.kube-bench-master
+	File: /kube-bench-security/master-job.yaml:2-113
+Check: CKV_K8S_21: "The default namespace should not be used"
+	FAILED for resource: Job.default.kube-bench-master
+	File: /kube-bench-security/master-job.yaml:2-113
+Check: CKV_K8S_10: "CPU requests should be set"
+	FAILED for resource: Job.default.kube-bench-master
+	File: /kube-bench-security/master-job.yaml:2-113
+Check: CKV_K8S_28: "Minimize the admission of containers with the NET_RAW capability"
+	FAILED for resource: Job.default.kube-bench-master
+	File: /kube-bench-security/master-job.yaml:2-113
+Check: CKV_K8S_31: "Ensure that the seccomp profile is set to docker/default or runtime/default"
+	FAILED for resource: Job.default.kube-bench-master
+	File: /kube-bench-security/master-job.yaml:2-113
+Check: CKV_K8S_43: "Image should use digest"
+	FAILED for resource: Job.default.kube-bench-master
+	File: /kube-bench-security/master-job.yaml:2-113
+Check: CKV_K8S_23: "Minimize the admission of root containers"
+	FAILED for resource: Job.default.kube-bench-master
+	File: /kube-bench-security/master-job.yaml:2-113
+Check: CKV_K8S_20: "Containers should not run with allowPrivilegeEscalation"
+	FAILED for resource: Deployment.default.kubernetes-goat-home-deployment
+	File: /kubernetes-goat-home/deployment.yaml:1-24
+Check: CKV_K8S_38: "Ensure that Service Account Tokens are only mounted where necessary"
+	FAILED for resource: Deployment.default.kubernetes-goat-home-deployment
+	File: /kubernetes-goat-home/deployment.yaml:1-24
+Check: CKV_K8S_8: "Liveness Probe Should be Configured"
+	FAILED for resource: Deployment.default.kubernetes-goat-home-deployment
+	File: /kubernetes-goat-home/deployment.yaml:1-24
+Check: CKV_K8S_37: "Minimize the admission of containers with capabilities assigned"
+	FAILED for resource: Deployment.default.kubernetes-goat-home-deployment
+	File: /kubernetes-goat-home/deployment.yaml:1-24
+Check: CKV_K8S_14: "Image Tag should be fixed - not latest or blank"
+	FAILED for resource: Deployment.default.kubernetes-goat-home-deployment
+	File: /kubernetes-goat-home/deployment.yaml:1-24
+Check: CKV_K8S_30: "Apply security context to your containers"
+	FAILED for resource: Deployment.default.kubernetes-goat-home-deployment
+	File: /kubernetes-goat-home/deployment.yaml:1-24
+Check: CKV_K8S_29: "Apply security context to your pods and containers"
+	FAILED for resource: Deployment.default.kubernetes-goat-home-deployment
+	File: /kubernetes-goat-home/deployment.yaml:1-24
+Check: CKV_K8S_22: "Use read-only filesystem for containers where possible"
+	FAILED for resource: Deployment.default.kubernetes-goat-home-deployment
+	File: /kubernetes-goat-home/deployment.yaml:1-24
+Check: CKV_K8S_40: "Containers should run as a high UID to avoid host conflict"
+	FAILED for resource: Deployment.default.kubernetes-goat-home-deployment
+	File: /kubernetes-goat-home/deployment.yaml:1-24
+Check: CKV_K8S_21: "The default namespace should not be used"
+	FAILED for resource: Deployment.default.kubernetes-goat-home-deployment
+	File: /kubernetes-goat-home/deployment.yaml:1-24
+Check: CKV_K8S_9: "Readiness Probe Should be Configured"
+	FAILED for resource: Deployment.default.kubernetes-goat-home-deployment
+	File: /kubernetes-goat-home/deployment.yaml:1-24
+Check: CKV_K8S_28: "Minimize the admission of containers with the NET_RAW capability"
+	FAILED for resource: Deployment.default.kubernetes-goat-home-deployment
+	File: /kubernetes-goat-home/deployment.yaml:1-24
+Check: CKV_K8S_31: "Ensure that the seccomp profile is set to docker/default or runtime/default"
+	FAILED for resource: Deployment.default.kubernetes-goat-home-deployment
+	File: /kubernetes-goat-home/deployment.yaml:1-24
+Check: CKV_K8S_43: "Image should use digest"
+	FAILED for resource: Deployment.default.kubernetes-goat-home-deployment
+	File: /kubernetes-goat-home/deployment.yaml:1-24
+Check: CKV_K8S_23: "Minimize the admission of root containers"
+	FAILED for resource: Deployment.default.kubernetes-goat-home-deployment
+	File: /kubernetes-goat-home/deployment.yaml:1-24
+Check: CKV_K8S_21: "The default namespace should not be used"
+	FAILED for resource: Service.default.kubernetes-goat-home-service
+	File: /kubernetes-goat-home/deployment.yaml:25-36
+Check: CKV_K8S_20: "Containers should not run with allowPrivilegeEscalation"
+	FAILED for resource: Deployment.default.build-code-deployment
+	File: /build-code/deployment.yaml:1-24
+Check: CKV_K8S_38: "Ensure that Service Account Tokens are only mounted where necessary"
+	FAILED for resource: Deployment.default.build-code-deployment
+	File: /build-code/deployment.yaml:1-24
+Check: CKV_K8S_8: "Liveness Probe Should be Configured"
+	FAILED for resource: Deployment.default.build-code-deployment
+	File: /build-code/deployment.yaml:1-24
+Check: CKV_K8S_37: "Minimize the admission of containers with capabilities assigned"
+	FAILED for resource: Deployment.default.build-code-deployment
+	File: /build-code/deployment.yaml:1-24
+Check: CKV_K8S_14: "Image Tag should be fixed - not latest or blank"
+	FAILED for resource: Deployment.default.build-code-deployment
+	File: /build-code/deployment.yaml:1-24
+Check: CKV_K8S_30: "Apply security context to your containers"
+	FAILED for resource: Deployment.default.build-code-deployment
+	File: /build-code/deployment.yaml:1-24
+Check: CKV_K8S_29: "Apply security context to your pods and containers"
+	FAILED for resource: Deployment.default.build-code-deployment
+	File: /build-code/deployment.yaml:1-24
+Check: CKV_K8S_22: "Use read-only filesystem for containers where possible"
+	FAILED for resource: Deployment.default.build-code-deployment
+	File: /build-code/deployment.yaml:1-24
+Check: CKV_K8S_40: "Containers should run as a high UID to avoid host conflict"
+	FAILED for resource: Deployment.default.build-code-deployment
+	File: /build-code/deployment.yaml:1-24
+Check: CKV_K8S_21: "The default namespace should not be used"
+	FAILED for resource: Deployment.default.build-code-deployment
+	File: /build-code/deployment.yaml:1-24
+Check: CKV_K8S_9: "Readiness Probe Should be Configured"
+	FAILED for resource: Deployment.default.build-code-deployment
+	File: /build-code/deployment.yaml:1-24
+Check: CKV_K8S_28: "Minimize the admission of containers with the NET_RAW capability"
+	FAILED for resource: Deployment.default.build-code-deployment
+	File: /build-code/deployment.yaml:1-24
+Check: CKV_K8S_31: "Ensure that the seccomp profile is set to docker/default or runtime/default"
+	FAILED for resource: Deployment.default.build-code-deployment
+	File: /build-code/deployment.yaml:1-24
+Check: CKV_K8S_43: "Image should use digest"
+	FAILED for resource: Deployment.default.build-code-deployment
+	File: /build-code/deployment.yaml:1-24
+Check: CKV_K8S_23: "Minimize the admission of root containers"
+	FAILED for resource: Deployment.default.build-code-deployment
+	File: /build-code/deployment.yaml:1-24
+Check: CKV_K8S_21: "The default namespace should not be used"
+	FAILED for resource: Service.default.build-code-service
+	File: /build-code/deployment.yaml:25-36
+Check: CKV_K8S_12: "Memory requests should be set"
+	FAILED for resource: DaemonSet.default.docker-bench-security
+	File: /docker-bench-security/deployment.yaml:12-138
+Check: CKV_K8S_20: "Containers should not run with allowPrivilegeEscalation"
+	FAILED for resource: DaemonSet.default.docker-bench-security
+	File: /docker-bench-security/deployment.yaml:12-138
+Check: CKV_K8S_38: "Ensure that Service Account Tokens are only mounted where necessary"
+	FAILED for resource: DaemonSet.default.docker-bench-security
+	File: /docker-bench-security/deployment.yaml:12-138
+Check: CKV_K8S_17: "Containers should not share the host process ID namespace"
+	FAILED for resource: DaemonSet.default.docker-bench-security
+	File: /docker-bench-security/deployment.yaml:12-138
+Check: CKV_K8S_8: "Liveness Probe Should be Configured"
+	FAILED for resource: DaemonSet.default.docker-bench-security
+	File: /docker-bench-security/deployment.yaml:12-138
+Check: CKV_K8S_37: "Minimize the admission of containers with capabilities assigned"
+	FAILED for resource: DaemonSet.default.docker-bench-security
+	File: /docker-bench-security/deployment.yaml:12-138
+Check: CKV_K8S_11: "CPU limits should be set"
+	FAILED for resource: DaemonSet.default.docker-bench-security
+	File: /docker-bench-security/deployment.yaml:12-138
+Check: CKV_K8S_14: "Image Tag should be fixed - not latest or blank"
+	FAILED for resource: DaemonSet.default.docker-bench-security
+	File: /docker-bench-security/deployment.yaml:12-138
+Check: CKV_K8S_19: "Containers should not share the host network namespace"
+	FAILED for resource: DaemonSet.default.docker-bench-security
+	File: /docker-bench-security/deployment.yaml:12-138
+Check: CKV_K8S_16: "Container should not be privileged"
+	FAILED for resource: DaemonSet.default.docker-bench-security
+	File: /docker-bench-security/deployment.yaml:12-138
+Check: CKV_K8S_22: "Use read-only filesystem for containers where possible"
+	FAILED for resource: DaemonSet.default.docker-bench-security
+	File: /docker-bench-security/deployment.yaml:12-138
+Check: CKV_K8S_18: "Containers should not share the host IPC namespace"
+	FAILED for resource: DaemonSet.default.docker-bench-security
+	File: /docker-bench-security/deployment.yaml:12-138
+Check: CKV_K8S_13: "Memory limits should be set"
+	FAILED for resource: DaemonSet.default.docker-bench-security
+	File: /docker-bench-security/deployment.yaml:12-138
+Check: CKV_K8S_40: "Containers should run as a high UID to avoid host conflict"
+	FAILED for resource: DaemonSet.default.docker-bench-security
+	File: /docker-bench-security/deployment.yaml:12-138
+Check: CKV_K8S_25: "Minimize the admission of containers with added capability"
+	FAILED for resource: DaemonSet.default.docker-bench-security
+	File: /docker-bench-security/deployment.yaml:12-138
+Check: CKV_K8S_21: "The default namespace should not be used"
+	FAILED for resource: DaemonSet.default.docker-bench-security
+	File: /docker-bench-security/deployment.yaml:12-138
+Check: CKV_K8S_10: "CPU requests should be set"
+	FAILED for resource: DaemonSet.default.docker-bench-security
+	File: /docker-bench-security/deployment.yaml:12-138
+Check: CKV_K8S_9: "Readiness Probe Should be Configured"
+	FAILED for resource: DaemonSet.default.docker-bench-security
+	File: /docker-bench-security/deployment.yaml:12-138
+Check: CKV_K8S_28: "Minimize the admission of containers with the NET_RAW capability"
+	FAILED for resource: DaemonSet.default.docker-bench-security
+	File: /docker-bench-security/deployment.yaml:12-138
+Check: CKV_K8S_31: "Ensure that the seccomp profile is set to docker/default or runtime/default"
+	FAILED for resource: DaemonSet.default.docker-bench-security
+	File: /docker-bench-security/deployment.yaml:12-138
+Check: CKV_K8S_43: "Image should use digest"
+	FAILED for resource: DaemonSet.default.docker-bench-security
+	File: /docker-bench-security/deployment.yaml:12-138
+Check: CKV_K8S_27: "Do not expose the docker daemon socket to containers"
+	FAILED for resource: DaemonSet.default.docker-bench-security
+	File: /docker-bench-security/deployment.yaml:12-138
+Check: CKV_K8S_23: "Minimize the admission of root containers"
+	FAILED for resource: DaemonSet.default.docker-bench-security
+	File: /docker-bench-security/deployment.yaml:12-138
+Check: CKV_K8S_12: "Memory requests should be set"
+	FAILED for resource: Deployment.default.health-check-deployment
+	File: /health-check/deployment.yaml:1-99
+Check: CKV_K8S_20: "Containers should not run with allowPrivilegeEscalation"
+	FAILED for resource: Deployment.default.health-check-deployment
+	File: /health-check/deployment.yaml:1-99
+Check: CKV_K8S_38: "Ensure that Service Account Tokens are only mounted where necessary"
+	FAILED for resource: Deployment.default.health-check-deployment
+	File: /health-check/deployment.yaml:1-99
+Check: CKV_K8S_8: "Liveness Probe Should be Configured"
+	FAILED for resource: Deployment.default.health-check-deployment
+	File: /health-check/deployment.yaml:1-99
+Check: CKV_K8S_37: "Minimize the admission of containers with capabilities assigned"
+	FAILED for resource: Deployment.default.health-check-deployment
+	File: /health-check/deployment.yaml:1-99
+Check: CKV_K8S_11: "CPU limits should be set"
+	FAILED for resource: Deployment.default.health-check-deployment
+	File: /health-check/deployment.yaml:1-99
+Check: CKV_K8S_14: "Image Tag should be fixed - not latest or blank"
+	FAILED for resource: Deployment.default.health-check-deployment
+	File: /health-check/deployment.yaml:1-99
+Check: CKV_K8S_29: "Apply security context to your pods and containers"
+	FAILED for resource: Deployment.default.health-check-deployment
+	File: /health-check/deployment.yaml:1-99
+Check: CKV_K8S_16: "Container should not be privileged"
+	FAILED for resource: Deployment.default.health-check-deployment
+	File: /health-check/deployment.yaml:1-99
+Check: CKV_K8S_22: "Use read-only filesystem for containers where possible"
+	FAILED for resource: Deployment.default.health-check-deployment
+	File: /health-check/deployment.yaml:1-99
+Check: CKV_K8S_13: "Memory limits should be set"
+	FAILED for resource: Deployment.default.health-check-deployment
+	File: /health-check/deployment.yaml:1-99
+Check: CKV_K8S_40: "Containers should run as a high UID to avoid host conflict"
+	FAILED for resource: Deployment.default.health-check-deployment
+	File: /health-check/deployment.yaml:1-99
+Check: CKV_K8S_21: "The default namespace should not be used"
+	FAILED for resource: Deployment.default.health-check-deployment
+	File: /health-check/deployment.yaml:1-99
+Check: CKV_K8S_10: "CPU requests should be set"
+	FAILED for resource: Deployment.default.health-check-deployment
+	File: /health-check/deployment.yaml:1-99
+Check: CKV_K8S_9: "Readiness Probe Should be Configured"
+	FAILED for resource: Deployment.default.health-check-deployment
+	File: /health-check/deployment.yaml:1-99
+Check: CKV_K8S_28: "Minimize the admission of containers with the NET_RAW capability"
+	FAILED for resource: Deployment.default.health-check-deployment
+	File: /health-check/deployment.yaml:1-99
+Check: CKV_K8S_31: "Ensure that the seccomp profile is set to docker/default or runtime/default"
+	FAILED for resource: Deployment.default.health-check-deployment
+	File: /health-check/deployment.yaml:1-99
+Check: CKV_K8S_43: "Image should use digest"
+	FAILED for resource: Deployment.default.health-check-deployment
+	File: /health-check/deployment.yaml:1-99
+Check: CKV_K8S_27: "Do not expose the docker daemon socket to containers"
+	FAILED for resource: Deployment.default.health-check-deployment
+	File: /health-check/deployment.yaml:1-99
+Check: CKV_K8S_23: "Minimize the admission of root containers"
+	FAILED for resource: Deployment.default.health-check-deployment
+	File: /health-check/deployment.yaml:1-99
+Check: CKV_K8S_21: "The default namespace should not be used"
+	FAILED for resource: Service.default.health-check-service
+	File: /health-check/deployment.yaml:100-110
+Check: CKV_K8S_49: "Minimize wildcard use in Roles and ClusterRoles"
+	FAILED for resource: Role.big-monolith.secret-reader
+	File: /hunger-check/deployment.yaml:7-16
+Check: CKV_K8S_12: "Memory requests should be set"
+	FAILED for resource: Deployment.big-monolith.hunger-check-deployment
+	File: /hunger-check/deployment.yaml:55-82
+Check: CKV_K8S_20: "Containers should not run with allowPrivilegeEscalation"
+	FAILED for resource: Deployment.big-monolith.hunger-check-deployment
+	File: /hunger-check/deployment.yaml:55-82
+Check: CKV_K8S_38: "Ensure that Service Account Tokens are only mounted where necessary"
+	FAILED for resource: Deployment.big-monolith.hunger-check-deployment
+	File: /hunger-check/deployment.yaml:55-82
+Check: CKV_K8S_8: "Liveness Probe Should be Configured"
+	FAILED for resource: Deployment.big-monolith.hunger-check-deployment
+	File: /hunger-check/deployment.yaml:55-82
+Check: CKV_K8S_37: "Minimize the admission of containers with capabilities assigned"
+	FAILED for resource: Deployment.big-monolith.hunger-check-deployment
+	File: /hunger-check/deployment.yaml:55-82
+Check: CKV_K8S_11: "CPU limits should be set"
+	FAILED for resource: Deployment.big-monolith.hunger-check-deployment
+	File: /hunger-check/deployment.yaml:55-82
+Check: CKV_K8S_14: "Image Tag should be fixed - not latest or blank"
+	FAILED for resource: Deployment.big-monolith.hunger-check-deployment
+	File: /hunger-check/deployment.yaml:55-82
+Check: CKV_K8S_30: "Apply security context to your containers"
+	FAILED for resource: Deployment.big-monolith.hunger-check-deployment
+	File: /hunger-check/deployment.yaml:55-82
+Check: CKV_K8S_29: "Apply security context to your pods and containers"
+	FAILED for resource: Deployment.big-monolith.hunger-check-deployment
+	File: /hunger-check/deployment.yaml:55-82
+Check: CKV_K8S_22: "Use read-only filesystem for containers where possible"
+	FAILED for resource: Deployment.big-monolith.hunger-check-deployment
+	File: /hunger-check/deployment.yaml:55-82
+Check: CKV_K8S_13: "Memory limits should be set"
+	FAILED for resource: Deployment.big-monolith.hunger-check-deployment
+	File: /hunger-check/deployment.yaml:55-82
+Check: CKV_K8S_40: "Containers should run as a high UID to avoid host conflict"
+	FAILED for resource: Deployment.big-monolith.hunger-check-deployment
+	File: /hunger-check/deployment.yaml:55-82
+Check: CKV_K8S_10: "CPU requests should be set"
+	FAILED for resource: Deployment.big-monolith.hunger-check-deployment
+	File: /hunger-check/deployment.yaml:55-82
+Check: CKV_K8S_9: "Readiness Probe Should be Configured"
+	FAILED for resource: Deployment.big-monolith.hunger-check-deployment
+	File: /hunger-check/deployment.yaml:55-82
+Check: CKV_K8S_28: "Minimize the admission of containers with the NET_RAW capability"
+	FAILED for resource: Deployment.big-monolith.hunger-check-deployment
+	File: /hunger-check/deployment.yaml:55-82
+Check: CKV_K8S_31: "Ensure that the seccomp profile is set to docker/default or runtime/default"
+	FAILED for resource: Deployment.big-monolith.hunger-check-deployment
+	File: /hunger-check/deployment.yaml:55-82
+Check: CKV_K8S_43: "Image should use digest"
+	FAILED for resource: Deployment.big-monolith.hunger-check-deployment
+	File: /hunger-check/deployment.yaml:55-82
+Check: CKV_K8S_23: "Minimize the admission of root containers"
+	FAILED for resource: Deployment.big-monolith.hunger-check-deployment
+	File: /hunger-check/deployment.yaml:55-82
+Check: CKV_K8S_20: "Containers should not run with allowPrivilegeEscalation"
+	FAILED for resource: Deployment.default.internal-proxy-deployment
+	File: /internal-proxy/deployment.yaml:1-40
+Check: CKV_K8S_38: "Ensure that Service Account Tokens are only mounted where necessary"
+	FAILED for resource: Deployment.default.internal-proxy-deployment
+	File: /internal-proxy/deployment.yaml:1-40
+Check: CKV_K8S_8: "Liveness Probe Should be Configured"
+	FAILED for resource: Deployment.default.internal-proxy-deployment
+	File: /internal-proxy/deployment.yaml:1-40
+Check: CKV_K8S_37: "Minimize the admission of containers with capabilities assigned"
+	FAILED for resource: Deployment.default.internal-proxy-deployment
+	File: /internal-proxy/deployment.yaml:1-40
+Check: CKV_K8S_14: "Image Tag should be fixed - not latest or blank"
+	FAILED for resource: Deployment.default.internal-proxy-deployment
+	File: /internal-proxy/deployment.yaml:1-40
+Check: CKV_K8S_30: "Apply security context to your containers"
+	FAILED for resource: Deployment.default.internal-proxy-deployment
+	File: /internal-proxy/deployment.yaml:1-40
+Check: CKV_K8S_29: "Apply security context to your pods and containers"
+	FAILED for resource: Deployment.default.internal-proxy-deployment
+	File: /internal-proxy/deployment.yaml:1-40
+Check: CKV_K8S_22: "Use read-only filesystem for containers where possible"
+	FAILED for resource: Deployment.default.internal-proxy-deployment
+	File: /internal-proxy/deployment.yaml:1-40
+Check: CKV_K8S_40: "Containers should run as a high UID to avoid host conflict"
+	FAILED for resource: Deployment.default.internal-proxy-deployment
+	File: /internal-proxy/deployment.yaml:1-40
+Check: CKV_K8S_21: "The default namespace should not be used"
+	FAILED for resource: Deployment.default.internal-proxy-deployment
+	File: /internal-proxy/deployment.yaml:1-40
+Check: CKV_K8S_9: "Readiness Probe Should be Configured"
+	FAILED for resource: Deployment.default.internal-proxy-deployment
+	File: /internal-proxy/deployment.yaml:1-40
+Check: CKV_K8S_28: "Minimize the admission of containers with the NET_RAW capability"
+	FAILED for resource: Deployment.default.internal-proxy-deployment
+	File: /internal-proxy/deployment.yaml:1-40
+Check: CKV_K8S_31: "Ensure that the seccomp profile is set to docker/default or runtime/default"
+	FAILED for resource: Deployment.default.internal-proxy-deployment
+	File: /internal-proxy/deployment.yaml:1-40
+Check: CKV_K8S_43: "Image should use digest"
+	FAILED for resource: Deployment.default.internal-proxy-deployment
+	File: /internal-proxy/deployment.yaml:1-40
+Check: CKV_K8S_23: "Minimize the admission of root containers"
+	FAILED for resource: Deployment.default.internal-proxy-deployment
+	File: /internal-proxy/deployment.yaml:1-40
+Check: CKV_K8S_21: "The default namespace should not be used"
+	FAILED for resource: Service.default.internal-proxy-api-service
+	File: /internal-proxy/deployment.yaml:41-53
+Check: CKV_K8S_21: "The default namespace should not be used"
+	FAILED for resource: Service.default.internal-proxy-info-app-service
+	File: /internal-proxy/deployment.yaml:54-67
+Check: CKV_K8S_20: "Containers should not run with allowPrivilegeEscalation"
+	FAILED for resource: Deployment.default.poor-registry-deployment
+	File: /poor-registry/deployment.yaml:1-24
+Check: CKV_K8S_38: "Ensure that Service Account Tokens are only mounted where necessary"
+	FAILED for resource: Deployment.default.poor-registry-deployment
+	File: /poor-registry/deployment.yaml:1-24
+Check: CKV_K8S_8: "Liveness Probe Should be Configured"
+	FAILED for resource: Deployment.default.poor-registry-deployment
+	File: /poor-registry/deployment.yaml:1-24
+Check: CKV_K8S_37: "Minimize the admission of containers with capabilities assigned"
+	FAILED for resource: Deployment.default.poor-registry-deployment
+	File: /poor-registry/deployment.yaml:1-24
+Check: CKV_K8S_14: "Image Tag should be fixed - not latest or blank"
+	FAILED for resource: Deployment.default.poor-registry-deployment
+	File: /poor-registry/deployment.yaml:1-24
+Check: CKV_K8S_30: "Apply security context to your containers"
+	FAILED for resource: Deployment.default.poor-registry-deployment
+	File: /poor-registry/deployment.yaml:1-24
+Check: CKV_K8S_29: "Apply security context to your pods and containers"
+	FAILED for resource: Deployment.default.poor-registry-deployment
+	File: /poor-registry/deployment.yaml:1-24
+Check: CKV_K8S_22: "Use read-only filesystem for containers where possible"
+	FAILED for resource: Deployment.default.poor-registry-deployment
+	File: /poor-registry/deployment.yaml:1-24
+Check: CKV_K8S_40: "Containers should run as a high UID to avoid host conflict"
+	FAILED for resource: Deployment.default.poor-registry-deployment
+	File: /poor-registry/deployment.yaml:1-24
+Check: CKV_K8S_21: "The default namespace should not be used"
+	FAILED for resource: Deployment.default.poor-registry-deployment
+	File: /poor-registry/deployment.yaml:1-24
+Check: CKV_K8S_9: "Readiness Probe Should be Configured"
+	FAILED for resource: Deployment.default.poor-registry-deployment
+	File: /poor-registry/deployment.yaml:1-24
+Check: CKV_K8S_28: "Minimize the admission of containers with the NET_RAW capability"
+	FAILED for resource: Deployment.default.poor-registry-deployment
+	File: /poor-registry/deployment.yaml:1-24
+Check: CKV_K8S_31: "Ensure that the seccomp profile is set to docker/default or runtime/default"
+	FAILED for resource: Deployment.default.poor-registry-deployment
+	File: /poor-registry/deployment.yaml:1-24
+Check: CKV_K8S_43: "Image should use digest"
+	FAILED for resource: Deployment.default.poor-registry-deployment
+	File: /poor-registry/deployment.yaml:1-24
+Check: CKV_K8S_23: "Minimize the admission of root containers"
+	FAILED for resource: Deployment.default.poor-registry-deployment
+	File: /poor-registry/deployment.yaml:1-24
+Check: CKV_K8S_21: "The default namespace should not be used"
+	FAILED for resource: Service.default.poor-registry-service
+	File: /poor-registry/deployment.yaml:25-36
+Check: CKV_K8S_12: "Memory requests should be set"
+	FAILED for resource: Job.default.kube-bench-node
+	File: /kube-bench-security/node-job.yaml:2-84
+Check: CKV_K8S_20: "Containers should not run with allowPrivilegeEscalation"
+	FAILED for resource: Job.default.kube-bench-node
+	File: /kube-bench-security/node-job.yaml:2-84
+Check: CKV_K8S_38: "Ensure that Service Account Tokens are only mounted where necessary"
+	FAILED for resource: Job.default.kube-bench-node
+	File: /kube-bench-security/node-job.yaml:2-84
+Check: CKV_K8S_17: "Containers should not share the host process ID namespace"
+	FAILED for resource: Job.default.kube-bench-node
+	File: /kube-bench-security/node-job.yaml:2-84
+Check: CKV_K8S_37: "Minimize the admission of containers with capabilities assigned"
+	FAILED for resource: Job.default.kube-bench-node
+	File: /kube-bench-security/node-job.yaml:2-84
+Check: CKV_K8S_11: "CPU limits should be set"
+	FAILED for resource: Job.default.kube-bench-node
+	File: /kube-bench-security/node-job.yaml:2-84
+Check: CKV_K8S_14: "Image Tag should be fixed - not latest or blank"
+	FAILED for resource: Job.default.kube-bench-node
+	File: /kube-bench-security/node-job.yaml:2-84
+Check: CKV_K8S_30: "Apply security context to your containers"
+	FAILED for resource: Job.default.kube-bench-node
+	File: /kube-bench-security/node-job.yaml:2-84
+Check: CKV_K8S_29: "Apply security context to your pods and containers"
+	FAILED for resource: Job.default.kube-bench-node
+	File: /kube-bench-security/node-job.yaml:2-84
+Check: CKV_K8S_22: "Use read-only filesystem for containers where possible"
+	FAILED for resource: Job.default.kube-bench-node
+	File: /kube-bench-security/node-job.yaml:2-84
+Check: CKV_K8S_13: "Memory limits should be set"
+	FAILED for resource: Job.default.kube-bench-node
+	File: /kube-bench-security/node-job.yaml:2-84
+Check: CKV_K8S_40: "Containers should run as a high UID to avoid host conflict"
+	FAILED for resource: Job.default.kube-bench-node
+	File: /kube-bench-security/node-job.yaml:2-84
+Check: CKV_K8S_21: "The default namespace should not be used"
+	FAILED for resource: Job.default.kube-bench-node
+	File: /kube-bench-security/node-job.yaml:2-84
+Check: CKV_K8S_10: "CPU requests should be set"
+	FAILED for resource: Job.default.kube-bench-node
+	File: /kube-bench-security/node-job.yaml:2-84
+Check: CKV_K8S_28: "Minimize the admission of containers with the NET_RAW capability"
+	FAILED for resource: Job.default.kube-bench-node
+	File: /kube-bench-security/node-job.yaml:2-84
+Check: CKV_K8S_31: "Ensure that the seccomp profile is set to docker/default or runtime/default"
+	FAILED for resource: Job.default.kube-bench-node
+	File: /kube-bench-security/node-job.yaml:2-84
+Check: CKV_K8S_43: "Image should use digest"
+	FAILED for resource: Job.default.kube-bench-node
+	File: /kube-bench-security/node-job.yaml:2-84
+Check: CKV_K8S_23: "Minimize the admission of root containers"
+	FAILED for resource: Job.default.kube-bench-node
+	File: /kube-bench-security/node-job.yaml:2-84
+Check: CKV_K8S_21: "The default namespace should not be used"
+	FAILED for resource: Secret.default.goatvault
+	File: /system-monitor/deployment.yaml:1-10
+Check: CKV_K8S_20: "Containers should not run with allowPrivilegeEscalation"
+	FAILED for resource: Deployment.default.system-monitor-deployment
+	File: /system-monitor/deployment.yaml:11-53
+Check: CKV_K8S_38: "Ensure that Service Account Tokens are only mounted where necessary"
+	FAILED for resource: Deployment.default.system-monitor-deployment
+	File: /system-monitor/deployment.yaml:11-53
+Check: CKV_K8S_17: "Containers should not share the host process ID namespace"
+	FAILED for resource: Deployment.default.system-monitor-deployment
+	File: /system-monitor/deployment.yaml:11-53
+Check: CKV_K8S_8: "Liveness Probe Should be Configured"
+	FAILED for resource: Deployment.default.system-monitor-deployment
+	File: /system-monitor/deployment.yaml:11-53
+Check: CKV_K8S_37: "Minimize the admission of containers with capabilities assigned"
+	FAILED for resource: Deployment.default.system-monitor-deployment
+	File: /system-monitor/deployment.yaml:11-53
+Check: CKV_K8S_35: "Prefer using secrets as files over secrets as environment variables"
+	FAILED for resource: Deployment.default.system-monitor-deployment
+	File: /system-monitor/deployment.yaml:11-53
+Check: CKV_K8S_14: "Image Tag should be fixed - not latest or blank"
+	FAILED for resource: Deployment.default.system-monitor-deployment
+	File: /system-monitor/deployment.yaml:11-53
+Check: CKV_K8S_29: "Apply security context to your pods and containers"
+	FAILED for resource: Deployment.default.system-monitor-deployment
+	File: /system-monitor/deployment.yaml:11-53
+Check: CKV_K8S_16: "Container should not be privileged"
+	FAILED for resource: Deployment.default.system-monitor-deployment
+	File: /system-monitor/deployment.yaml:11-53
+Check: CKV_K8S_22: "Use read-only filesystem for containers where possible"
+	FAILED for resource: Deployment.default.system-monitor-deployment
+	File: /system-monitor/deployment.yaml:11-53
+Check: CKV_K8S_18: "Containers should not share the host IPC namespace"
+	FAILED for resource: Deployment.default.system-monitor-deployment
+	File: /system-monitor/deployment.yaml:11-53
+Check: CKV_K8S_40: "Containers should run as a high UID to avoid host conflict"
+	FAILED for resource: Deployment.default.system-monitor-deployment
+	File: /system-monitor/deployment.yaml:11-53
+Check: CKV_K8S_21: "The default namespace should not be used"
+	FAILED for resource: Deployment.default.system-monitor-deployment
+	File: /system-monitor/deployment.yaml:11-53
+Check: CKV_K8S_9: "Readiness Probe Should be Configured"
+	FAILED for resource: Deployment.default.system-monitor-deployment
+	File: /system-monitor/deployment.yaml:11-53
+Check: CKV_K8S_28: "Minimize the admission of containers with the NET_RAW capability"
+	FAILED for resource: Deployment.default.system-monitor-deployment
+	File: /system-monitor/deployment.yaml:11-53
+Check: CKV_K8S_31: "Ensure that the seccomp profile is set to docker/default or runtime/default"
+	FAILED for resource: Deployment.default.system-monitor-deployment
+	File: /system-monitor/deployment.yaml:11-53
+Check: CKV_K8S_43: "Image should use digest"
+	FAILED for resource: Deployment.default.system-monitor-deployment
+	File: /system-monitor/deployment.yaml:11-53
+Check: CKV_K8S_23: "Minimize the admission of root containers"
+	FAILED for resource: Deployment.default.system-monitor-deployment
+	File: /system-monitor/deployment.yaml:11-53
+Check: CKV_K8S_21: "The default namespace should not be used"
+	FAILED for resource: Service.default.system-monitor-service
+	File: /system-monitor/deployment.yaml:54-65
+Check: CKV2_K8S_6: "Minimize the admission of pods which lack an associated NetworkPolicy"
+	FAILED for resource: Pod.default.batch-check-job
+	File: /batch-check/job.yaml:1-17
+Check: CKV2_K8S_6: "Minimize the admission of pods which lack an associated NetworkPolicy"
+	FAILED for resource: Pod.secure-middleware.cache-store-deployment.app-cache-store
+	File: /cache-store/deployment.yaml:19-39
+Check: CKV2_K8S_6: "Minimize the admission of pods which lack an associated NetworkPolicy"
+	FAILED for resource: Pod.default.health-check-deployment-simple.app-health-check
+	File: /health-check/deployment-simple-alternative.yaml:5-63
+Check: CKV2_K8S_6: "Minimize the admission of pods which lack an associated NetworkPolicy"
+	FAILED for resource: Pod.default.hidden-in-layers
+	File: /hidden-in-layers/deployment.yaml:1-17
+Check: CKV2_K8S_6: "Minimize the admission of pods which lack an associated NetworkPolicy"
+	FAILED for resource: Pod.default.kubernetes-goat-home-deployment.app-kubernetes-goat-home
+	File: /kubernetes-goat-home/deployment.yaml:1-24
+Check: CKV2_K8S_6: "Minimize the admission of pods which lack an associated NetworkPolicy"
+	FAILED for resource: Pod.default.build-code-deployment.app-build-code
+	File: /build-code/deployment.yaml:1-24
+Check: CKV2_K8S_6: "Minimize the admission of pods which lack an associated NetworkPolicy"
+	FAILED for resource: Pod.default.docker-bench-security.name-docker-bench
+	File: /docker-bench-security/deployment.yaml:12-138
+Check: CKV2_K8S_6: "Minimize the admission of pods which lack an associated NetworkPolicy"
+	FAILED for resource: Pod.default.health-check-deployment.app-health-check
+	File: /health-check/deployment.yaml:1-99
+Check: CKV2_K8S_6: "Minimize the admission of pods which lack an associated NetworkPolicy"
+	FAILED for resource: Pod.big-monolith.hunger-check-deployment.app-hunger-check
+	File: /hunger-check/deployment.yaml:55-82
+Check: CKV2_K8S_6: "Minimize the admission of pods which lack an associated NetworkPolicy"
+	FAILED for resource: Pod.default.internal-proxy-deployment.app-internal-proxy
+	File: /internal-proxy/deployment.yaml:1-40
+Check: CKV2_K8S_6: "Minimize the admission of pods which lack an associated NetworkPolicy"
+	FAILED for resource: Pod.default.poor-registry-deployment.app-poor-registry
+	File: /poor-registry/deployment.yaml:1-24
+Check: CKV2_K8S_6: "Minimize the admission of pods which lack an associated NetworkPolicy"
+	FAILED for resource: Pod.default.system-monitor-deployment.app-system-monitor
+	File: /system-monitor/deployment.yaml:11-53
+Check: CKV2_K8S_5: "No ServiceAccount/Node should be able to read all secrets"
+	FAILED for resource: RoleBinding.big-monolith.secret-reader-binding
+	File: /hunger-check/deployment.yaml:17-30

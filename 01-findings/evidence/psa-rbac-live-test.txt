@@ -1,0 +1,72 @@
+Cluster: Server Version: v1.36.1
+
+################ TEST 1: Pod Security Admission (Module 6, items 2 and 3)
+## 1a. Apply the fixed manifests (ExternalSecret CRD isn't installed, so that one object errors)
+namespace/internal-proxy created
+limitrange/defaults created
+resourcequota/quota created
+namespace/platform-node-agents created
+namespace/health-check created
+serviceaccount/health-check created
+deployment.apps/health-check created
+service/health-check created
+namespace/system-monitor created
+serviceaccount/system-monitor created
+deployment.apps/system-monitor created
+service/system-monitor created
+error: resource mapping not found for name: "goatvault" namespace: "system-monitor" from "<repo>/06-remediation/fixed-manifests/system-monitor.yaml": no matches for kind "ExternalSecret" in version "external-secrets.io/v1"
+ensure CRDs are installed first
+
+## 1b. Apply kubernetes-goat's original deployments into the same restricted namespaces
+secret/goatvault created
+Warning: would violate PodSecurity "restricted:latest": host namespaces (hostPID=true, hostIPC=true), privileged (container "system-monitor" must not set securityContext.privileged=true), allowPrivilegeEscalation != false (container "system-monitor" must set securityContext.allowPrivilegeEscalation=false), unrestricted capabilities (container "system-monitor" must set securityContext.capabilities.drop=["ALL"]), restricted volume types (volume "host-filesystem" uses restricted volume type "hostPath"), runAsNonRoot != true (pod or container "system-monitor" must set securityContext.runAsNonRoot=true), seccompProfile (pod or container "system-monitor" must set securityContext.seccompProfile.type to "RuntimeDefault" or "Localhost")
+deployment.apps/system-monitor-deployment created
+service/system-monitor-service created
+Warning: would violate PodSecurity "restricted:latest": privileged (containers "detect-runtime-socket", "health-check" must not set securityContext.privileged=true), allowPrivilegeEscalation != false (containers "detect-runtime-socket", "health-check" must set securityContext.allowPrivilegeEscalation=false), unrestricted capabilities (containers "detect-runtime-socket", "health-check" must set securityContext.capabilities.drop=["ALL"]), restricted volume types (volumes "host-root", "containerd-sock-volume-fallback", "docker-sock-volume-fallback" use restricted volume type "hostPath"), runAsNonRoot != true (pod or containers "detect-runtime-socket", "health-check" must set securityContext.runAsNonRoot=true), seccompProfile (pod or containers "detect-runtime-socket", "health-check" must set securityContext.seccompProfile.type to "RuntimeDefault" or "Localhost")
+deployment.apps/health-check-deployment created
+service/health-check-service created
+
+## 1c. Pods that were admitted (ErrImagePull is expected: images are placeholders)
+health-check-5bbb48bdc9-psqkw   0/1   ErrImagePull   0     12s
+health-check-5bbb48bdc9-snh5q   0/1   ErrImagePull   0     12s
+system-monitor-6d96fc9fdd-4gtw2   0/1   ErrImagePull   0     13s
+system-monitor-6d96fc9fdd-67sg9   0/1   ErrImagePull   0     13s
+
+## 1d. ReplicaSet FailedCreate events for the goat deployments
+health-check-deployment-795db5f4b6   Error creating: pods "health-check-deployment-795db5f4b6-8gs9v" is forbidden: violates PodSecurity "restricted:latest": privileged (containers "detect-runtime-socket", "health-check" must not set securityContext.privileged=true), allowPrivilegeEscalation != false (containers "detect-runtime-socket", "health-check" must set securityContext.allowPrivilegeEscalation=false), unrestricted capabilities (containers "detect-runtime-socket", "health-check" must set securityContext.capabilities.drop=["ALL"]), restricted volume types (volumes "host-root", "containerd-sock-volume-fallback", "docker-sock-volume-fallback" use restricted volume type "hostPath"), runAsNonRoot != true (pod or containers "detect-runtime-socket", "health-check" must set securityContext.runAsNonRoot=true), seccompProfile (pod or containers "detect-runtime-socket", "health-check" must set securityContext.seccompProfile.type to "RuntimeDefault" or "Localhost")
+system-monitor-deployment-8fcd4c5dd   Error creating: pods "system-monitor-deployment-8fcd4c5dd-fkmrx" is forbidden: violates PodSecurity "restricted:latest": host namespaces (hostPID=true, hostIPC=true), privileged (container "system-monitor" must not set securityContext.privileged=true), allowPrivilegeEscalation != false (container "system-monitor" must set securityContext.allowPrivilegeEscalation=false), unrestricted capabilities (container "system-monitor" must set securityContext.capabilities.drop=["ALL"]), restricted volume types (volume "host-filesystem" uses restricted volume type "hostPath"), runAsNonRoot != true (pod or container "system-monitor" must set securityContext.runAsNonRoot=true), seccompProfile (pod or container "system-monitor" must set securityContext.seccompProfile.type to "RuntimeDefault" or "Localhost")
+
+## 1e. Evidence query from remediation-advisory.md (expect empty)
+(control, kube-system included, proves the query detects host access:)
+kube-system/etcd-assess-psa-control-plane
+kube-system/kindnet-7dczl
+kube-system/kube-apiserver-assess-psa-control-plane
+
+################ TEST 2: RBAC before/after (Module 6, item 1)
+## 2a. BEFORE: kubernetes-goat scenarios/insecure-rbac/setup.yaml
+serviceaccount/superadmin created
+clusterrolebinding.rbac.authorization.k8s.io/superadmin created
+Resources                                       Non-Resource URLs                      Resource Names   Verbs
+*.*                                             []                                     []               [*]
+                                                [*]                                    []               [*]
+
+## 2b. FIX: namespace-scoped ci-deployer Role; remove the binding
+role.rbac.authorization.k8s.io/ci-deployer created
+rolebinding.rbac.authorization.k8s.io/ci-deployer created
+clusterrolebinding.rbac.authorization.k8s.io "superadmin" deleted
+serviceaccount "superadmin" deleted from kube-system namespace
+
+## 2c. AFTER
+Resources                                       Non-Resource URLs                      Resource Names   Verbs
+selfsubjectreviews.authentication.k8s.io        []                                     []               [create]
+selfsubjectaccessreviews.authorization.k8s.io   []                                     []               [create]
+selfsubjectrulesreviews.authorization.k8s.io    []                                     []               [create]
+CI create clusterrolebindings:      no
+CI get secrets (own ns):            no
+CI exec into pods (own ns):         no
+CI patch deployments (own ns):      yes
+CI patch deployments (other ns):    no
+
+## 2d. Remaining cluster-admin bindings (kubeadm:cluster-admins is kind/kubeadm-specific; EKS doesn't create it)
+cluster-admin
+kubeadm:cluster-admins

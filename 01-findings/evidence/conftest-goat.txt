@@ -1,0 +1,110 @@
+WARN - scenarios/cache-store/deployment.yaml - main - [F-20] Deployment/cache-store-deployment container 'cache-store' does not set readOnlyRootFilesystem.
+WARN - scenarios/cache-store/deployment.yaml - main - [F-20] Deployment/cache-store-deployment container 'cache-store' does not set runAsNonRoot.
+WARN - scenarios/cache-store/deployment.yaml - main - [F-21] Deployment/cache-store-deployment container 'cache-store' has no memory limit.
+WARN - scenarios/cache-store/deployment.yaml - main - [F-21] Deployment/cache-store-deployment container 'cache-store' has no resource requests.
+FAIL - scenarios/cache-store/deployment.yaml - main - [F-17] Deployment/cache-store-deployment container 'cache-store' image 'madhuakula/k8s-goat-cache-store' is not pinned by digest.
+WARN - scenarios/docker-bench-security/deployment.yaml - main - [F-20] DaemonSet/docker-bench-security container 'docker-bench' does not set readOnlyRootFilesystem.
+WARN - scenarios/docker-bench-security/deployment.yaml - main - [F-20] DaemonSet/docker-bench-security container 'docker-bench' does not set runAsNonRoot.
+WARN - scenarios/docker-bench-security/deployment.yaml - main - [F-20] DaemonSet/docker-bench-security container 'verify-runtime-socket' does not set readOnlyRootFilesystem.
+WARN - scenarios/docker-bench-security/deployment.yaml - main - [F-20] DaemonSet/docker-bench-security container 'verify-runtime-socket' does not set runAsNonRoot.
+WARN - scenarios/docker-bench-security/deployment.yaml - main - [F-21] DaemonSet/docker-bench-security container 'verify-runtime-socket' has no memory limit.
+WARN - scenarios/docker-bench-security/deployment.yaml - main - [F-21] DaemonSet/docker-bench-security container 'verify-runtime-socket' has no resource requests.
+FAIL - scenarios/docker-bench-security/deployment.yaml - main - [F-02] DaemonSet/docker-bench-security container 'docker-bench' is privileged.
+FAIL - scenarios/docker-bench-security/deployment.yaml - main - [F-02] DaemonSet/docker-bench-security container 'verify-runtime-socket' is privileged.
+FAIL - scenarios/docker-bench-security/deployment.yaml - main - [F-02] DaemonSet/docker-bench-security mounts hostPath /.
+FAIL - scenarios/docker-bench-security/deployment.yaml - main - [F-02] DaemonSet/docker-bench-security mounts hostPath /etc.
+FAIL - scenarios/docker-bench-security/deployment.yaml - main - [F-02] DaemonSet/docker-bench-security mounts hostPath /lib/systemd/system.
+FAIL - scenarios/docker-bench-security/deployment.yaml - main - [F-02] DaemonSet/docker-bench-security mounts hostPath /usr/bin/containerd.
+FAIL - scenarios/docker-bench-security/deployment.yaml - main - [F-02] DaemonSet/docker-bench-security mounts hostPath /usr/bin/runc.
+FAIL - scenarios/docker-bench-security/deployment.yaml - main - [F-02] DaemonSet/docker-bench-security mounts hostPath /usr/lib/systemd.
+FAIL - scenarios/docker-bench-security/deployment.yaml - main - [F-02] DaemonSet/docker-bench-security mounts hostPath /var/lib.
+FAIL - scenarios/docker-bench-security/deployment.yaml - main - [F-02] DaemonSet/docker-bench-security sets hostIPC.
+FAIL - scenarios/docker-bench-security/deployment.yaml - main - [F-02] DaemonSet/docker-bench-security sets hostNetwork.
+FAIL - scenarios/docker-bench-security/deployment.yaml - main - [F-02] DaemonSet/docker-bench-security sets hostPID.
+FAIL - scenarios/docker-bench-security/deployment.yaml - main - [F-03] DaemonSet/docker-bench-security mounts the container runtime socket /run/containerd/containerd.sock.
+FAIL - scenarios/docker-bench-security/deployment.yaml - main - [F-03] DaemonSet/docker-bench-security mounts the container runtime socket /run/docker.sock.
+FAIL - scenarios/docker-bench-security/deployment.yaml - main - [F-03] DaemonSet/docker-bench-security mounts the container runtime socket /var/run/docker.sock.
+FAIL - scenarios/docker-bench-security/deployment.yaml - main - [F-17] DaemonSet/docker-bench-security container 'docker-bench' image 'madhuakula/hacker-container' is not pinned by digest.
+FAIL - scenarios/docker-bench-security/deployment.yaml - main - [F-17] DaemonSet/docker-bench-security container 'verify-runtime-socket' image 'busybox:latest' is not pinned by digest.
+FAIL - scenarios/docker-bench-security/deployment.yaml - main - [F-27] DaemonSet/docker-bench-security deploys to the default namespace.
+WARN - scenarios/hunger-check/deployment.yaml - main - [F-20] Deployment/hunger-check-deployment container 'hunger-check' does not set readOnlyRootFilesystem.
+WARN - scenarios/hunger-check/deployment.yaml - main - [F-20] Deployment/hunger-check-deployment container 'hunger-check' does not set runAsNonRoot.
+WARN - scenarios/hunger-check/deployment.yaml - main - [F-21] Deployment/hunger-check-deployment container 'hunger-check' has no memory limit.
+WARN - scenarios/hunger-check/deployment.yaml - main - [F-21] Deployment/hunger-check-deployment container 'hunger-check' has no resource requests.
+FAIL - scenarios/hunger-check/deployment.yaml - main - [F-04/F-08] Role/secret-reader uses '*' in resources. List the exact resources and verbs needed.
+FAIL - scenarios/hunger-check/deployment.yaml - main - [F-11] Secret/vaultapikey has values committed to Git. Use an ExternalSecret.
+FAIL - scenarios/hunger-check/deployment.yaml - main - [F-11] Secret/webhookapikey has values committed to Git. Use an ExternalSecret.
+FAIL - scenarios/hunger-check/deployment.yaml - main - [F-17] Deployment/hunger-check-deployment container 'hunger-check' image 'madhuakula/k8s-goat-hunger-check' is not pinned by digest.
+FAIL - scenarios/insecure-rbac/setup.yaml - main - [F-01] ClusterRoleBinding/superadmin binds cluster-admin. Use a namespace-scoped Role; cluster-scoped changes go through the platform pipeline.
+WARN - scenarios/build-code/deployment.yaml - main - [F-20] Deployment/build-code-deployment container 'build-code' does not set readOnlyRootFilesystem.
+WARN - scenarios/build-code/deployment.yaml - main - [F-20] Deployment/build-code-deployment container 'build-code' does not set runAsNonRoot.
+WARN - scenarios/build-code/deployment.yaml - main - [F-21] Deployment/build-code-deployment container 'build-code' has no resource requests.
+FAIL - scenarios/build-code/deployment.yaml - main - [F-17] Deployment/build-code-deployment container 'build-code' image 'madhuakula/k8s-goat-build-code' is not pinned by digest.
+FAIL - scenarios/build-code/deployment.yaml - main - [F-27] Deployment/build-code-deployment deploys to the default namespace.
+WARN - scenarios/health-check/deployment-simple-alternative.yaml - main - [F-20] Deployment/health-check-deployment-simple container 'health-check' does not set readOnlyRootFilesystem.
+WARN - scenarios/health-check/deployment-simple-alternative.yaml - main - [F-20] Deployment/health-check-deployment-simple container 'health-check' does not set runAsNonRoot.
+WARN - scenarios/health-check/deployment-simple-alternative.yaml - main - [F-21] Deployment/health-check-deployment-simple container 'health-check' has no resource requests.
+FAIL - scenarios/health-check/deployment-simple-alternative.yaml - main - [F-02] Deployment/health-check-deployment-simple container 'health-check' is privileged.
+FAIL - scenarios/health-check/deployment-simple-alternative.yaml - main - [F-03] Deployment/health-check-deployment-simple mounts the container runtime socket /run/containerd/containerd.sock.
+FAIL - scenarios/health-check/deployment-simple-alternative.yaml - main - [F-03] Deployment/health-check-deployment-simple mounts the container runtime socket /run/docker.sock.
+FAIL - scenarios/health-check/deployment-simple-alternative.yaml - main - [F-03] Deployment/health-check-deployment-simple mounts the container runtime socket /var/run/docker.sock.
+FAIL - scenarios/health-check/deployment-simple-alternative.yaml - main - [F-17] Deployment/health-check-deployment-simple container 'health-check' image 'madhuakula/k8s-goat-health-check' is not pinned by digest.
+FAIL - scenarios/health-check/deployment-simple-alternative.yaml - main - [F-27] Deployment/health-check-deployment-simple deploys to the default namespace.
+WARN - scenarios/health-check/deployment.yaml - main - [F-20] Deployment/health-check-deployment container 'detect-runtime-socket' does not set readOnlyRootFilesystem.
+WARN - scenarios/health-check/deployment.yaml - main - [F-20] Deployment/health-check-deployment container 'detect-runtime-socket' does not set runAsNonRoot.
+WARN - scenarios/health-check/deployment.yaml - main - [F-20] Deployment/health-check-deployment container 'health-check' does not set readOnlyRootFilesystem.
+WARN - scenarios/health-check/deployment.yaml - main - [F-20] Deployment/health-check-deployment container 'health-check' does not set runAsNonRoot.
+WARN - scenarios/health-check/deployment.yaml - main - [F-21] Deployment/health-check-deployment container 'detect-runtime-socket' has no memory limit.
+WARN - scenarios/health-check/deployment.yaml - main - [F-21] Deployment/health-check-deployment container 'detect-runtime-socket' has no resource requests.
+WARN - scenarios/health-check/deployment.yaml - main - [F-21] Deployment/health-check-deployment container 'health-check' has no resource requests.
+FAIL - scenarios/health-check/deployment.yaml - main - [F-02] Deployment/health-check-deployment container 'detect-runtime-socket' is privileged.
+FAIL - scenarios/health-check/deployment.yaml - main - [F-02] Deployment/health-check-deployment container 'health-check' is privileged.
+FAIL - scenarios/health-check/deployment.yaml - main - [F-02] Deployment/health-check-deployment mounts hostPath /.
+FAIL - scenarios/health-check/deployment.yaml - main - [F-03] Deployment/health-check-deployment mounts the container runtime socket /run/containerd/containerd.sock.
+FAIL - scenarios/health-check/deployment.yaml - main - [F-03] Deployment/health-check-deployment mounts the container runtime socket /var/run/docker.sock.
+FAIL - scenarios/health-check/deployment.yaml - main - [F-17] Deployment/health-check-deployment container 'detect-runtime-socket' image 'busybox:latest' is not pinned by digest.
+FAIL - scenarios/health-check/deployment.yaml - main - [F-17] Deployment/health-check-deployment container 'health-check' image 'madhuakula/k8s-goat-health-check' is not pinned by digest.
+FAIL - scenarios/health-check/deployment.yaml - main - [F-27] Deployment/health-check-deployment deploys to the default namespace.
+WARN - scenarios/poor-registry/deployment.yaml - main - [F-20] Deployment/poor-registry-deployment container 'poor-registry' does not set readOnlyRootFilesystem.
+WARN - scenarios/poor-registry/deployment.yaml - main - [F-20] Deployment/poor-registry-deployment container 'poor-registry' does not set runAsNonRoot.
+WARN - scenarios/poor-registry/deployment.yaml - main - [F-21] Deployment/poor-registry-deployment container 'poor-registry' has no resource requests.
+FAIL - scenarios/poor-registry/deployment.yaml - main - [F-17] Deployment/poor-registry-deployment container 'poor-registry' image 'madhuakula/k8s-goat-poor-registry' is not pinned by digest.
+FAIL - scenarios/poor-registry/deployment.yaml - main - [F-27] Deployment/poor-registry-deployment deploys to the default namespace.
+WARN - scenarios/system-monitor/deployment.yaml - main - [F-20] Deployment/system-monitor-deployment container 'system-monitor' does not set readOnlyRootFilesystem.
+WARN - scenarios/system-monitor/deployment.yaml - main - [F-20] Deployment/system-monitor-deployment container 'system-monitor' does not set runAsNonRoot.
+WARN - scenarios/system-monitor/deployment.yaml - main - [F-21] Deployment/system-monitor-deployment container 'system-monitor' has no resource requests.
+FAIL - scenarios/system-monitor/deployment.yaml - main - [F-11] Secret/goatvault has values committed to Git. Use an ExternalSecret.
+FAIL - scenarios/system-monitor/deployment.yaml - main - [F-02] Deployment/system-monitor-deployment container 'system-monitor' is privileged.
+FAIL - scenarios/system-monitor/deployment.yaml - main - [F-02] Deployment/system-monitor-deployment mounts hostPath /.
+FAIL - scenarios/system-monitor/deployment.yaml - main - [F-02] Deployment/system-monitor-deployment sets hostIPC.
+FAIL - scenarios/system-monitor/deployment.yaml - main - [F-02] Deployment/system-monitor-deployment sets hostPID.
+FAIL - scenarios/system-monitor/deployment.yaml - main - [F-17] Deployment/system-monitor-deployment container 'system-monitor' image 'madhuakula/k8s-goat-system-monitor' is not pinned by digest.
+FAIL - scenarios/system-monitor/deployment.yaml - main - [F-20] Deployment/system-monitor-deployment container 'system-monitor' allows privilege escalation.
+FAIL - scenarios/system-monitor/deployment.yaml - main - [F-27] Deployment/system-monitor-deployment deploys to the default namespace.
+WARN - scenarios/batch-check/job.yaml - main - [F-20] Job/batch-check-job container 'batch-check' does not set readOnlyRootFilesystem.
+WARN - scenarios/batch-check/job.yaml - main - [F-20] Job/batch-check-job container 'batch-check' does not set runAsNonRoot.
+WARN - scenarios/batch-check/job.yaml - main - [F-21] Job/batch-check-job container 'batch-check' has no memory limit.
+WARN - scenarios/batch-check/job.yaml - main - [F-21] Job/batch-check-job container 'batch-check' has no resource requests.
+FAIL - scenarios/batch-check/job.yaml - main - [F-17] Job/batch-check-job container 'batch-check' image 'madhuakula/k8s-goat-batch-check' is not pinned by digest.
+FAIL - scenarios/batch-check/job.yaml - main - [F-27] Job/batch-check-job deploys to the default namespace.
+WARN - scenarios/hidden-in-layers/deployment.yaml - main - [F-20] Job/hidden-in-layers container 'hidden-in-layers' does not set readOnlyRootFilesystem.
+WARN - scenarios/hidden-in-layers/deployment.yaml - main - [F-20] Job/hidden-in-layers container 'hidden-in-layers' does not set runAsNonRoot.
+WARN - scenarios/hidden-in-layers/deployment.yaml - main - [F-21] Job/hidden-in-layers container 'hidden-in-layers' has no memory limit.
+WARN - scenarios/hidden-in-layers/deployment.yaml - main - [F-21] Job/hidden-in-layers container 'hidden-in-layers' has no resource requests.
+FAIL - scenarios/hidden-in-layers/deployment.yaml - main - [F-17] Job/hidden-in-layers container 'hidden-in-layers' image 'madhuakula/k8s-goat-hidden-in-layers' is not pinned by digest.
+FAIL - scenarios/hidden-in-layers/deployment.yaml - main - [F-27] Job/hidden-in-layers deploys to the default namespace.
+WARN - scenarios/kubernetes-goat-home/deployment.yaml - main - [F-20] Deployment/kubernetes-goat-home-deployment container 'kubernetes-goat-home' does not set readOnlyRootFilesystem.
+WARN - scenarios/kubernetes-goat-home/deployment.yaml - main - [F-20] Deployment/kubernetes-goat-home-deployment container 'kubernetes-goat-home' does not set runAsNonRoot.
+WARN - scenarios/kubernetes-goat-home/deployment.yaml - main - [F-21] Deployment/kubernetes-goat-home-deployment container 'kubernetes-goat-home' has no resource requests.
+FAIL - scenarios/kubernetes-goat-home/deployment.yaml - main - [F-17] Deployment/kubernetes-goat-home-deployment container 'kubernetes-goat-home' image 'madhuakula/k8s-goat-home' is not pinned by digest.
+FAIL - scenarios/kubernetes-goat-home/deployment.yaml - main - [F-27] Deployment/kubernetes-goat-home-deployment deploys to the default namespace.
+WARN - scenarios/internal-proxy/deployment.yaml - main - [F-20] Deployment/internal-proxy-deployment container 'info-app' does not set readOnlyRootFilesystem.
+WARN - scenarios/internal-proxy/deployment.yaml - main - [F-20] Deployment/internal-proxy-deployment container 'info-app' does not set runAsNonRoot.
+WARN - scenarios/internal-proxy/deployment.yaml - main - [F-20] Deployment/internal-proxy-deployment container 'internal-api' does not set readOnlyRootFilesystem.
+WARN - scenarios/internal-proxy/deployment.yaml - main - [F-20] Deployment/internal-proxy-deployment container 'internal-api' does not set runAsNonRoot.
+FAIL - scenarios/internal-proxy/deployment.yaml - main - [F-17] Deployment/internal-proxy-deployment container 'info-app' image 'madhuakula/k8s-goat-info-app' is not pinned by digest.
+FAIL - scenarios/internal-proxy/deployment.yaml - main - [F-17] Deployment/internal-proxy-deployment container 'internal-api' image 'madhuakula/k8s-goat-internal-api' is not pinned by digest.
+FAIL - scenarios/internal-proxy/deployment.yaml - main - [F-27] Deployment/internal-proxy-deployment deploys to the default namespace.
+FAIL - scenarios/internal-proxy/deployment.yaml - main - [F-10] Service/internal-proxy-info-app-service is a NodePort. Use ClusterIP behind the ingress controller.
+
+585 tests, 477 passed, 48 warnings, 60 failures, 0 exceptions
