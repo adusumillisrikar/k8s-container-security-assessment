@@ -23,7 +23,11 @@ metadata:
   name: allow-dns
   namespace: internal-proxy
 spec:
-  podSelector: {}
+  # Every pod except quarantined ones: NetworkPolicies only add permissions, so a
+  # quarantine "deny" can't override an allow that still selects the pod.
+  podSelector:
+    matchExpressions:
+      - { key: quarantine, operator: DoesNotExist }
   policyTypes: [Egress]
   egress:
     - to:

@@ -4,7 +4,7 @@ Security review and target-state design for a government programme's Kubernetes 
 
 ## Executive summary
 
-**Overall posture: not ready for go-live as it stands. Ready within the window if four platform controls go in first.**
+**Overall posture: not ready for go-live as it stands. Ready within the window: close the 10 blockers first, then put four platform controls in before go-live.**
 
 The review found **31 issues: 4 Critical, 14 High, 11 Medium, 2 Low** ([findings register](01-findings/findings-register.md)). In plain terms:
 
@@ -29,8 +29,8 @@ The review found **31 issues: 4 Critical, 14 High, 11 Medium, 2 Low** ([findings
 | Weeks | Focus | Main actions |
 |---|---|---|
 | 1–2 | Blockers | Confirm these findings against the real estate with the delivery teams; remove the cluster-admin binding and scope CI to its namespaces; remove privileged and host-access pods; rotate exposed secrets; turn on audit logging; Pod Security in warn mode everywhere |
-| 3–6 | Platform, then go-live | Policy gates and admission from audit to enforce; default-deny networking namespace by namespace; Pod Identity and IMDSv2; secrets into Secrets Manager; image signing; COTS controls and signed risk acceptance |
-| 7–12 | Prove and harden | GitOps cut-over so CI loses cluster access entirely; Falco paging on; soft gates ratchet to hard; first cluster rebuild drill and database restore test; run the same policies against a test AKS/GKE cluster |
+| 3–6 | Platform, then go-live | Policy gates and admission from audit to enforce (Pod Security enforcing `baseline`, which already blocks privileged pods and host access, and warning on `restricted`); default-deny networking namespace by namespace; Pod Identity and IMDSv2; secrets into Secrets Manager; image signing; COTS controls and signed risk acceptance |
+| 7–12 | Prove and harden | GitOps cut-over so CI loses cluster access entirely; Falco paging on; soft gates and Pod Security `restricted` ratchet to enforce; first cluster rebuild drill and database restore test; run the same policies against a test AKS/GKE cluster |
 
 Measured by: blockers closed with evidence, share of namespaces at default-deny and Pod Security `restricted`, time to detect a test cluster-admin binding, and measured rebuild time against the 2-hour target.
 
@@ -42,7 +42,7 @@ Measured by: blockers closed with evidence, share of namespaces at default-deny 
 | **Supplementary** (EKS and ECR Terraform) | [bridgecrewio/terragoat](https://github.com/bridgecrewio/terragoat): `terraform/aws/eks.tf`, `ecr.tf` only | `729f8da` |
 | **"What good looks like"** baseline for remediation and diagrams | [aws-ia/terraform-aws-eks-blueprints](https://github.com/aws-ia/terraform-aws-eks-blueprints) | referenced, not reviewed |
 
-**Why this combination:** kubernetes-goat covers the cluster and workload layers well (RBAC, pod security, secrets, network, supply chain), but it contains no Terraform. Its only provisioning code is an AWS CDK stack for a lab VM. The brief asks for findings across Terraform/cluster provisioning too, so two files from terragoat provide the EKS control-plane and registry findings (public endpoint, logging, envelope encryption, ECR). Every finding cites `file:line` at the pinned commit, so the evidence stays valid if upstream changes.
+**Why this combination:** kubernetes-goat covers the cluster and workload layers well (RBAC, pod security, secrets, network, supply chain), but it contains no Terraform. Its only provisioning code is an AWS CDK stack for a lab VM. The brief asks for findings across Terraform/cluster provisioning too, so two files from terragoat provide the EKS control-plane and registry findings (public endpoint, authentication, logging, secrets encryption key, ECR). Every finding cites `file:line` at the pinned commit, so the evidence stays valid if upstream changes.
 
 ## How the modules fit together
 
@@ -65,7 +65,7 @@ flowchart TB
   A --> DR[12 · DR<br/>rebuild it if needed]
 ```
 
-- Every finding ID (F-01 to F-31) is used consistently: in the pipeline policies (each rule names the finding it prevents), the Falco rules, the threat model, the compliance mapping and the diagrams.
+- Every finding ID (F-01 to F-31) is used consistently: in the pipeline policies (each rule names the finding it prevents), the Falco rules, the threat model, the compliance mapping and the slides.
 - The **COTS recommendation (Module 7)** reuses the admission, network and runtime designs rather than inventing separate controls.
 - The **threat model (Module 8)** checks the earlier designs against one workload and states openly where they fall short.
 - **Where the managed-Kubernetes line sits** (provider vs us, and how it differs on EKS, AKS and GKE) is in the [architecture narrative](09-architecture/architecture-narrative.md#shared-responsibility-where-the-line-sits-on-eks-aks-and-gke).
@@ -90,9 +90,9 @@ flowchart TB
 ## How the review was done, and how it was done safely
 
 - **Manual review first.** All manifests, Dockerfiles, scripts and the relevant application code were reviewed by hand. Scanners were used afterwards to cross-check, and the coverage note in [`01-findings/evidence/`](01-findings/evidence/) shows what each one caught and missed.
-- **Policies and fixes were tested, not just written.** The pipeline and admission policies were run against the real goat manifests and against the corrected manifests, and the Module 6 fixes were checked on a throwaway local cluster. Testing caught two bugs in my own policies and two findings the manual review missed; all are listed in the [evidence README](01-findings/evidence/README.md#what-testing-changed-in-the-submission).
+- **Policies and fixes were tested, not just written.** The pipeline and admission policies were run against the real goat manifests and against the corrected manifests, and the Module 6 fixes were checked on a throwaway local cluster. Testing and a final review caught a bug in my own admission policy, a wrong check ID, an overstated Semgrep claim, a pipeline job whose image couldn't have run it, and two findings the manual review missed; all are listed in the [evidence README](01-findings/evidence/README.md#what-testing-changed-in-the-submission).
 - **No vulnerable workload ever ran.** kubernetes-goat's setup scripts deploy privileged pods and web shells, and its access script exposes them on all network interfaces. Neither script was run. The live test applied goat's manifests only to a throwaway local cluster, with every image reference replaced by an unresolvable registry, and Pod Security refused the pods. The repo was cloned into an isolated folder with Git hooks disabled.
-- **Scanners were treated as untrusted too.** In March and April 2026, the Trivy and KICS Docker Hub images were replaced with credential-stealing versions. So every scanner here ran from an image **pinned by digest**, against a **read-only** mount of the public reference repo, with **no network access** and **no credentials** in reach. Exact images and commands are in the evidence folder.
+- **Scanners were treated as untrusted too.** In March and April 2026, the Trivy and KICS Docker Hub images were replaced with credential-stealing versions. So every scanner here ran from an image **pinned by digest**, against **read-only** mounts, with **no credentials** in reach and **no network access**, except the two checks that have to download schemas or rule packs (kubeconform and Semgrep's registry rules), which are kept in a separate script. Exact images and commands are in the evidence folder.
 - **No secrets in this repo.** The reference repo contains fake credentials; this repo cites their locations only and never copies the values.
 
 ## Use of AI

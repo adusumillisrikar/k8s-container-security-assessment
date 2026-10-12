@@ -12,8 +12,11 @@
 # Image signature verification is in verify-images.yaml (it needs registry
 # access, so it's kept separate from the policies that can be tested offline).
 #
-# Rollout: every rule starts as `Audit` for one week, violations are fixed,
-# then flipped to `Enforce`. The values below are the target state.
+# Rollout: rules that block an attacker path (cluster-admin, registries, NodePort,
+# default namespace) run in `Audit` for one week, then `Enforce`. Rules that need
+# teams to change images (pod-security-restricted, require-requests-limits) stay in
+# `Audit` for the same 60 days as the pipeline's soft gates. Values below are the
+# target state.
 ---
 apiVersion: kyverno.io/v1
 kind: ClusterPolicy
@@ -23,7 +26,9 @@ metadata:
     policies.kyverno.io/title: Disallow cluster-admin bindings (F-01)
     policies.kyverno.io/description: >-
       Blocks any RoleBinding or ClusterRoleBinding to cluster-admin, except
-      when created by the platform break-glass group.
+      when created by the platform break-glass group, or when every subject is
+      EKS's own add-on manager (EKS creates eks:addon-cluster-admin itself, and
+      blocking it would break EKS add-on management).
 spec:
   # Admission-only: Kyverno can't evaluate the requesting user's group in
   # background scans, and with background: true the whole policy is skipped.
@@ -43,9 +48,17 @@ spec:
       validate:
         failureAction: Enforce
         message: "cluster-admin bindings are not allowed (F-01). Raise a platform change for cluster-scoped access."
-        pattern:
-          roleRef:
-            name: "!cluster-admin"
+        deny:
+          conditions:
+            all:
+              - key: "{{ request.object.roleRef.name }}"
+                operator: Equals
+                value: cluster-admin
+              # Any subject other than EKS's add-on manager makes it a denial, so
+              # adding yourself to the EKS-managed binding is blocked too.
+              - key: "{{ request.object.subjects[?!(kind=='User' && name=='eks:addon-manager')] || `[]` | length(@) }}"
+                operator: GreaterThan
+                value: 0
 ---
 apiVersion: kyverno.io/v1
 kind: ClusterPolicy

@@ -46,7 +46,8 @@
     Typical first step after a shell is obtained in a pod (F-01, F-08, F-27).
   condition: >
     open_read and container
-    and fd.name startswith /var/run/secrets/kubernetes.io/serviceaccount/token
+    and fd.name startswith /var/run/secrets/kubernetes.io/serviceaccount/
+    and fd.filename = token
     and not proc.name in (sa_token_readers)
     and not k8s.ns.name in (platform_namespaces)
   output: >

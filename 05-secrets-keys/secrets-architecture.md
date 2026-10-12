@@ -80,7 +80,7 @@ Rotation fails in practice when it causes outages, because then people stop rota
 5. **For applications that can't re-read** (including, likely, the COTS product): **Stakater Reloader** watches the Secret and triggers a *rolling* restart of the Deployment. That respects PDBs and readiness probes, so it's a zero-downtime rollout, not a manual restart cycle.
 6. **Verification:** the rotation Lambda's final step tests the new credential; a CloudWatch alarm fires if any secret is older than its rotation policy allows.
 
-Rotation cadence: database and service credentials every 30 days; third-party API keys per provider capability (90 days or on staff change); signing keys yearly (KMS automatic rotation).
+Rotation cadence: database and service credentials every 30 days; third-party API keys per provider capability (90 days or on staff change); the image-signing key yearly. KMS automatic rotation only works for symmetric keys and the signing key is asymmetric, so that one is a planned change: a new key behind the same alias, with the old public key kept in the Kyverno policy until images signed with it age out.
 
 ## 6. Key hierarchy and root of trust
 

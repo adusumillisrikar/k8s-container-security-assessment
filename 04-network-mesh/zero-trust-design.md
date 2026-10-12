@@ -32,7 +32,10 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata: { name: allow-dns }
 spec:
-  podSelector: {}
+  # Every pod except quarantined ones. NetworkPolicies only add permissions,
+  # so a quarantine "deny" can't override an allow that still selects the pod.
+  podSelector:
+    matchExpressions: [{ key: quarantine, operator: DoesNotExist }]
   policyTypes: [Egress]
   egress:
     - to:
@@ -40,7 +43,8 @@ spec:
           podSelector: { matchLabels: { k8s-app: kube-dns } }
       ports: [{ protocol: UDP, port: 53 }, { protocol: TCP, port: 53 }]
 ---
-# 3. Quarantine: pre-staged for incident response (Module 3, Phase 2)
+# 3. Quarantine: pre-staged for incident response (Module 3, Phase 2). Selects
+#    quarantined pods with no rules; every allow above excludes them, so they get nothing.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata: { name: quarantine }
@@ -70,7 +74,7 @@ The request template asks five things: source, destination, port/protocol, why, 
 **Ingress (north-south in):**
 - Internet → **AWS WAF** (managed rule groups plus rate limiting) → **ALB** via the AWS Load Balancer Controller → pod IPs (`target-type: ip`). TLS 1.2+ with ACM certificates; HTTP redirects to HTTPS.
 - Internal-only services use `internal` ALBs in private subnets.
-- **No NodePort services** (F-10), enforced by Kyverno. Node security groups accept traffic only from the ALB security group and the control plane.
+- **No NodePort services** (F-10), enforced by Kyverno. Node security groups accept traffic only from the ALB security group, the other nodes in the cluster and the control plane.
 - Pod-level: the app's NetworkPolicy allows ingress only from the ALB subnets' CIDRs on the container port.
 
 **Egress (north-south out):**
@@ -101,7 +105,7 @@ The panel brief asks for both sides. Here they are for *this* estate: about 18 E
 2. East-west service-to-service calls grow to where NetworkPolicy's IP/port rules are no longer a meaningful control (rough threshold: more than about 30 services calling each other); or
 3. AKS/GKE onboarding needs one uniform in-cluster encryption story across clouds.
 
-**If a mesh is adopted:** **Istio ambient mode** (GA since Istio 1.24). It uses no sidecars: a per-node `ztunnel` gives L4 mTLS and identity, and an optional per-namespace `waypoint` proxy adds L7 policy only where needed. That removes the COTS sidecar problem and most of the per-pod overhead. (Linkerd is simpler, but its stable releases have required a commercial licence for production since 2024, which is a procurement question for a government programme.)
+**If a mesh is adopted:** **Istio ambient mode** (GA since Istio 1.24). It uses no sidecars: a per-node `ztunnel` gives L4 mTLS and identity, and an optional per-namespace `waypoint` proxy adds L7 policy only where needed. That removes the COTS sidecar problem and most of the per-pod overhead. (Linkerd is simpler, but since 2024 its stable releases come only through Buoyant's commercial distribution for organisations of this size; the open-source edge releases remain. That's a procurement question for a government programme.)
 
 - `PeerAuthentication` mode `STRICT` mesh-wide; plaintext only for named exceptions during migration.
 - `AuthorizationPolicy` deny-by-default per namespace; allows written against SPIFFE identities (`cluster.local/ns/<ns>/sa/<sa>`), so they only work if F-27 is fixed (one SA per workload).

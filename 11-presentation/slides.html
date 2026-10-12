@@ -112,7 +112,7 @@
 <!-- 3. Executive summary -->
 <section class="slide">
   <p class="kicker">Executive summary</p>
-  <h1>Not ready for go-live today. Ready within the window if we start with the platform.</h1>
+  <h1>Not ready for go-live today. Ready within the window: blockers first, then four platform controls.</h1>
   <div class="grid2" style="grid-template-columns: 1.25fr 1fr; margin-top:6px">
     <div>
       <ul>
@@ -178,7 +178,7 @@
   <div class="grid4">
     <div class="card red"><p><span class="tag c">F-01</span></p><h2>CI account is cluster-admin</h2><p>The audit-finding pattern. Anyone who can run a pipeline holds the master key.</p></div>
     <div class="card red"><p><span class="tag c">F-02</span></p><h2>Root on the node + open web shell</h2><p>Privileged pod with the host disk mounted and a terminal with no password.</p></div>
-    <div class="card red"><p><span class="tag c">F-03</span></p><h2>A text box that runs commands</h2><p>Command injection in a pod that holds the container engine's socket.</p></div>
+    <div class="card red"><p><span class="tag c">F-03</span></p><h2>A text box that runs commands</h2><p>Command injection in a privileged pod: one form field to root on the server.</p></div>
     <div class="card red"><p><span class="tag c">F-04</span></p><h2>One chart install = admin for all</h2><p>Grants <code>*/*/*</code> to the default identity most pods use.</p></div>
   </div>
   <h2 style="margin-top:22px">Why the order matters: findings combine into chains</h2>
@@ -223,7 +223,7 @@
   <h2 style="margin-top:24px">Same chain B, broken three times</h2>
   <table>
     <tr><th>Attacker step</th><th>Stopped by</th></tr>
-    <tr><td>Deploy a privileged pod with the host disk mounted</td><td><b>Prevent:</b> refused at merge (Conftest) and at the API server (Pod Security <code>restricted</code>)</td></tr>
+    <tr><td>Deploy a privileged pod with the host disk mounted</td><td><b>Prevent:</b> refused at merge (Conftest) and at the API server (Pod Security)</td></tr>
     <tr><td>From a compromised pod, reach another app's web shell</td><td><b>Contain:</b> default-deny NetworkPolicy drops the connection</td></tr>
     <tr><td>Read a service-account token or call the node's metadata service</td><td><b>Detect:</b> Falco rules alert; token isn't mounted; IMDS hop limit blocks the call</td></tr>
   </table>
@@ -304,7 +304,7 @@
       <h2>Scenario: confirmed container escape attempt</h2>
       <table>
         <tr><td><span class="num">1</span></td><td><b>Capture first</b> (memory checkpoint, filesystem diff, logs), from outside the container</td></tr>
-        <tr><td><span class="num">2</span></td><td><b>Relabel the pod</b>: it leaves the Service, a clean replica starts, a pre-staged policy isolates it</td></tr>
+        <tr><td><span class="num">2</span></td><td><b>Relabel the pod</b>: it leaves the Service, a clean replica starts, and no network policy allows it anything</td></tr>
         <tr><td><span class="num">3</span></td><td><b>Cordon, don't drain</b> the node; swap it to a forensic security group</td></tr>
         <tr><td><span class="num">4</span></td><td><b>Revoke and rotate</b> every credential the pod and node could reach</td></tr>
         <tr><td><span class="num">5</span></td><td><b>Replace, don't clean</b>: rebuild from Git at signed digests</td></tr>
@@ -509,6 +509,7 @@
       <tr><td>Semgrep claim overstated: registry packs missed injection and SSRF</td><td>3 org rules; pass on fixed code</td></tr>
       <tr><td>Two findings the manual review missed</td><td>Added as F-30, F-31</td></tr>
       <tr><td>Stale facts: K8s 1.33, EKS secret encryption default, auth defaults</td><td>1.36; F-23 and F-15 reworded</td></tr>
+      <tr><td>Final review: a pipeline image with no shell; EKS's own admin binding blocked; quarantine still allowed DNS</td><td>All fixed and re-tested</td></tr>
     </table>
     <div>
       <ul style="font-size:16.5px">

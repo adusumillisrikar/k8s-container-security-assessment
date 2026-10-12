@@ -25,7 +25,7 @@ For each finding:
 |---|---|
 | **Domain** | **Access control** (secondary: secure development lifecycle, since the binding arrived through the delivery pipeline) |
 | **Control objective** | Privileged access is limited to named, approved roles; non-human identities get least privilege; privileged grants are reviewed periodically. |
-| **Public anchors** | CIS EKS 4.1.1 (cluster-admin only where required), 4.1.3 (minimise wildcards); NIST 800-53 AC-6 (least privilege), AC-6(5) (privileged accounts), AC-2(7) (privileged role management) |
+| **Public anchors** | CIS EKS 4.1.1 (cluster-admin only where required), 4.1.3 (minimise wildcards); NIST 800-53 AC-6 (least privilege), AC-6(5) (privileged accounts), AC-2(7) (privileged user accounts) |
 | **Test** | (a) Daily scheduled query of all RoleBindings/ClusterRoleBindings for `cluster-admin` or `*` rules, compared with an approved list. (b) Conftest gate result on every MR. (c) Kyverno policy report showing zero violations. |
 | **Evidence** | Daily JSON export of bindings plus diff against approved list (log archive, 1 year); pipeline gate history; Kyverno `PolicyReport`; quarterly access review sign-off by the platform owner. |
 | **Status** | Non-compliant → remediate before go-live (P0). No exception offered: there's no business need that a namespace-scoped Role can't meet. |
@@ -36,7 +36,7 @@ For each finding:
 |---|---|
 | **Domain** | **Encryption** |
 | **Control objective** | Sensitive data at rest is encrypted with keys the agency controls; key use is logged; keys are rotated. |
-| **Public anchors** | CIS EKS 5.3.1 (Secrets encrypted with KMS CMK); NIST 800-53 SC-28 (protection at rest), SC-12 (key management). Security Hub `EKS.3` was retired in August 2026, because EKS 1.28+ encrypts by default, and it never checked *whose* key was used |
+| **Public anchors** | CIS EKS 5.3.1 (Secrets encrypted with KMS CMK); NIST 800-53 SC-28 (protection at rest), SC-12 (key management). Security Hub `EKS.3` was scheduled for retirement in August 2026, because EKS 1.28+ encrypts Secrets by default with an AWS-owned key; the custom Config rule below checks for *our* key instead |
 | **Test** | A custom AWS Config rule (newer tier, continuous) that checks `encryptionConfig` names a customer-managed key from the approved list; the same check via `aws eks describe-cluster --query cluster.encryptionConfig` in the scheduled job (older tier); KMS key rotation enabled; CloudTrail shows `Decrypt` calls only from the EKS service role. |
 | **Evidence** | Config rule history or dated `describe-cluster` output; KMS key policy export; key rotation status. |
 | **Status** | Non-compliant → remediate before go-live (cheap). Worth noting in the evidence pack: before the fix, Secrets were still envelope-encrypted by EKS with an AWS-owned key, so the gap was *key custody*, not plaintext data. That matters if the auditor asks whether there was an exposure. |
@@ -58,8 +58,8 @@ For each finding:
 |---|---|
 | **Domain** | **Configuration baseline** |
 | **Control objective** | Systems are configured to an approved hardened baseline; deviations are prevented or detected; exceptions are documented and approved. |
-| **Public anchors** | CIS EKS 4.2.x (minimise privileged containers, host PID/IPC/network, privilege escalation, root containers); NIST 800-53 CM-6 (configuration settings), CM-7 (least functionality), CM-2 (baseline configuration) |
-| **Test** | `kubectl get ns -L pod-security.kubernetes.io/enforce` shows every app namespace at `restricted`, with platform namespaces at a documented level; Kyverno `PolicyReport`s show zero `fail` results outside approved exceptions; monthly kube-bench run. |
+| **Public anchors** | CIS EKS 4.2.x (minimise privileged containers, host PID/IPC/network, privilege escalation); NIST 800-53 CM-6 (configuration settings), CM-7 (least functionality), CM-2 (baseline configuration) |
+| **Test** | `kubectl get ns -L pod-security.kubernetes.io/enforce` shows every app namespace enforcing `restricted` (or `baseline` with `restricted` warnings during the 60-day ratchet), with platform namespaces at a documented level; Kyverno `PolicyReport`s show zero `fail` results outside approved exceptions; monthly kube-bench run. |
 | **Evidence** | Namespace label export (scheduled); Kyverno policy reports; exception register (Module 7 COTS entry) with approver and expiry; kube-bench report. |
 | **Status** | Non-compliant → remediate before go-live. **Exception** for `cots-casemgmt` (PSA `baseline` instead of `restricted`) with compensating controls documented in Module 7, owned by the system owner and endorsed by the ITSO. This is the worked example of how an exception enters the compliance record. |
 

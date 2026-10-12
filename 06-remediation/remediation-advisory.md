@@ -43,7 +43,7 @@ kubectl delete serviceaccount superadmin -n kube-system
 
 | Check | Command | Expected result |
 |---|---|---|
-| No `cluster-admin` bindings except platform break-glass | `kubectl get clusterrolebindings,rolebindings -A -o json \| jq -r '.items[] \| select(.roleRef.name=="cluster-admin") \| .metadata.name'` | Only `cluster-admin` (the built-in one for `system:masters`) |
+| No `cluster-admin` bindings except platform break-glass | `kubectl get clusterrolebindings,rolebindings -A -o json \| jq -r '.items[] \| select(.roleRef.name=="cluster-admin") \| .metadata.name'` | Only platform-owned bindings: the built-in `cluster-admin` (for `system:masters`) and, on EKS, `eks:addon-cluster-admin` (EKS's own add-on manager). Nothing bound to a CI or workload identity |
 | The old account has no rights | `kubectl auth can-i --list --as=system:serviceaccount:kube-system:superadmin` | Only the default discovery permissions |
 | CI can deploy but can't escalate | `kubectl auth can-i create clusterrolebindings --as=ci --as-group=ci-deploy:internal-proxy` | `no` |
 | CI can't read secrets | `kubectl auth can-i get secrets -n internal-proxy --as=ci --as-group=ci-deploy:internal-proxy` | `no` |
@@ -76,7 +76,7 @@ On top of that, the image runs a **web-based terminal** (`gotty`) with no passwo
 **Step 3: Apply the corrected manifest** [`fixed-manifests/system-monitor.yaml`](fixed-manifests/system-monitor.yaml). Compared with the original, it:
 - removes `privileged`, `hostPID`, `hostIPC` and the host disk mount;
 - runs as a normal user (`runAsNonRoot`, UID 10001) with a read-only filesystem and all Linux capabilities dropped;
-- moves it into its own namespace with `pod-security.kubernetes.io/enforce: restricted`, so the cluster itself refuses any future change that puts those settings back;
+- moves it into its own namespace with `pod-security.kubernetes.io/enforce: restricted`, so the cluster itself refuses any future change that brings back privileged mode, host access or running as root;
 - gets its secret from the secrets store as a mounted file, instead of from a value committed to Git;
 - pins the image by digest from our own registry.
 
@@ -102,7 +102,7 @@ On top of that, the image runs a **web-based terminal** (`gotty`) with no passwo
 
 The health-check page asks for a server address and pings it. The code builds a command by gluing the user's text onto `ping -c 2 ` and hands the whole string to a shell. A shell treats characters like `;` and `|` as "and then run this too". So typing `8.8.8.8; cat /etc/passwd` runs both commands. That's called **command injection**, and it means anyone who can reach the page can run any command they like.
 
-The container also has the server's **container engine socket** mounted and runs privileged. The socket is the control channel that starts containers. With it, the attacker can start a new container on the server with full access to the whole machine. So a text box becomes control of the server.
+The container also runs **privileged**, which switches off the walls between it and the server: it can reach the server's devices and, for example, mount the server's disk. The configuration also tries to hand it the container engine's control socket. Either way, a text box becomes control of the server.
 
 ### Fix it
 

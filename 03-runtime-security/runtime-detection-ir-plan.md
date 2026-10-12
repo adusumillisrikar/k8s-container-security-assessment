@@ -19,10 +19,10 @@ The estate is mostly citizen-facing web services (internet-exposed, unpredictabl
 
 | # | Category | Example rules | Why it ranks here | Findings it covers |
 |---|---|---|---|---|
-| 1 | **Container escape and privilege** | Privileged container started; `nsenter`/`setns` into host namespaces; host path mounted at runtime; kernel module load; write below host `/etc` | Escape turns one bad pod into the node and its cloud identity. Highest blast radius. | F-02, F-03, F-07 |
+| 1 | **Container escape and privilege** | Falco defaults: *Detect release_agent File Container Escapes*, *Linux Kernel Module Injection Detected*, *PTRACE attached to process*; from Falco's optional rule sets: privileged container launched, namespace change (`setns`) | Escape turns one bad pod into the node and its cloud identity. Highest blast radius. | F-02, F-03, F-07 |
 | 2 | **Interactive shells and unexpected exec** | Terminal shell in container; `kubectl exec` into production namespace (audit) | Web services shouldn't spawn shells. Very high signal, very low noise. | F-02, F-08 |
 | 3 | **Credential access** | Read of SA token by a process other than the app; connection to `169.254.169.254` from an app pod; read of `/etc/shadow` or cloud CLI config | This is how a pod foothold becomes cluster or cloud access. | F-09, F-19 |
-| 4 | **Drift and droppers** | Binary executed that wasn't in the image ("drop and execute"); `curl`/`wget` piped to a shell; known miner pool ports or domains | Catches the batch-check pattern and most commodity payloads. | F-24, F-26 |
+| 4 | **Drift and droppers** | *Drop and execute new binary in container*; `curl`/`wget` piped to a shell; known miner pool ports or domains | Catches the batch-check pattern and most commodity payloads. | F-24, F-26 |
 | 5 | **Control-plane abuse** (audit) | New `cluster-admin`/wildcard binding; `list secrets` by a non-controller identity; anonymous requests; new `MutatingWebhookConfiguration` | The audit-finding scenario. Also attacker persistence. | F-01, F-04 |
 | 6 | **Unexpected egress** | Outbound connection to a destination outside the namespace's allowlist | Exfiltration and command-and-control. Partially prevented by default-deny (Module 4); this detects attempts. | F-12 |
 
@@ -56,7 +56,7 @@ Alert fatigue is how runtime detection fails in practice. Rules:
 
 ## 5. Incident scenario: confirmed container escape attempt
 
-**Setup:** Falco fires *"Launch privileged container"* and then *"nsenter into host namespace"* from pod `payments-api-7f9c…` in namespace `citizen-payments` on node `ip-10-20-3-41`. Same pod, two minutes earlier: *"Terminal shell in container"*. GuardDuty reports the node's role calling `sts:GetCallerIdentity` from an unusual IP.
+**Setup:** Falco fires *Terminal shell in container* on pod `payments-api-7f9c…` in namespace `citizen-payments` on node `ip-10-20-3-41`, then *Drop and execute new binary in container*, then *Detect release_agent File Container Escapes* (a known cgroups escape technique). The pod's hardening should make that escape fail, but GuardDuty then reports the node's role calling `sts:GetCallerIdentity` from an unusual IP, so we have to assume it may have succeeded.
 
 **Roles:** Incident Commander (IC, platform security lead), Technical Lead (platform engineer), Comms (service delivery manager), Scribe. Contact list and out-of-band channel (not hosted on the affected cluster) are pre-agreed.
 
@@ -72,7 +72,7 @@ The instinct is to `kubectl delete pod`. That destroys the memory, the process t
 | Step | Action | Why it preserves evidence |
 |---|---|---|
 | 1 | **Capture volatile evidence first** (§6), unless active exfiltration is visible in flow logs. If it is, isolate first and capture second. | Order matters: isolation changes the process's behaviour. The IC makes that call explicitly and logs it. |
-| 2 | **Orphan and isolate the pod.** Change the pod's `app` label to `quarantine`. The ReplicaSet no longer owns it and starts a clean replacement; the Service stops routing to it. A pre-staged NetworkPolicy matching `quarantine=true` denies all ingress and egress. | Pod keeps running for analysis. Service continues on the clean replica. One label change; no `exec` into the container. |
+| 2 | **Orphan and isolate the pod.** Remove its `app` label and add `quarantine=true`. The ReplicaSet releases it and starts a clean replacement, and the Service and every app-specific allow policy stop selecting it. NetworkPolicies only ever *add* permissions, so isolation comes from nothing allowing it: the namespace-wide allows (DNS) exclude `quarantine=true` pods, and the pre-staged `quarantine` policy makes the deny explicit. Depending on the CNI, connections already open may survive, which step 4 covers. | Pod keeps running for analysis. Service continues on the clean replica. One label change; no `exec` into the container. |
 | 3 | **Cordon the node** (`kubectl cordon`), don't drain. | No new workloads land on a possibly compromised host. Draining would kill the evidence. |
 | 4 | **Isolate the node at the network layer:** swap its ENI security group to a pre-built *forensics* SG that allows only the forensic workstation's range. | Contains anything already running at host level, which pod-level policy can't. |
 | 5 | **Cut credentials:** revoke active sessions on the node IAM role (or the pod's own role, once Pod Identity is in place, F-19); rotate every secret the pod's SA could read; disable the pod's SA by removing its RoleBindings. | The attacker's stolen tokens stop working even if they've copied them elsewhere. |
@@ -104,6 +104,8 @@ Blameless post-incident review. Output: timeline, root cause, what detection wor
 | Process tree, open sockets, loaded binaries | From the node: read `/proc/<host-pid>/` for the container's processes | No |
 | Node disk | EBS snapshot of the node's volumes | No |
 | Node memory | AVML via SSM Run Command, written straight to the forensic bucket | Only if the attacker already has *host* access, in which case they'd see the process. Accepted; done after the pod checkpoint. |
+
+On Bottlerocket nodes, node-level collection runs through Bottlerocket's admin container, enabled only for the incident and logged through SSM.
 
 **Chain of custody:** every artefact is SHA-256 hashed at collection, written to a forensic S3 bucket in the security account (Object Lock in compliance mode, KMS key restricted to the IR role), and logged in the incident timeline with collector, time and hash.
 

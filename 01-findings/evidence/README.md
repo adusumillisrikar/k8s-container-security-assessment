@@ -61,6 +61,7 @@ The 2026 Trivy and KICS Docker Hub compromises showed that a security scanner is
 | 15 | gitleaks vs this repo's full history, and vs the goat tree | This repo: **no leaks**. Goat: 13 hits on the committed Secret manifests and the `ENV API_KEY` line; misses the deleted-layer secret, the `.git` inside the tarball and the Redis/metadata seed files | [gitleaks-summary.txt](gitleaks-summary.txt) |
 | 16 | kubeconform: fixed manifests and Kyverno policies vs Kubernetes 1.36 schemas (CRDs from the CRDs catalog) | **28/28 valid**, 0 skipped | [kubeconform-fixed.txt](kubeconform-fixed.txt) |
 | 17 | kube-bench on a clean kind cluster (CIS Kubernetes 1.12) | 63 PASS, 12 FAIL, 56 WARN. Interpreted below: most FAILs are control-plane checks that AWS owns on EKS | [kube-bench-kind.txt](kube-bench-kind.txt) |
+| 18 | Kyverno cluster-admin rule against four cases, including EKS's own `eks:addon-cluster-admin` binding | goat binding **blocked**; EKS's own binding **allowed**; EKS binding with an extra subject **blocked**; ordinary `view` binding allowed | [kyverno-cluster-admin-cases.txt](kyverno-cluster-admin-cases.txt) |
 
 ## What testing changed in the submission
 
@@ -72,7 +73,8 @@ Testing found real problems in my own work. They've been fixed, and they're list
 4. **The image-signature policy** was moved to its own file (`verify-images.yaml`), because it needs registry access and can't be tested offline. It's documented, not claimed as tested.
 5. **Semgrep's registry packs didn't do what the pipeline design claimed.** The design said Semgrep would catch shell injection, SSRF and debug mode. Tested, the registry packs caught only debug mode, and only as a warning. Three organisation rules were written, tested against goat and against the corrected code, and the design and pipeline file now say what was actually shown.
 6. **Final review fixes (not found by tools).** The target Kubernetes version moved from 1.33 to 1.36 (1.33 left EKS standard support in July 2026); F-23 now reflects that EKS 1.28+ envelope-encrypts Secrets by default with an AWS-owned key (the gap is key custody); F-15 now covers authentication defaults (`CONFIG_MAP` mode, creator admin bootstrapped).
-7. **Note for later:** Kyverno 1.19 marks `kyverno.io/v1 ClusterPolicy` as deprecated in favour of CEL-based `ValidatingPolicy`. The policies work today; migrating them is a planned upgrade item, not a go-live blocker.
+7. **Fresh-eyes review before submission.** The `kubeconform` image in the example pipeline had no shell, so GitLab couldn't have run the job (now the `-alpine` variant, checked); the `cluster-admin` admission rule would have blocked EKS's own `eks:addon-cluster-admin` binding (now allows a binding only when every subject is EKS's add-on manager, re-tested); the quarantine design still let a quarantined pod use DNS, because NetworkPolicies only add permissions (namespace-wide allows now exclude quarantined pods); F-03 no longer relies on the runtime-socket hand-off; F-06 no longer says the `vault` namespace doesn't exist (goat's scenario 22 guide creates it); F-05's `.git` claim was verified by reading the git objects.
+8. **Note for later:** Kyverno 1.19 marks `kyverno.io/v1 ClusterPolicy` as deprecated in favour of CEL-based `ValidatingPolicy`. The policies work today; migrating them is a planned upgrade item, not a go-live blocker.
 
 ## Coverage: manual review vs scanners
 
@@ -82,7 +84,7 @@ Testing found real problems in my own work. They've been fixed, and they're list
 |---|---|---|---|---|---|
 | F-01 cluster-admin binding | ✓ | ✓ | ✗ | ◐ Medium | ✓ |
 | F-02 privileged + host access + web shell | ✓ | ✓ | ✓ | ✓ | ✓ (web shell: ✗ all) |
-| F-03 command injection + runtime socket | ✓ | ◐ socket only | ◐ socket only | ◐ hostPath only | ✓ (injection: see code table) |
+| F-03 command injection in a privileged pod | ✓ | ◐ socket only | ◐ socket only | ◐ hostPath only | ✓ (injection: see code table) |
 | F-04 wildcard ClusterRole chart | ✓ | ✓ | n/a | ✓ | n/a |
 | F-05 secrets in images | ✓ | ✗ | ✗ | ◐ ENV only | ✗ |
 | F-06 no admission control | ✓ | ✗ | ✗ | ✗ | n/a |

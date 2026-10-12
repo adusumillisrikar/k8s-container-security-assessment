@@ -39,7 +39,7 @@ Read it left to right: **how software gets in** (delivery zone), **where it runs
 | **Data** | RDS: private subnets, SG allows 5432 only from the node group SG, `rds.force_ssl=1`, PITR and cross-region backup copy | SG and NetworkPolicy together: SG says "which nodes", NetworkPolicy says "which pods on those nodes". |
 | **Pipeline placement** | Runners in a separate CI VPC joined by Transit Gateway, routed only to the ECR endpoint (flow F) | The CI network has no route to the EKS API at all, which enforces flow 3 of the HLD at the network layer. |
 | **Detection placement** | Falco and Fluent Bit as DaemonSets on every node; control-plane logs from EKS; GuardDuty alongside | Falco sees syscalls inside every pod on the node; audit logs see the API; GuardDuty adds AWS threat intel. All feed the security account. |
-| **Admission placement** | PSA (built into the API server) plus Kyverno webhooks | PSA can't be removed by a compromised cluster add-on; Kyverno adds the supply-chain checks PSA can't express. |
+| **Admission placement** | PSA (built into the API server) plus Kyverno webhooks | PSA is built into the API server, so it keeps working if the Kyverno webhook is down or removed; changing a namespace's level needs RBAC on namespaces, which only the platform team holds. Kyverno adds the supply-chain checks PSA can't express. |
 
 ## Shared responsibility: where the line sits on EKS, AKS and GKE
 

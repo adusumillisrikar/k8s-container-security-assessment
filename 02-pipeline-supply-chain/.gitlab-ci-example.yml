@@ -33,7 +33,7 @@ variables:
   # within days). Every public tool digest below is the one actually run for this
   # assessment (01-findings/evidence/). CI_TOOLS_IMAGE is internal and illustrative.
   GITLEAKS_IMAGE: "docker.io/zricethezav/gitleaks:v8.30.1@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f"
-  KUBECONFORM_IMAGE: "ghcr.io/yannh/kubeconform:v0.8.0@sha256:faffaf43f95aa6425306e1ab8d6fcad72acb9049158f38e574c085ea1ec0f64e"
+  KUBECONFORM_IMAGE: "ghcr.io/yannh/kubeconform:v0.8.0-alpine@sha256:6b90a5f23d846140ce0194fe050b1995e546eba938f3a6bf10c039dd5e24588f"  # -alpine: the default image has no shell, so GitLab can't run a script in it
   CONFTEST_IMAGE: "docker.io/openpolicyagent/conftest:v0.70.1@sha256:82f23e0e1f3faf2f3798f4b1974676c1aed96b05c6656ec6820435c31867c532"
   CHECKOV_IMAGE: "docker.io/bridgecrew/checkov:3.3.19@sha256:d3e96adafdb315ca82e792ca8708c01adae85292800fb064c8b309b3d0cb7b80"
   KUBESCORE_IMAGE: "docker.io/zegl/kube-score:v1.20.0@sha256:ac4c43ad560af905d66f6bf57b0937c591332e6dbf2167c31193a13b4695ab97"
@@ -75,6 +75,8 @@ default:
 gitleaks:
   stage: secrets
   image: { name: $GITLEAKS_IMAGE, entrypoint: [""] }
+  variables:
+    GIT_DEPTH: "0"   # full history; a shallow clone can't see the MR's base commit
   script:
     # Full history on MRs: a secret added then deleted in the same MR is still leaked.
     - gitleaks git --redact --verbose --log-opts="${CI_MERGE_REQUEST_DIFF_BASE_SHA:-HEAD~1}..HEAD" .
@@ -89,7 +91,7 @@ kubeconform:
     # 1.36: current EKS standard-support version (1.33 left standard support in July 2026).
     # CRDs (ExternalSecret, Kyverno policies) are validated from the CRDs catalog, not skipped.
     - >
-      kubeconform -strict -summary -kubernetes-version 1.36.0
+      /kubeconform -strict -summary -kubernetes-version 1.36.0
       -schema-location default
       -schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json'
       $MANIFEST_DIR
@@ -203,15 +205,18 @@ sbom-sign-attest:
     # Sign with a KMS-held key: the private key never exists on the runner.
     - cosign sign --yes --tlog-upload=false --key $COSIGN_KEY $IMAGE@$IMAGE_DIGEST
     - cosign attest --yes --tlog-upload=false --key $COSIGN_KEY --type cyclonedx --predicate sbom.cdx.json $IMAGE@$IMAGE_DIGEST
+    # SLSA provenance for the image: written from CI variables (commit, pipeline, runner),
+    # then signed with the same KMS key. GitLab's runner metadata covers job artifacts
+    # and isn't signed on its own, so it isn't relied on for the image.
+    - ./ci/write-provenance.sh "$IMAGE@$IMAGE_DIGEST" > provenance.json
+    - cosign attest --yes --tlog-upload=false --key $COSIGN_KEY --type slsaprovenance1 --predicate provenance.json $IMAGE@$IMAGE_DIGEST
     # SBOM also goes to Dependency-Track so new CVEs against already-deployed
     # images raise alerts without waiting for the next build.
-    - 'curl -sf -X POST "$DTRACK_URL/api/v1/bom" -H "X-Api-Key: $DTRACK_API_KEY" -F "projectName=$CI_PROJECT_NAME" -F "projectVersion=$IMAGE_DIGEST" -F "bom=@sbom.cdx.json"'
+    - 'curl -sf -X POST "$DTRACK_URL/api/v1/bom" -H "X-Api-Key: $DTRACK_API_KEY" -F "autoCreate=true" -F "projectName=$CI_PROJECT_NAME" -F "projectVersion=$IMAGE_DIGEST" -F "bom=@sbom.cdx.json"'
   artifacts:
     paths: [sbom.cdx.json]
     expire_in: 1 year
-  # SLSA provenance: GitLab runner-generated provenance (RUNNER_GENERATE_ARTIFACTS_METADATA)
-  # is enabled at group level and attested alongside the SBOM. See pipeline-design.md
-  # for why Build L2 now and L3 later.
+  # See pipeline-design.md for why SLSA Build L2 now and L3 later.
 
 # ---------------------------------------------------------- deploy-staging
 deploy-staging:

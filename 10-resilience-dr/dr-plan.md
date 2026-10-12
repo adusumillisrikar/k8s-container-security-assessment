@@ -28,7 +28,7 @@ On EKS, **AWS runs etcd** and backs it up; we have no direct access to etcd and 
 - Captures cluster objects and, through CSI snapshots, persistent volumes. It's open source and works the same on AKS and GKE.
 - **Secrets are excluded** from the backup (`--exclude-resources secrets`). They're re-created by ESO from Secrets Manager, so backing them up would only create a second, less protected copy of every credential.
 - Stored in an S3 bucket in a **separate backup account**, encrypted with a dedicated KMS key (`backup-prod`), **Object Lock in compliance mode** (30 days) so backups can't be deleted or altered, even by an administrator or an attacker with `cluster-admin`.
-- **Access:** Velero's role can *write* backups but not delete them. Restore uses a separate role, available only through break-glass with two-person approval, and every use alarms to the security team.
+- **Access:** Velero's role can *write* backups but not delete them; retention is enforced by Object Lock and S3 lifecycle rules rather than Velero's own clean-up. Restore uses a separate role, available only through break-glass with two-person approval, and every use alarms to the security team.
 
 ## 3. Stateful workloads
 

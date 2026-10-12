@@ -18,7 +18,7 @@ Each control comes from a design already in this pack, not a one-off. They're la
 
 ### Control 1: Admission: a narrow, explicit exception (Modules 2 and 6, F-06)
 
-- Dedicated namespace `cots-casemgmt` at PSA **`baseline`**, not `restricted`. Baseline still blocks privileged, host namespaces, `hostPath` and dangerous capabilities. Only `runAsNonRoot` and `readOnlyRootFilesystem` are relaxed.
+- Dedicated namespace `cots-casemgmt` at PSA **`baseline`**, not `restricted`. Baseline still blocks privileged mode, host namespaces, `hostPath` and dangerous capabilities. What it relaxes is running as root and the extra hardening `restricted` requires (dropping all capabilities, no privilege escalation, seccomp), so the namespace's own Kyverno policy puts back every one of those the product can live with:
 - A Kyverno policy scoped to this namespace only:
   - **only one image allowed: the exact vendor digest** we received, mirrored into our ECR, scanned, and **signed by us** after review. We can't make the vendor sign; we can make sure nothing else runs in its place.
   - `capabilities.drop: [ALL]`, adding back only what the vendor's documentation says it needs (typically `CHOWN`, `SETUID`, `SETGID`), with each one justified in the exception record;
@@ -33,7 +33,7 @@ Each control comes from a design already in this pack, not a one-off. They're la
 - **Default-deny NetworkPolicy**, then exactly:
   - ingress from the internal ALB subnets on the app port only;
   - egress to its database (RDS, TLS) on 5432 only;
-  - egress to the vendor licence server: `0.0.0.0/0` except private and link-local ranges, so it leaves via **AWS Network Firewall** with **one domain allowlisted** (the licence host). Nothing else on the internet is reachable.
+  - egress to the vendor licence server on 443 only: `0.0.0.0/0` except private and link-local ranges, so it leaves via **AWS Network Firewall** with **one domain allowlisted** (the licence host). Nothing else on the internet is reachable.
 - **IMDSv2 hop limit 1** on that node group, so the container can't reach node credentials.
 - If it's internet-facing: **AWS WAF** in front, with managed rule groups and, where a CVE is web-exploitable, a specific rule as a **virtual patch**.
 

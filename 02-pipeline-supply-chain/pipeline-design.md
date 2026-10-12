@@ -68,6 +68,8 @@ The rule I'd defend to a delivery team: **hard-fail when the finding gives an at
 - **Soft, permanently:** kube-score reliability hints. Useful, but not security, and not worth blocking a release over.
 - **Unfixed CVEs** (`--ignore-unfixed`): never block. Blocking on something nobody can fix only teaches people to ignore red pipelines.
 
+**Admission moves on the same dates**, so the pipeline and the cluster never disagree: from go-live, Pod Security enforces `baseline` (which already blocks privileged pods, host namespaces and `hostPath`) and only *warns* on `restricted`; Kyverno's requests-and-limits and pod-security rules run in `Audit`. On the ratchet date, all three switch to enforce together.
+
 **Exceptions** live in a `security-exceptions.yaml` in the app repo: finding ID, justification, compensating control, owner, expiry date (max 90 days). The file is CODEOWNERS-protected by the security team, and the pipeline fails when an exception has expired. Exceptions are visible, owned and time-boxed, and the risk forum reviews them monthly.
 
 **Speed budget:** MR stage under 5 minutes. Every static job runs in parallel; Trivy uses a cached DB; Checkov and Conftest run on changed paths in MRs and on the full repo nightly. A pipeline people wait 20 minutes for gets bypassed.
@@ -100,7 +102,7 @@ The SBOM says *what* is in the image. The signature says *we* approved it. Prove
 
 **Recommendation: SLSA Build Level 2 now, Level 3 as a 2-quarter target.**
 
-- **L2 now:** GitLab can generate signed provenance from the runner (`RUNNER_GENERATE_ARTIFACTS_METADATA`), and we attest it alongside the SBOM. Cheap, and it gives an audit trail from image back to commit.
+- **L2 now:** GitLab's runner can produce an SLSA provenance statement for *job artifacts* (`RUNNER_GENERATE_ARTIFACTS_METADATA`), but that statement isn't signed on its own and doesn't cover an image pushed to a registry. So the pipeline writes a provenance predicate for the image from CI variables (source commit, pipeline, runner) and signs it with the same KMS key as a Cosign attestation. Cheap, and it gives a signed audit trail from image digest back to commit.
 - **L3 later:** L3 needs the provenance to be unforgeable by the build itself, which means hardened, isolated, ephemeral runners where one job can't influence another or touch the signing material. The estate has shared group-level runners today. Getting to L3 is mostly runner platform work, and that work is worth doing anyway: it's the single biggest pipeline risk. Claiming L3 on shared runners would be paperwork rather than security.
 - **Proportionality:** these workloads were containerised in a hurry, and the team is still learning to work with policy gates. Adding provenance verification at admission *now* would add a failure mode they can't easily debug. So: generate and store provenance now; *verify* it at admission once the runner work lands.
 

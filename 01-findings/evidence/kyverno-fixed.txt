@@ -23,23 +23,7 @@ results:
   source: kyverno
   timestamp:
     nanos: 0
-    seconds: 1791764549
-- message: rule passed
-  policy: restrict-image-registries
-  properties:
-    process: background scan
-  resources:
-  - apiVersion: apps/v1
-    kind: Deployment
-    name: health-check
-    namespace: health-check
-  result: pass
-  rule: autogen-programme-ecr-only
-  scored: true
-  source: kyverno
-  timestamp:
-    nanos: 0
-    seconds: 1791764549
+    seconds: 1791777804
 - message: rule passed
   policy: require-requests-limits
   properties:
@@ -55,23 +39,39 @@ results:
   source: kyverno
   timestamp:
     nanos: 0
-    seconds: 1791764549
-- message: rule passed
-  policy: restrict-image-registries
+    seconds: 1791777804
+- message: Validation rule 'autogen-restricted' passed.
+  policy: pod-security-restricted
   properties:
     process: background scan
   resources:
   - apiVersion: apps/v1
     kind: Deployment
-    name: system-monitor
-    namespace: system-monitor
+    name: health-check
+    namespace: health-check
   result: pass
-  rule: autogen-programme-ecr-only
+  rule: autogen-restricted
   scored: true
   source: kyverno
   timestamp:
     nanos: 0
-    seconds: 1791764549
+    seconds: 1791777804
+- message: validation rule 'no-nodeport' passed.
+  policy: disallow-nodeport-and-default-namespace
+  properties:
+    process: background scan
+  resources:
+  - apiVersion: v1
+    kind: Service
+    name: health-check
+    namespace: health-check
+  result: pass
+  rule: no-nodeport
+  scored: true
+  source: kyverno
+  timestamp:
+    nanos: 0
+    seconds: 1791777804
 - message: rule passed
   policy: require-requests-limits
   properties:
@@ -87,7 +87,7 @@ results:
   source: kyverno
   timestamp:
     nanos: 0
-    seconds: 1791764549
+    seconds: 1791777804
 - message: Validation rule 'autogen-restricted' passed.
   policy: pod-security-restricted
   properties:
@@ -103,39 +103,7 @@ results:
   source: kyverno
   timestamp:
     nanos: 0
-    seconds: 1791764549
-- message: Validation rule 'autogen-restricted' passed.
-  policy: pod-security-restricted
-  properties:
-    process: background scan
-  resources:
-  - apiVersion: apps/v1
-    kind: Deployment
-    name: health-check
-    namespace: health-check
-  result: pass
-  rule: autogen-restricted
-  scored: true
-  source: kyverno
-  timestamp:
-    nanos: 0
-    seconds: 1791764549
-- message: validation rule 'no-nodeport' passed.
-  policy: disallow-nodeport-and-default-namespace
-  properties:
-    process: background scan
-  resources:
-  - apiVersion: v1
-    kind: Service
-    name: health-check
-    namespace: health-check
-  result: pass
-  rule: no-nodeport
-  scored: true
-  source: kyverno
-  timestamp:
-    nanos: 0
-    seconds: 1791764549
+    seconds: 1791777804
 - message: validation rule 'no-nodeport' passed.
   policy: disallow-nodeport-and-default-namespace
   properties:
@@ -151,7 +119,39 @@ results:
   source: kyverno
   timestamp:
     nanos: 0
-    seconds: 1791764549
+    seconds: 1791777804
+- message: rule passed
+  policy: restrict-image-registries
+  properties:
+    process: background scan
+  resources:
+  - apiVersion: apps/v1
+    kind: Deployment
+    name: health-check
+    namespace: health-check
+  result: pass
+  rule: autogen-programme-ecr-only
+  scored: true
+  source: kyverno
+  timestamp:
+    nanos: 0
+    seconds: 1791777804
+- message: rule passed
+  policy: restrict-image-registries
+  properties:
+    process: background scan
+  resources:
+  - apiVersion: apps/v1
+    kind: Deployment
+    name: system-monitor
+    namespace: system-monitor
+  result: pass
+  rule: autogen-programme-ecr-only
+  scored: true
+  source: kyverno
+  timestamp:
+    nanos: 0
+    seconds: 1791777804
 source: ""
 summary:
   error: 0

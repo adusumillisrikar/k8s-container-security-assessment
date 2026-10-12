@@ -25,56 +25,7 @@ results:
   source: kyverno
   timestamp:
     nanos: 0
-    seconds: 1791764549
-- message: validation rule 'no-nodeport' passed.
-  policy: disallow-nodeport-and-default-namespace
-  properties:
-    process: background scan
-  resources:
-  - apiVersion: v1
-    kind: Service
-    name: health-check-service
-    namespace: default
-  result: pass
-  rule: no-nodeport
-  scored: true
-  source: kyverno
-  timestamp:
-    nanos: 0
-    seconds: 1791764549
-- message: 'validation failure: validation error: Images must come from the programme
-    ECR registry (F-14, F-17). rule autogen-programme-ecr-only failed at path /image/'
-  policy: restrict-image-registries
-  properties:
-    process: background scan
-  resources:
-  - apiVersion: apps/v1
-    kind: Deployment
-    name: internal-proxy-deployment
-    namespace: default
-  result: fail
-  rule: autogen-programme-ecr-only
-  scored: true
-  source: kyverno
-  timestamp:
-    nanos: 0
-    seconds: 1791764549
-- message: rule passed
-  policy: require-requests-limits
-  properties:
-    process: background scan
-  resources:
-  - apiVersion: apps/v1
-    kind: Deployment
-    name: internal-proxy-deployment
-    namespace: default
-  result: pass
-  rule: autogen-requests-and-memory-limit
-  scored: true
-  source: kyverno
-  timestamp:
-    nanos: 0
-    seconds: 1791764549
+    seconds: 1791777803
 - message: Workloads must run in their own namespace, not default (F-27).
   policy: disallow-nodeport-and-default-namespace
   properties:
@@ -82,7 +33,7 @@ results:
   resources:
   - apiVersion: apps/v1
     kind: Deployment
-    name: internal-proxy-deployment
+    name: system-monitor-deployment
     namespace: default
   result: fail
   rule: autogen-no-default-namespace
@@ -90,111 +41,7 @@ results:
   source: kyverno
   timestamp:
     nanos: 0
-    seconds: 1791764549
-- message: 'Validation rule ''autogen-restricted'' failed. It violates PodSecurity
-    "restricted:latest": (Forbidden reason: allowPrivilegeEscalation != false, field
-    error list: [spec.template.spec.containers[0].securityContext.allowPrivilegeEscalation
-    is forbidden, forbidden values found: true])(Forbidden reason: unrestricted capabilities,
-    field error list: [spec.template.spec.containers[0].securityContext.capabilities.drop:
-    Required value])(Forbidden reason: host namespaces, field error list: [spec.template.spec.hostPID
-    is forbidden, forbidden values found: true, spec.template.spec.hostIPC is forbidden,
-    forbidden values found: true])(Forbidden reason: hostPath volumes, field error
-    list: [spec.template.spec.volumes[0].hostPath is forbidden, forbidden values found:
-    /])(Forbidden reason: privileged, field error list: [spec.template.spec.containers[0].securityContext.privileged
-    is forbidden, forbidden values found: true])(Forbidden reason: restricted volume
-    types, field error list: [spec.template.spec.volumes[0].hostPath: Forbidden])(Forbidden
-    reason: runAsNonRoot != true, field error list: [spec.template.spec.containers[0].securityContext.runAsNonRoot:
-    Required value])(Forbidden reason: seccompProfile, field error list: [spec.template.spec.containers[0].securityContext.seccompProfile.type:
-    Required value])'
-  policy: pod-security-restricted
-  properties:
-    controls: allowPrivilegeEscalation,capabilities_restricted,hostNamespaces,hostPathVolumes,privileged,restrictedVolumes,runAsNonRoot,seccompProfile_restricted
-    controlsJSON: '[{"ID":"allowPrivilegeEscalation","Name":"Privilege Escalation","Images":["docker.io/madhuakula/k8s-goat-system-monitor:latest"]},{"ID":"capabilities_restricted","Name":"Capabilities","Images":["docker.io/madhuakula/k8s-goat-system-monitor:latest"]},{"ID":"hostNamespaces","Name":"Host
-      Namespaces","Images":null},{"ID":"hostPathVolumes","Name":"HostPath Volumes","Images":null},{"ID":"privileged","Name":"Privileged
-      Containers","Images":["docker.io/madhuakula/k8s-goat-system-monitor:latest"]},{"ID":"restrictedVolumes","Name":"Volume
-      Types","Images":null},{"ID":"runAsNonRoot","Name":"Running as Non-root","Images":["docker.io/madhuakula/k8s-goat-system-monitor:latest"]},{"ID":"seccompProfile_restricted","Name":"Seccomp","Images":["docker.io/madhuakula/k8s-goat-system-monitor:latest"]}]'
-    process: background scan
-    standard: restricted
-    version: latest
-  resources:
-  - apiVersion: apps/v1
-    kind: Deployment
-    name: system-monitor-deployment
-    namespace: default
-  result: fail
-  rule: autogen-restricted
-  scored: true
-  source: kyverno
-  timestamp:
-    nanos: 0
-    seconds: 1791764549
-- message: 'validation failure: validation error: Images must come from the programme
-    ECR registry (F-14, F-17). rule autogen-programme-ecr-only failed at path /image/'
-  policy: restrict-image-registries
-  properties:
-    process: background scan
-  resources:
-  - apiVersion: apps/v1
-    kind: Deployment
-    name: health-check-deployment
-    namespace: default
-  result: fail
-  rule: autogen-programme-ecr-only
-  scored: true
-  source: kyverno
-  timestamp:
-    nanos: 0
-    seconds: 1791764549
-- message: 'validation error: cluster-admin bindings are not allowed (F-01). Raise
-    a platform change for cluster-scoped access. rule no-cluster-admin failed at path
-    /roleRef/name/'
-  policy: disallow-cluster-admin-bindings
-  properties:
-    process: admission review
-  resources:
-  - apiVersion: rbac.authorization.k8s.io/v1
-    kind: ClusterRoleBinding
-    name: superadmin
-  result: fail
-  rule: no-cluster-admin
-  scored: true
-  source: kyverno
-  timestamp:
-    nanos: 0
-    seconds: 1791764549
-- message: 'validation failure: validation error: Images must come from the programme
-    ECR registry (F-14, F-17). rule autogen-programme-ecr-only failed at path /image/'
-  policy: restrict-image-registries
-  properties:
-    process: background scan
-  resources:
-  - apiVersion: apps/v1
-    kind: Deployment
-    name: system-monitor-deployment
-    namespace: default
-  result: fail
-  rule: autogen-programme-ecr-only
-  scored: true
-  source: kyverno
-  timestamp:
-    nanos: 0
-    seconds: 1791764549
-- message: validation rule 'no-nodeport' passed.
-  policy: disallow-nodeport-and-default-namespace
-  properties:
-    process: background scan
-  resources:
-  - apiVersion: v1
-    kind: Service
-    name: system-monitor-service
-    namespace: default
-  result: pass
-  rule: no-nodeport
-  scored: true
-  source: kyverno
-  timestamp:
-    nanos: 0
-    seconds: 1791764549
+    seconds: 1791777803
 - message: 'validation failure: validation error: Every container needs CPU/memory
     requests and a memory limit (F-21). rule autogen-requests-and-memory-limit failed
     at path /resources/'
@@ -212,104 +59,7 @@ results:
   source: kyverno
   timestamp:
     nanos: 0
-    seconds: 1791764549
-- message: 'Validation rule ''autogen-restricted'' failed. It violates PodSecurity
-    "restricted:latest": (Forbidden reason: allowPrivilegeEscalation != false, field
-    error list: [spec.template.spec.containers[0].securityContext.allowPrivilegeEscalation:
-    Required value, spec.template.spec.containers[1].securityContext.allowPrivilegeEscalation:
-    Required value])(Forbidden reason: unrestricted capabilities, field error list:
-    [spec.template.spec.containers[0].securityContext.capabilities.drop: Required
-    value, spec.template.spec.containers[1].securityContext.capabilities.drop: Required
-    value])(Forbidden reason: runAsNonRoot != true, field error list: [spec.template.spec.containers[0].securityContext.runAsNonRoot:
-    Required value, spec.template.spec.containers[1].securityContext.runAsNonRoot:
-    Required value])(Forbidden reason: seccompProfile, field error list: [spec.template.spec.containers[0].securityContext.seccompProfile.type:
-    Required value, spec.template.spec.containers[1].securityContext.seccompProfile.type:
-    Required value])'
-  policy: pod-security-restricted
-  properties:
-    controls: allowPrivilegeEscalation,capabilities_restricted,runAsNonRoot,seccompProfile_restricted
-    controlsJSON: '[{"ID":"allowPrivilegeEscalation","Name":"Privilege Escalation","Images":["docker.io/madhuakula/k8s-goat-internal-api:latest","docker.io/madhuakula/k8s-goat-info-app:latest"]},{"ID":"capabilities_restricted","Name":"Capabilities","Images":["docker.io/madhuakula/k8s-goat-internal-api:latest","docker.io/madhuakula/k8s-goat-info-app:latest"]},{"ID":"runAsNonRoot","Name":"Running
-      as Non-root","Images":["docker.io/madhuakula/k8s-goat-internal-api:latest","docker.io/madhuakula/k8s-goat-info-app:latest"]},{"ID":"seccompProfile_restricted","Name":"Seccomp","Images":["docker.io/madhuakula/k8s-goat-internal-api:latest","docker.io/madhuakula/k8s-goat-info-app:latest"]}]'
-    process: background scan
-    standard: restricted
-    version: latest
-  resources:
-  - apiVersion: apps/v1
-    kind: Deployment
-    name: internal-proxy-deployment
-    namespace: default
-  result: fail
-  rule: autogen-restricted
-  scored: true
-  source: kyverno
-  timestamp:
-    nanos: 0
-    seconds: 1791764549
-- message: validation rule 'no-nodeport' passed.
-  policy: disallow-nodeport-and-default-namespace
-  properties:
-    process: background scan
-  resources:
-  - apiVersion: v1
-    kind: Service
-    name: internal-proxy-api-service
-    namespace: default
-  result: pass
-  rule: no-nodeport
-  scored: true
-  source: kyverno
-  timestamp:
-    nanos: 0
-    seconds: 1791764549
-- message: 'validation error: NodePort services are not allowed; use ClusterIP behind
-    the ingress controller (F-10). rule no-nodeport failed at path /spec/type/'
-  policy: disallow-nodeport-and-default-namespace
-  properties:
-    process: background scan
-  resources:
-  - apiVersion: v1
-    kind: Service
-    name: internal-proxy-info-app-service
-    namespace: default
-  result: fail
-  rule: no-nodeport
-  scored: true
-  source: kyverno
-  timestamp:
-    nanos: 0
-    seconds: 1791764549
-- message: Workloads must run in their own namespace, not default (F-27).
-  policy: disallow-nodeport-and-default-namespace
-  properties:
-    process: background scan
-  resources:
-  - apiVersion: apps/v1
-    kind: Deployment
-    name: system-monitor-deployment
-    namespace: default
-  result: fail
-  rule: autogen-no-default-namespace
-  scored: true
-  source: kyverno
-  timestamp:
-    nanos: 0
-    seconds: 1791764549
-- message: Workloads must run in their own namespace, not default (F-27).
-  policy: disallow-nodeport-and-default-namespace
-  properties:
-    process: background scan
-  resources:
-  - apiVersion: apps/v1
-    kind: Deployment
-    name: health-check-deployment
-    namespace: default
-  result: fail
-  rule: autogen-no-default-namespace
-  scored: true
-  source: kyverno
-  timestamp:
-    nanos: 0
-    seconds: 1791764549
+    seconds: 1791777803
 - message: 'Validation rule ''autogen-restricted'' failed. It violates PodSecurity
     "restricted:latest": (Forbidden reason: allowPrivilegeEscalation != false, field
     error list: [spec.template.spec.initContainers[0].securityContext.allowPrivilegeEscalation
@@ -351,7 +101,256 @@ results:
   source: kyverno
   timestamp:
     nanos: 0
-    seconds: 1791764549
+    seconds: 1791777803
+- message: rule passed
+  policy: require-requests-limits
+  properties:
+    process: background scan
+  resources:
+  - apiVersion: apps/v1
+    kind: Deployment
+    name: internal-proxy-deployment
+    namespace: default
+  result: pass
+  rule: autogen-requests-and-memory-limit
+  scored: true
+  source: kyverno
+  timestamp:
+    nanos: 0
+    seconds: 1791777803
+- message: validation rule 'no-nodeport' passed.
+  policy: disallow-nodeport-and-default-namespace
+  properties:
+    process: background scan
+  resources:
+  - apiVersion: v1
+    kind: Service
+    name: internal-proxy-api-service
+    namespace: default
+  result: pass
+  rule: no-nodeport
+  scored: true
+  source: kyverno
+  timestamp:
+    nanos: 0
+    seconds: 1791777803
+- message: 'Validation rule ''autogen-restricted'' failed. It violates PodSecurity
+    "restricted:latest": (Forbidden reason: allowPrivilegeEscalation != false, field
+    error list: [spec.template.spec.containers[0].securityContext.allowPrivilegeEscalation
+    is forbidden, forbidden values found: true])(Forbidden reason: unrestricted capabilities,
+    field error list: [spec.template.spec.containers[0].securityContext.capabilities.drop:
+    Required value])(Forbidden reason: host namespaces, field error list: [spec.template.spec.hostPID
+    is forbidden, forbidden values found: true, spec.template.spec.hostIPC is forbidden,
+    forbidden values found: true])(Forbidden reason: hostPath volumes, field error
+    list: [spec.template.spec.volumes[0].hostPath is forbidden, forbidden values found:
+    /])(Forbidden reason: privileged, field error list: [spec.template.spec.containers[0].securityContext.privileged
+    is forbidden, forbidden values found: true])(Forbidden reason: restricted volume
+    types, field error list: [spec.template.spec.volumes[0].hostPath: Forbidden])(Forbidden
+    reason: runAsNonRoot != true, field error list: [spec.template.spec.containers[0].securityContext.runAsNonRoot:
+    Required value])(Forbidden reason: seccompProfile, field error list: [spec.template.spec.containers[0].securityContext.seccompProfile.type:
+    Required value])'
+  policy: pod-security-restricted
+  properties:
+    controls: allowPrivilegeEscalation,capabilities_restricted,hostNamespaces,hostPathVolumes,privileged,restrictedVolumes,runAsNonRoot,seccompProfile_restricted
+    controlsJSON: '[{"ID":"allowPrivilegeEscalation","Name":"Privilege Escalation","Images":["docker.io/madhuakula/k8s-goat-system-monitor:latest"]},{"ID":"capabilities_restricted","Name":"Capabilities","Images":["docker.io/madhuakula/k8s-goat-system-monitor:latest"]},{"ID":"hostNamespaces","Name":"Host
+      Namespaces","Images":null},{"ID":"hostPathVolumes","Name":"HostPath Volumes","Images":null},{"ID":"privileged","Name":"Privileged
+      Containers","Images":["docker.io/madhuakula/k8s-goat-system-monitor:latest"]},{"ID":"restrictedVolumes","Name":"Volume
+      Types","Images":null},{"ID":"runAsNonRoot","Name":"Running as Non-root","Images":["docker.io/madhuakula/k8s-goat-system-monitor:latest"]},{"ID":"seccompProfile_restricted","Name":"Seccomp","Images":["docker.io/madhuakula/k8s-goat-system-monitor:latest"]}]'
+    process: background scan
+    standard: restricted
+    version: latest
+  resources:
+  - apiVersion: apps/v1
+    kind: Deployment
+    name: system-monitor-deployment
+    namespace: default
+  result: fail
+  rule: autogen-restricted
+  scored: true
+  source: kyverno
+  timestamp:
+    nanos: 0
+    seconds: 1791777803
+- message: validation rule 'no-nodeport' passed.
+  policy: disallow-nodeport-and-default-namespace
+  properties:
+    process: background scan
+  resources:
+  - apiVersion: v1
+    kind: Service
+    name: system-monitor-service
+    namespace: default
+  result: pass
+  rule: no-nodeport
+  scored: true
+  source: kyverno
+  timestamp:
+    nanos: 0
+    seconds: 1791777803
+- message: 'validation failure: validation error: Images must come from the programme
+    ECR registry (F-14, F-17). rule autogen-programme-ecr-only failed at path /image/'
+  policy: restrict-image-registries
+  properties:
+    process: background scan
+  resources:
+  - apiVersion: apps/v1
+    kind: Deployment
+    name: health-check-deployment
+    namespace: default
+  result: fail
+  rule: autogen-programme-ecr-only
+  scored: true
+  source: kyverno
+  timestamp:
+    nanos: 0
+    seconds: 1791777803
+- message: Workloads must run in their own namespace, not default (F-27).
+  policy: disallow-nodeport-and-default-namespace
+  properties:
+    process: background scan
+  resources:
+  - apiVersion: apps/v1
+    kind: Deployment
+    name: health-check-deployment
+    namespace: default
+  result: fail
+  rule: autogen-no-default-namespace
+  scored: true
+  source: kyverno
+  timestamp:
+    nanos: 0
+    seconds: 1791777803
+- message: validation rule 'no-nodeport' passed.
+  policy: disallow-nodeport-and-default-namespace
+  properties:
+    process: background scan
+  resources:
+  - apiVersion: v1
+    kind: Service
+    name: health-check-service
+    namespace: default
+  result: pass
+  rule: no-nodeport
+  scored: true
+  source: kyverno
+  timestamp:
+    nanos: 0
+    seconds: 1791777803
+- message: Workloads must run in their own namespace, not default (F-27).
+  policy: disallow-nodeport-and-default-namespace
+  properties:
+    process: background scan
+  resources:
+  - apiVersion: apps/v1
+    kind: Deployment
+    name: internal-proxy-deployment
+    namespace: default
+  result: fail
+  rule: autogen-no-default-namespace
+  scored: true
+  source: kyverno
+  timestamp:
+    nanos: 0
+    seconds: 1791777803
+- message: 'Validation rule ''autogen-restricted'' failed. It violates PodSecurity
+    "restricted:latest": (Forbidden reason: allowPrivilegeEscalation != false, field
+    error list: [spec.template.spec.containers[0].securityContext.allowPrivilegeEscalation:
+    Required value, spec.template.spec.containers[1].securityContext.allowPrivilegeEscalation:
+    Required value])(Forbidden reason: unrestricted capabilities, field error list:
+    [spec.template.spec.containers[0].securityContext.capabilities.drop: Required
+    value, spec.template.spec.containers[1].securityContext.capabilities.drop: Required
+    value])(Forbidden reason: runAsNonRoot != true, field error list: [spec.template.spec.containers[0].securityContext.runAsNonRoot:
+    Required value, spec.template.spec.containers[1].securityContext.runAsNonRoot:
+    Required value])(Forbidden reason: seccompProfile, field error list: [spec.template.spec.containers[0].securityContext.seccompProfile.type:
+    Required value, spec.template.spec.containers[1].securityContext.seccompProfile.type:
+    Required value])'
+  policy: pod-security-restricted
+  properties:
+    controls: allowPrivilegeEscalation,capabilities_restricted,runAsNonRoot,seccompProfile_restricted
+    controlsJSON: '[{"ID":"allowPrivilegeEscalation","Name":"Privilege Escalation","Images":["docker.io/madhuakula/k8s-goat-internal-api:latest","docker.io/madhuakula/k8s-goat-info-app:latest"]},{"ID":"capabilities_restricted","Name":"Capabilities","Images":["docker.io/madhuakula/k8s-goat-internal-api:latest","docker.io/madhuakula/k8s-goat-info-app:latest"]},{"ID":"runAsNonRoot","Name":"Running
+      as Non-root","Images":["docker.io/madhuakula/k8s-goat-internal-api:latest","docker.io/madhuakula/k8s-goat-info-app:latest"]},{"ID":"seccompProfile_restricted","Name":"Seccomp","Images":["docker.io/madhuakula/k8s-goat-internal-api:latest","docker.io/madhuakula/k8s-goat-info-app:latest"]}]'
+    process: background scan
+    standard: restricted
+    version: latest
+  resources:
+  - apiVersion: apps/v1
+    kind: Deployment
+    name: internal-proxy-deployment
+    namespace: default
+  result: fail
+  rule: autogen-restricted
+  scored: true
+  source: kyverno
+  timestamp:
+    nanos: 0
+    seconds: 1791777803
+- message: 'validation error: NodePort services are not allowed; use ClusterIP behind
+    the ingress controller (F-10). rule no-nodeport failed at path /spec/type/'
+  policy: disallow-nodeport-and-default-namespace
+  properties:
+    process: background scan
+  resources:
+  - apiVersion: v1
+    kind: Service
+    name: internal-proxy-info-app-service
+    namespace: default
+  result: fail
+  rule: no-nodeport
+  scored: true
+  source: kyverno
+  timestamp:
+    nanos: 0
+    seconds: 1791777803
+- message: 'validation failure: validation error: Images must come from the programme
+    ECR registry (F-14, F-17). rule autogen-programme-ecr-only failed at path /image/'
+  policy: restrict-image-registries
+  properties:
+    process: background scan
+  resources:
+  - apiVersion: apps/v1
+    kind: Deployment
+    name: system-monitor-deployment
+    namespace: default
+  result: fail
+  rule: autogen-programme-ecr-only
+  scored: true
+  source: kyverno
+  timestamp:
+    nanos: 0
+    seconds: 1791777803
+- message: cluster-admin bindings are not allowed (F-01). Raise a platform change
+    for cluster-scoped access.
+  policy: disallow-cluster-admin-bindings
+  properties:
+    process: admission review
+  resources:
+  - apiVersion: rbac.authorization.k8s.io/v1
+    kind: ClusterRoleBinding
+    name: superadmin
+  result: fail
+  rule: no-cluster-admin
+  scored: true
+  source: kyverno
+  timestamp:
+    nanos: 0
+    seconds: 1791777803
+- message: 'validation failure: validation error: Images must come from the programme
+    ECR registry (F-14, F-17). rule autogen-programme-ecr-only failed at path /image/'
+  policy: restrict-image-registries
+  properties:
+    process: background scan
+  resources:
+  - apiVersion: apps/v1
+    kind: Deployment
+    name: internal-proxy-deployment
+    namespace: default
+  result: fail
+  rule: autogen-programme-ecr-only
+  scored: true
+  source: kyverno
+  timestamp:
+    nanos: 0
+    seconds: 1791777803
 source: ""
 summary:
   error: 0
