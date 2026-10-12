@@ -19,4 +19,4 @@ docker run --rm --entrypoint falco "$FALCO" --version | head -1
 docker run --rm --network none --read-only --cap-drop ALL --security-opt no-new-privileges --tmpfs /tmp \
   -v "$VOL:/plugins:ro" -v "$(p "$REPO/tools/falco"):/cfg:ro" -v "$(p "$REPO/03-runtime-security"):/rules:ro" \
   --entrypoint falco "$FALCO" -c /cfg/validate-config.yaml \
-  -V /etc/falco/falco_rules.yaml -V /rules/falco-rules-custom.yaml 2>&1 | grep -v '^\s*$'
+  -V /etc/falco/falco_rules.yaml -V /rules/falco-rules-custom.yaml 2>&1 | grep -v -e '^\s*$' -e 'System info:'

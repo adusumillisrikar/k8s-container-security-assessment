@@ -1,0 +1,38 @@
+# Semgrep 1.178.0, organisation rules (02-pipeline-supply-chain/policies/semgrep/org-rules.yaml), offline
+
+## 1. Against kubernetes-goat @723a0db infrastructure/ (expect F-03, F-09, F-10)
+ ──────────────────────────        ────────────────                                                                     
+  go             1       2          Custom       3                                                                      
+  python         1       2                                                                                              
+  js             1       1                                                                                              
+    /goat/infrastructure/health-check/main.go
+   ❯❯❱ repo.02-pipeline-supply-chain.policies.semgrep.org-go-shell-command-built-from-input
+          ❰❰ Blocking ❱❱
+          [F-03] A shell (sh -c) runs a command built at runtime. Any input in that string can add its own 
+          commands. Run the program directly with separate arguments (exec.Command("ping", "-c", "2", "--",
+          host)) and validate the input.                                                                   
+           29┆ cmd := exec.Command("sh", "-c", "ping -c 2 "+endpoint)
+    /goat/infrastructure/info-app/app.py
+   ❯❯❱ repo.02-pipeline-supply-chain.policies.semgrep.org-flask-debug-enabled
+          ❰❰ Blocking ❱❱
+          [F-10] Flask debug mode is on. It exposes the Werkzeug debugger, which can run code. Never ship
+          debug=True; run under gunicorn in production.                                                  
+           11┆ app.run(host='0.0.0.0', port=5000, debug=True)
+    /goat/infrastructure/internal-api/code/server.js
+   ❯❯❱ repo.02-pipeline-supply-chain.policies.semgrep.org-node-request-data-to-child-process
+          ❰❰ Blocking ❱❱
+          [F-09] Request data reaches a child process. With curl/wget this is SSRF (the server fetches any    
+          URL, including cloud metadata) and argument injection (values starting with "-" become options). Use
+          an HTTP client with a destination allowlist instead of shelling out.                                
+           22┆ const child = spawnSync('curl', [endpoint, '-H', headers, '-X', method]);
+✅ Scan completed successfully.
+ • Findings: 3 (3 blocking)
+ • Rules run: 3
+ • Targets scanned: 5
+ • Parsed lines: ~100.0%
+ • Scan skipped: 
+   ◦ Files larger than  files 1.0 MB: 3
+ • Scan was limited to files tracked by git
+
+## 2. Against the corrected health-check code from remediation-advisory.md (expect 0 findings)
+Ran 1 rule on 1 file: 0 findings.

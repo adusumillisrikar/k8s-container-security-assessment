@@ -1,0 +1,16 @@
+# Semgrep 1.178.0 registry packs p/ci, p/command-injection, p/flask, p/nodejs vs kubernetes-goat @723a0db infrastructure/
+# (network on only to download the rule packs; telemetry off; code mounted read-only)
+
+Findings: 5  (parse errors: 9, all Dockerfile partial-parse warnings)
+
+WARNING	python.flask.security.audit.app-run-param-config.avoid_app_run_with_bad_host	infrastructure/info-app/app.py:11
+WARNING	python.flask.security.audit.debug-enabled.debug-enabled	infrastructure/info-app/app.py:11
+WARNING	javascript.express.security.audit.xss.direct-response-write.direct-response-write	infrastructure/internal-api/code/server.js:25
+WARNING	javascript.express.security.audit.xss.direct-response-write.direct-response-write	infrastructure/internal-api/code/server.js:27
+WARNING	javascript.express.security.audit.xss.direct-response-write.direct-response-write	infrastructure/internal-api/code/server.js:29
+
+Not reported by any registry rule:
+  infrastructure/health-check/main.go:29  shell command injection (F-03)
+  infrastructure/internal-api/code/server.js:22  SSRF / argument injection via curl (F-09)
+Reported only as WARNING (an ERROR-only gate passes it):
+  infrastructure/info-app/app.py:11  Flask debug=True (F-10)

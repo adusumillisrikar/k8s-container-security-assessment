@@ -22,13 +22,15 @@ CHECKOV=docker.io/bridgecrew/checkov@sha256:d3e96adafdb315ca82e792ca8708c01adae8
 KUBESCORE=docker.io/zegl/kube-score@sha256:ac4c43ad560af905d66f6bf57b0937c591332e6dbf2167c31193a13b4695ab97          # v1.20.0
 TRIVY=docker.io/aquasec/trivy@sha256:62b1e65e8869bc4b4c6aa4fa2b21595256c7c2f6018a9d9ad61caf87187c1969                 # 0.74.0
 KYVERNO=ghcr.io/kyverno/kyverno-cli@sha256:ced7b2be0b04250cabfe695f15307f69eb715fe23234816388af4f3812915b2a          # v1.19.1
+GITLEAKS=docker.io/zricethezav/gitleaks@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f       # v8.30.1
+SEMGREP=docker.io/semgrep/semgrep@sha256:32e459968daabe7ab86968184a29109b9564aa00392401156f9788452b42786b           # 1.178.0
 
 # Docker on Windows (Git Bash) needs mixed-style paths and no MSYS path rewriting.
 p() { if command -v cygpath >/dev/null; then cygpath -m "$1"; else echo "$1"; fi; }
 export MSYS_NO_PATHCONV=1
 
 sandbox=(docker run --rm --network none --read-only --cap-drop ALL
-         --security-opt no-new-privileges --tmpfs /tmp:rw,size=512m
+         --security-opt no-new-privileges --tmpfs /tmp:rw,exec,size=1g
          -v "$(p "$GOAT"):/goat:ro" -v "$(p "$TG"):/tg:ro" -v "$(p "$REPO"):/repo:ro"
          -v "$(p "$OUT"):/out")
 
@@ -73,5 +75,13 @@ echo "== 7. Kyverno CLI: admission policies vs goat and fixed manifests (verifyI
   /repo/02-pipeline-supply-chain/policies/kyverno/cluster-guardrails.yaml \
   $(for f in $FIXED; do printf -- '--resource %s ' "$f"; done) \
   --policy-report --remove-color > "$OUT/kyverno-fixed.txt" 2>&1 || true
+
+echo "== 8. gitleaks: this repo's full history, and the goat tree (values redacted)"
+"${sandbox[@]}" -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0='*' "$GITLEAKS"   git --redact --no-banner /repo > "$OUT/gitleaks-own-repo.txt" 2>&1 || true
+"${sandbox[@]}" "$GITLEAKS" dir --redact --no-banner --report-format json --report-path /out/gitleaks-goat.json /goat > /dev/null 2>&1 || true
+
+echo "== 9. Semgrep: organisation rules (local rule file, so this runs offline)"
+"${sandbox[@]}" -e HOME=/tmp -e SEMGREP_SEND_METRICS=off "$SEMGREP" semgrep scan --metrics=off --disable-version-check   --config /repo/02-pipeline-supply-chain/policies/semgrep/org-rules.yaml /goat/infrastructure > "$OUT/semgrep-org-goat.txt" 2>&1 || true
+"${sandbox[@]}" -e HOME=/tmp -e SEMGREP_SEND_METRICS=off "$SEMGREP" semgrep scan --metrics=off --disable-version-check   --config /repo/02-pipeline-supply-chain/policies/semgrep/org-rules.yaml /repo/02-pipeline-supply-chain/policies/semgrep/known-good > "$OUT/semgrep-org-known-good.txt" 2>&1 || true
 
 echo "done -> $OUT"

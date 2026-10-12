@@ -7,6 +7,7 @@ Everything here was produced by two scripts in [`tools/`](../../tools/). Anyone 
 | [`tools/run-scans.sh`](../../tools/run-scans.sh) | Runs Conftest, Checkov, kube-score, Trivy and the Kyverno CLI against kubernetes-goat `723a0db`, terragoat `729f8da` (`eks.tf`, `ecr.tf`), and this repo's fixed manifests |
 | [`tools/psa-rbac-test.sh`](../../tools/psa-rbac-test.sh) | Creates a throwaway local kind cluster, checks the Module 6 claims live (Pod Security and RBAC before/after), then deletes the cluster |
 | [`tools/validate-falco.sh`](../../tools/validate-falco.sh) | Validates the custom Falco rules (Module 3) with Falco 0.45.0 and the signature-verified k8saudit/json plugins, offline |
+| [`tools/run-online-checks.sh`](../../tools/run-online-checks.sh) | The two checks that need network access: kubeconform (downloads schemas) and Semgrep registry packs (downloads rules). Inputs read-only, no credentials, telemetry off |
 
 Run on 2026-10-12.
 
@@ -32,6 +33,9 @@ The 2026 Trivy and KICS Docker Hub compromises showed that a security scanner is
 | Kyverno CLI | v1.19.1 | `ghcr.io/kyverno/kyverno-cli@sha256:ced7b2be0b04250cabfe695f15307f69eb715fe23234816388af4f3812915b2a` |
 | kind | v0.32.0, Kubernetes v1.36.1 | kind's default node image |
 | Falco | 0.45.0 | `falcosecurity/falco@sha256:788f1129c542171813083d4afc61b16730a47dde8c23d9c39370acef996349b6` |
+| gitleaks | v8.30.1 | `zricethezav/gitleaks@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f` |
+| Semgrep | 1.178.0 | `semgrep/semgrep@sha256:32e459968daabe7ab86968184a29109b9564aa00392401156f9788452b42786b` |
+| kubeconform | v0.8.0 | `ghcr.io/yannh/kubeconform@sha256:faffaf43f95aa6425306e1ab8d6fcad72acb9049158f38e574c085ea1ec0f64e` |
 | falcoctl | 0.14.2 | `falcosecurity/falcoctl@sha256:90ba9627886e8f26b746fa52465d755b28ee49b76eb1d047a0fefd8cadb21907` (plugin signatures verified on install) |
 
 ## Headline results
@@ -50,6 +54,10 @@ The 2026 Trivy and KICS Docker Hub compromises showed that a security scanner is
 | 10 | Live RBAC: F-01 before/after | Before: superadmin SA has `*.*`. After: CI identity can patch Deployments in its own namespace only; can't read Secrets, `exec`, or create ClusterRoleBindings | [psa-rbac-live-test.txt](psa-rbac-live-test.txt) |
 | 11 | Checkov vs terragoat EKS/ECR | 11 failures, confirming F-15, F-16, F-22, F-23, F-25, plus two items the manual review missed (now F-30, F-31) | [checkov-terragoat.txt](checkov-terragoat.txt) |
 | 12 | Custom Falco rules (Module 3) through Falco's own validator, with the `k8saudit` plugin loaded | `falco-rules-custom.yaml: Ok`. All 5 rules (3 syscall, 2 audit-log) load without errors or warnings | [falco-rules-validation.txt](falco-rules-validation.txt) |
+| 13 | Semgrep registry packs (p/ci, p/command-injection, p/flask, p/nodejs) vs goat application code | **Missed** the Go command injection (F-03) and the Node SSRF (F-09); flagged Flask debug (F-10) only as WARNING, which an ERROR-only gate passes | [semgrep-registry-summary.txt](semgrep-registry-summary.txt) |
+| 14 | Semgrep **organisation rules** (`policies/semgrep/org-rules.yaml`) vs goat, and vs the corrected code from the remediation advisory | **All three caught** (F-03, F-09, F-10), all blocking. **0 findings** on the corrected code | [semgrep-org-rules.txt](semgrep-org-rules.txt) |
+| 15 | gitleaks vs this repo's full history, and vs the goat tree | This repo: **no leaks**. Goat: 13 hits on the committed Secret manifests and the `ENV API_KEY` line; misses the deleted-layer secret, the `.git` inside the tarball and the Redis/metadata seed files | [gitleaks-summary.txt](gitleaks-summary.txt) |
+| 16 | kubeconform: fixed manifests and Kyverno policies vs Kubernetes 1.36 schemas (CRDs from the CRDs catalog) | **28/28 valid**, 0 skipped | [kubeconform-fixed.txt](kubeconform-fixed.txt) |
 
 ## What testing changed in the submission
 
@@ -59,7 +67,9 @@ Testing found real problems in my own work. They've been fixed, and they're list
 2. **A wrong Checkov check ID in the pipeline.** I'd assumed `CKV_K8S_155` covered `cluster-admin` bindings; it covers webhook-configuration permissions. Replaced with `CKV_K8S_49` (wildcard roles) and `CKV2_K8S_5` (secret read), and the pipeline now relies on Conftest for the binding itself, as result 2 shows it must.
 3. **Two missed findings.** Checkov caught VPC flow logs disabled and an unrestricted default security group in terragoat's `eks.tf`, which the manual review hadn't listed. Added as F-30 and F-31.
 4. **The image-signature policy** was moved to its own file (`verify-images.yaml`), because it needs registry access and can't be tested offline. It's documented, not claimed as tested.
-5. **Note for later:** Kyverno 1.19 marks `kyverno.io/v1 ClusterPolicy` as deprecated in favour of CEL-based `ValidatingPolicy`. The policies work today; migrating them is a planned upgrade item, not a go-live blocker.
+5. **Semgrep's registry packs didn't do what the pipeline design claimed.** The design said Semgrep would catch shell injection, SSRF and debug mode. Tested, the registry packs caught only debug mode, and only as a warning. Three organisation rules were written, tested against goat and against the corrected code, and the design and pipeline file now say what was actually shown.
+6. **Final review fixes (not found by tools).** The target Kubernetes version moved from 1.33 to 1.36 (1.33 left EKS standard support in July 2026); F-23 now reflects that EKS 1.28+ envelope-encrypts Secrets by default with an AWS-owned key (the gap is key custody); F-15 now covers authentication defaults (`CONFIG_MAP` mode, creator admin bootstrapped).
+7. **Note for later:** Kyverno 1.19 marks `kyverno.io/v1 ClusterPolicy` as deprecated in favour of CEL-based `ValidatingPolicy`. The policies work today; migrating them is a planned upgrade item, not a go-live blocker.
 
 ## Coverage: manual review vs scanners
 
@@ -69,13 +79,13 @@ Testing found real problems in my own work. They've been fixed, and they're list
 |---|---|---|---|---|---|
 | F-01 cluster-admin binding | ✓ | ✓ | ✗ | ◐ Medium | ✓ |
 | F-02 privileged + host access + web shell | ✓ | ✓ | ✓ | ✓ | ✓ (web shell: ✗ all) |
-| F-03 command injection + runtime socket | ✓ | ◐ socket only | ◐ socket only | ◐ hostPath only | ✓ (injection: ✗ all) |
+| F-03 command injection + runtime socket | ✓ | ◐ socket only | ◐ socket only | ◐ hostPath only | ✓ (injection: see code table) |
 | F-04 wildcard ClusterRole chart | ✓ | ✓ | n/a | ✓ | n/a |
 | F-05 secrets in images | ✓ | ✗ | ✗ | ◐ ENV only | ✗ |
 | F-06 no admission control | ✓ | ✗ | ✗ | ✗ | n/a |
 | F-07 privileged toolkit DaemonSet | ✓ | ✓ | ✓ | ✓ | ✓ |
 | F-08 wildcard Role + secrets | ✓ | ✓ | ✓ | ✓ | n/a |
-| F-09 SSRF | ✓ | ✗ | ✗ | ✗ | ✗ |
+| F-09 SSRF | ✓ | ✗ | ✗ | ✗ | ✗ (see code table) |
 | F-10 Flask debug + NodePort | ✓ | ◐ NodePort | ✗ | ✗ | ◐ NodePort |
 | F-11 Secrets in Git, env vars | ✓ | ✓ | ✓ | ✗ | n/a |
 | F-12 no NetworkPolicy | ✓ | ✗ | ✓ | ✗ | n/a |
@@ -99,8 +109,21 @@ Testing found real problems in my own work. They've been fixed, and they're list
 | F-30 VPC flow logs off | **✗** | n/a | ✓ | n/a | n/a |
 | F-31 default SG unrestricted | **✗** | n/a | ✓ | n/a | n/a |
 
+**Code and secret scanners** (only the findings these tools can see):
+
+| Finding | Semgrep registry packs | Semgrep org rules | gitleaks | Trivy secret scanner |
+|---|---|---|---|---|
+| F-03 command injection | ✗ | ✓ | n/a | n/a |
+| F-09 SSRF / argument injection | ✗ | ✓ | n/a | n/a |
+| F-10 Flask debug mode | ◐ WARNING only | ✓ | n/a | n/a |
+| F-05 secrets in images | n/a | n/a | ◐ `ENV` line only | ✗ |
+| F-11 Secret values in Git | n/a | n/a | ✓ | ✗ |
+| F-13 Redis seed secret | n/a | n/a | ✗ | ✗ |
+
+**Not run:** kube-bench. Neither reference repo defines EKS worker nodes, and a kind node isn't representative of an EKS node, so its results would describe kind rather than the target state. In the design it runs as a scheduled job against real nodes (F-18).
+
 **What this shows:**
-- **Scanners are good at configuration and bad at intent.** They reliably catch privileged pods, missing limits and public endpoints. None of them found the SSRF, the command injection, the unauthenticated Redis and registry, the secret hidden in a deleted image layer, the `.git` history shipped inside an image, or the dormant download-and-run script. Those are among the highest-impact findings, and they came from reading the code.
-- **Trivy's secret scanner found none of the planted secrets** (in Dockerfiles, Secret manifests, the Redis seed file or the metadata service files). They don't match its known credential patterns; only the `ENV API_KEY` line was caught, and by a Dockerfile misconfiguration check, not the secret scanner. Secret detection needs organisation-specific rules (gitleaks custom patterns) on top of the defaults.
+- **Scanners are good at configuration and bad at intent.** They reliably catch privileged pods, missing limits and public endpoints. No generic scanner found the SSRF or the command injection (organisation Semgrep rules now do), and none at all found the unauthenticated Redis and registry, the secret hidden in a deleted image layer, the `.git` history shipped inside an image, or the dormant download-and-run script. Those are among the highest-impact findings, and they came from reading the code.
+- **Trivy's secret scanner found none of the planted secrets** (in Dockerfiles, Secret manifests, the Redis seed file or the metadata service files). They don't match its known credential patterns; only the `ENV API_KEY` line was caught, and by a Dockerfile misconfiguration check, not the secret scanner. gitleaks did better on files in Git (13 hits) but also can't see inside image layers or archives. Secret detection needs organisation-specific rules (gitleaks custom patterns) on top of the defaults.
 - **The audit finding is the clearest case:** the generic catalogues either miss it (Checkov) or under-rate it (Trivy). That's why the pipeline has an organisation-owned Conftest policy written for our own incidents.
 - **Manual review missed two things Checkov caught (F-30, F-31).** Using both is the point.

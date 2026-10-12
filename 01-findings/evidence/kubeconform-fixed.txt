@@ -1,0 +1,4 @@
+# kubeconform v0.8.0, Kubernetes 1.36.0 schemas + datreeio CRDs-catalog (network on for schema download only)
+# Input: 06-remediation/fixed-manifests/ and 02-pipeline-supply-chain/policies/kyverno/
+
+Summary: 28 resources found in 7 files - Valid: 28, Invalid: 0, Errors: 0, Skipped: 0

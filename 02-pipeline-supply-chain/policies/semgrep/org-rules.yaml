@@ -1,0 +1,63 @@
+# Organisation-owned Semgrep rules, run in the semgrep-sast job alongside the
+# registry rule packs.
+#
+# Why these exist: in testing, Semgrep's registry packs (p/ci, p/command-injection,
+# p/flask, p/nodejs) missed the command injection (F-03) and the SSRF (F-09) in
+# kubernetes-goat, and rated Flask debug mode (F-10) only as WARNING, which the
+# ERROR-only gate lets through. Same lesson as the Conftest cluster-admin rule:
+# generic catalogues need rules written for our own findings.
+# Evidence: 01-findings/evidence/semgrep-org-rules.txt
+rules:
+  - id: org-go-shell-command-built-from-input
+    languages: [go]
+    severity: ERROR
+    message: >-
+      [F-03] A shell (sh -c) runs a command built at runtime. Any input in that
+      string can add its own commands. Run the program directly with separate
+      arguments (exec.Command("ping", "-c", "2", "--", host)) and validate the input.
+    patterns:
+      - pattern-either:
+          - pattern: exec.Command($SH, "-c", $CMD)
+          - pattern: exec.CommandContext($CTX, $SH, "-c", $CMD)
+      - metavariable-regex:
+          metavariable: $SH
+          regex: ^"(/bin/|/usr/bin/)?(sh|bash|zsh|ash|dash)"$
+      - pattern-not: exec.Command($SH, "-c", "...")
+      - pattern-not: exec.CommandContext($CTX, $SH, "-c", "...")
+
+  - id: org-node-request-data-to-child-process
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: >-
+      [F-09] Request data reaches a child process. With curl/wget this is SSRF
+      (the server fetches any URL, including cloud metadata) and argument
+      injection (values starting with "-" become options). Use an HTTP client
+      with a destination allowlist instead of shelling out.
+    mode: taint
+    pattern-sources:
+      - pattern: $REQ.body
+      - pattern: $REQ.query
+      - pattern: $REQ.params
+      - pattern: $REQ.headers
+    pattern-sinks:
+      - pattern-either:
+          - pattern: spawnSync(...)
+          - pattern: spawn(...)
+          - pattern: execFileSync(...)
+          - pattern: execFile(...)
+          - pattern: execSync(...)
+          - pattern: exec(...)
+          - pattern: $CP.spawnSync(...)
+          - pattern: $CP.spawn(...)
+          - pattern: $CP.execFileSync(...)
+          - pattern: $CP.execFile(...)
+          - pattern: $CP.execSync(...)
+          - pattern: $CP.exec(...)
+
+  - id: org-flask-debug-enabled
+    languages: [python]
+    severity: ERROR
+    message: >-
+      [F-10] Flask debug mode is on. It exposes the Werkzeug debugger, which can
+      run code. Never ship debug=True; run under gunicorn in production.
+    pattern: $APP.run(..., debug=True, ...)

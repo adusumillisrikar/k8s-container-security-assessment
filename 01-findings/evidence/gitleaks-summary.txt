@@ -1,0 +1,17 @@
+# gitleaks v8.30.1 (offline, --redact)
+
+## 1. This repository, full history
+20 commits scanned. no leaks found
+
+## 2. kubernetes-goat @723a0db working tree (rule and location only; values redacted)
+generic-api-key	infrastructure/users-repo/Dockerfile:4
+kubernetes-secret-yaml	scenarios/hunger-check/deployment.yaml:38
+generic-api-key	scenarios/hunger-check/deployment.yaml:44
+kubernetes-secret-yaml	scenarios/hunger-check/deployment.yaml:47
+generic-api-key	scenarios/hunger-check/deployment.yaml:53
+kubernetes-secret-yaml	scenarios/system-monitor/deployment.yaml:2
+generic-api-key	scenarios/system-monitor/deployment.yaml:8
+generic-api-key	scenarios/system-monitor/deployment.yaml:52
+
+Total: 13 hits.
+Missed: the secret ADDed then deleted in hidden-in-layers (only visible in image layers), the .git history inside build-code/app.tar.gz, the Redis seed file (cache-store/data.redis) and the metadata-db secret files.
