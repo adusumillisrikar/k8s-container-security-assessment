@@ -68,6 +68,7 @@ flowchart TB
 - Every finding ID (F-01 to F-31) is used consistently: in the pipeline policies (each rule names the finding it prevents), the Falco rules, the threat model, the compliance mapping and the diagrams.
 - The **COTS recommendation (Module 7)** reuses the admission, network and runtime designs rather than inventing separate controls.
 - The **threat model (Module 8)** checks the earlier designs against one workload and states openly where they fall short.
+- **Where the managed-Kubernetes line sits** (provider vs us, and how it differs on EKS, AKS and GKE) is in the [architecture narrative](09-architecture/architecture-narrative.md#shared-responsibility-where-the-line-sits-on-eks-aks-and-gke).
 
 ## Navigating the repo
 

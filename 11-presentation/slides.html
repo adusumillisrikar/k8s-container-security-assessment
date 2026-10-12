@@ -59,6 +59,11 @@
   .title-slide p { color: #CBD5E1; font-size: 22px; }
   .title-slide .foot { color: #94A3B8; border-top-color: #334155; }
   code { font-family: Consolas, Menlo, monospace; font-size: .9em; background: var(--slate); padding: 1px 5px; border-radius: 4px; }
+  .diagram-lg { width: 100%; height: 612px; object-fit: contain; display: block; }
+  .crop { position: relative; overflow: hidden; border: 1px solid var(--line); border-radius: 8px; flex: none; }
+  .crop img { position: absolute; }
+  .backup .kicker { color: var(--muted); }
+  table.tight th, table.tight td { font-size: 14px; padding: 7px 10px; }
 </style>
 </head>
 <body>
@@ -68,7 +73,7 @@
   <div style="margin-top:120px">
     <p class="kicker">DevSecOps technical assessment · Track 1</p>
     <h1>Kubernetes &amp; container security: review, target state and go-live plan</h1>
-    <p style="margin-top:28px">Srikar Adusumilli</p>
+    <p style="margin-top:28px">Srikar Adusumilli · October 2026</p>
     <p class="muted" style="font-size:18px;color:#94A3B8">Repository: github.com/adusumillisrikar/k8s-container-security-assessment</p>
   </div>
   <div class="foot"><span>Reviewed against kubernetes-goat @723a0db (primary) and terragoat EKS/ECR Terraform @729f8da</span><span>1</span></div>
@@ -249,6 +254,7 @@
         <li><b>SLSA Build L2 now</b>, L3 after runner isolation work. Claiming L3 on shared runners would be paperwork.</li>
         <li><b>Production:</b> security + service-owner approval; nobody approves their own deploy.</li>
         <li><b>Exceptions:</b> in Git, owned, max 90 days, pipeline fails when they expire.</li>
+        <li><b>Speed budget:</b> merge-request checks under 5 minutes, all in parallel. A slow gate gets bypassed.</li>
       </ul>
       <div class="callout" style="margin-top:12px;font-size:17px">Other clouds: policies, scanners and Argo CD are unchanged. Registry, signing key and identity trust change.</div>
     </div>
@@ -310,17 +316,34 @@
 </section>
 
 <!-- 11. HLD -->
-<section class="slide" style="padding-top:36px">
-  <p class="kicker">High-level design (governance view)</p>
-  <img class="diagram" src="../09-architecture/hld-diagram.png" alt="High-level design">
+<section class="slide" style="padding-top:22px">
+  <p class="kicker" style="margin-bottom:4px">High-level design (governance view)</p>
+  <img class="diagram-lg" src="../09-architecture/hld-diagram.svg" alt="High-level design">
   <div class="foot"><span>Key decision: flow 3. The cluster pulls from Git; CI has no path to the cluster (red dashed)</span><span>11</span></div>
 </section>
 
 <!-- 12. LLD -->
-<section class="slide" style="padding-top:36px">
-  <p class="kicker">Low-level design: citizen request → payments-api → database</p>
-  <img class="diagram" src="../09-architecture/lld-diagram.png" alt="Low-level design">
-  <div class="foot"><span>Every allowed flow is in the table; anything else is dropped. One IAM permission for the app: rds-db:connect</span><span>12</span></div>
+<section class="slide" style="padding-top:28px">
+  <p class="kicker" style="margin-bottom:10px">Low-level design: one citizen request, end to end (full diagram: backup A5)</p>
+  <div style="display:flex;gap:22px">
+    <div class="crop" style="width:757px;height:600px">
+      <img src="../09-architecture/lld-diagram.svg" alt="Low-level design, VPC view" style="width:1114px;left:-175px;top:-58px">
+    </div>
+    <div style="flex:1">
+      <table class="tight">
+        <tr><th>#</th><th>Step</th><th>Control</th></tr>
+        <tr><td>1</td><td>Citizen → WAF → ALB</td><td>443, TLS 1.2+</td></tr>
+        <tr><td>A</td><td>ALB → pod</td><td>8443, TLS again; only from ALB subnets</td></tr>
+        <tr><td>C</td><td>Pod → Pod Identity agent</td><td>Short-lived creds, one permission: <code>rds-db:connect</code></td></tr>
+        <tr><td>B</td><td>Pod → RDS</td><td>5432, TLS forced, IAM token, no password</td></tr>
+        <tr><td>E</td><td>ESO → Secrets Manager</td><td>Own namespace's path only; mounted as a file</td></tr>
+        <tr><td>F</td><td>CI → ECR</td><td>Push only; no route to the cluster</td></tr>
+        <tr><td style="color:var(--red)">✕</td><td>Anything else</td><td>Dropped: IMDS, internet, other namespaces</td></tr>
+      </table>
+      <p style="font-size:14.5px;margin-top:14px">Pod: non-root, read-only filesystem, no capabilities, no SA token. Falco and Fluent Bit on every node; admission checks the signature before it runs.</p>
+    </div>
+  </div>
+  <div class="foot"><span>09-architecture/lld-diagram.svg · every allowed flow is listed; anything else is dropped</span><span>12</span></div>
 </section>
 
 <!-- 13. COTS -->
@@ -425,8 +448,101 @@
   <div style="margin-top:44px;text-align:center">
     <p style="font-size:34px;color:var(--ink);font-weight:700;margin:0">Questions</p>
     <p class="muted" style="font-size:18px">github.com/adusumillisrikar/k8s-container-security-assessment</p>
+    <p class="muted" style="font-size:15px;margin-top:26px">Backup slides: A1 shared responsibility · A2 one finding, two audiences · A3 how this was verified · A4 secrets options · A5 full LLD</p>
   </div>
   <div class="foot"><span>Kubernetes &amp; container security review</span><span>16</span></div>
+</section>
+
+<!-- A1. Shared responsibility -->
+<section class="slide backup">
+  <p class="kicker">Backup A1 · Shared responsibility</p>
+  <h1 style="font-size:32px">The provider runs the control plane. Everything that decides who gets in, what runs and what talks is ours.</h1>
+  <table class="tight">
+    <tr><th style="width:20%"></th><th>EKS</th><th>AKS</th><th>GKE</th></tr>
+    <tr><td><b>Audit logs</b></td><td>Off until enabled (F-16)</td><td>Not collected until a diagnostic setting routes them</td><td>Admin Activity always on; Data Access off by default</td></tr>
+    <tr><td><b>Worker node OS</b></td><td>AWS publishes AMIs, we roll them out (Auto Mode / Fargate: AWS)</td><td>Node image auto-upgrade channel</td><td>Auto-upgrade by default; Autopilot: Google runs nodes</td></tr>
+    <tr><td><b>Pod hardening default</b></td><td>None: ours to enforce</td><td>None: ours to enforce</td><td>Autopilot blocks privileged pods</td></tr>
+    <tr><td><b>Secrets at rest</b></td><td>AWS-owned key by default; our key optional (F-23)</td><td>Platform-encrypted; our KMS key optional</td><td>Encrypted by default; Cloud KMS layer optional</td></tr>
+    <tr><td><b>API endpoint</b></td><td>Public by default (F-15)</td><td>Public by default</td><td>External endpoint by default</td></tr>
+    <tr><td><b>NetworkPolicy</b></td><td>Turn on in VPC CNI (F-12)</td><td>Engine chosen at cluster creation</td><td>Enforced by Dataplane V2</td></tr>
+    <tr><td><b>Control-plane SLA</b></td><td>Included</td><td>Standard/Premium tier only</td><td>Included</td></tr>
+  </table>
+  <div class="callout" style="margin-top:16px;font-size:17px"><b>Design rule:</b> build to the weakest default on every row, so the baseline holds on any cloud. Our own Pod Security, audit logs shipped explicitly, our keys, private endpoints, AKS Standard tier.</div>
+  <div class="foot"><span>09-architecture/architecture-narrative.md · kube-bench on kind showed the same split: control-plane checks are AWS's on EKS</span><span>A1</span></div>
+</section>
+
+<!-- A2. Two audiences -->
+<section class="slide backup">
+  <p class="kicker">Backup A2 · One finding, two audiences</p>
+  <h1 style="font-size:32px">F-01 for the governance board, and for the delivery engineer</h1>
+  <div class="grid2">
+    <div class="card purple">
+      <h2>To the board: how bad, and what do you need from us?</h2>
+      <ul>
+        <li>Our build system holds the master key to the cluster. A tampered build could control every service and hide its tracks.</li>
+        <li><b>Blocks go-live.</b> About one engineer-day to fix. No risk acceptance offered.</li>
+        <li>You'll see evidence that both the pipeline and the cluster refuse it.</li>
+      </ul>
+    </div>
+    <div class="card blue">
+      <h2>To the engineer: what changes, and how do I know it works?</h2>
+      <ul>
+        <li>CI can now deploy Deployments, Services, ConfigMaps and Ingresses in <b>your</b> namespaces only. No Secrets, no <code>exec</code>, nothing cluster-wide.</li>
+        <li>A deploy fails with <code>forbidden</code>? The error names the permission; request just that one in the MR.</li>
+        <li>Check (as tested): <code>kubectl auth can-i create clusterrolebindings --as=ci --as-group=ci-deploy:&lt;your-ns&gt;</code> → <code>no</code></li>
+      </ul>
+    </div>
+  </div>
+  <div class="callout green" style="margin-top:18px;font-size:17px">Same facts, different questions. The worked engineer version for the top three findings is the remediation pack (Module 6).</div>
+  <div class="foot"><span>06-remediation/remediation-advisory.md</span><span>A2</span></div>
+</section>
+
+<!-- A3. Verification -->
+<section class="slide backup">
+  <p class="kicker">Backup A3 · How this was verified</p>
+  <h1 style="font-size:32px">Testing changed the submission, which is why it was worth doing</h1>
+  <div class="grid2">
+    <table class="tight">
+      <tr><th>Found by testing or review</th><th>Fixed</th></tr>
+      <tr><td>Kyverno cluster-admin rule silently skipped (background mode)</td><td>Admission-only; re-tested</td></tr>
+      <tr><td>Wrong Checkov check ID in the pipeline</td><td>Corrected; Conftest covers F-01</td></tr>
+      <tr><td>Semgrep claim overstated: registry packs missed injection and SSRF</td><td>3 org rules; pass on fixed code</td></tr>
+      <tr><td>Two findings the manual review missed</td><td>Added as F-30, F-31</td></tr>
+      <tr><td>Stale facts: K8s 1.33, EKS secret encryption default, auth defaults</td><td>1.36; F-23 and F-15 reworded</td></tr>
+    </table>
+    <div>
+      <ul style="font-size:16.5px">
+        <li>Conftest, Kyverno, Checkov, Trivy, kube-score, Semgrep, gitleaks, kubeconform, Falco, kube-bench</li>
+        <li>Live checks on a throwaway kind cluster: Pod Security blocks goat's pods; the fixed ones pass; RBAC before and after</li>
+        <li>Every tool pinned by digest, two-week release cooldown, offline where possible. No goat image was ever pulled or run</li>
+        <li>This repo's full history: no secrets (gitleaks)</li>
+      </ul>
+    </div>
+  </div>
+  <div class="foot"><span>01-findings/evidence/README.md · reproduce with tools/</span><span>A3</span></div>
+</section>
+
+<!-- A4. Secrets options -->
+<section class="slide backup">
+  <p class="kicker">Backup A4 · Secrets and keys</p>
+  <h1 style="font-size:32px">External Secrets Operator now, with the backend kept swappable</h1>
+  <table class="tight">
+    <tr><th></th><th>ESO + Secrets Manager</th><th>Vault / OpenBao</th><th>Sealed Secrets / SOPS</th></tr>
+    <tr><td><b>Run cost</b></td><td>Low: managed backend</td><td>High: a tier-0 service to run</td><td>Low</td></tr>
+    <tr><td><b>Rotation</b></td><td>Managed, dual-user; no manual restarts</td><td>Best: short-lived dynamic credentials</td><td>Manual re-encrypt and commit</td></tr>
+    <tr><td><b>Read audit</b></td><td>CloudTrail on every read</td><td>Detailed audit log</td><td>Git shows changes, not reads</td></tr>
+    <tr><td><b>Multi-cloud</b></td><td>Same API; backend per cloud</td><td>One backend everywhere</td><td>Per-cloud KMS or per-cluster keys</td></tr>
+    <tr><td><b>Ready for go-live</b></td><td>Weeks</td><td>Months</td><td>Weeks, but weak on rotation</td></tr>
+  </table>
+  <div class="callout" style="margin-top:16px;font-size:17px"><b>Decision point at AKS/GKE onboarding:</b> if secrets must be shared across clouds or dynamic credentials are needed, repoint the per-namespace SecretStores at Vault. App manifests don't change. Best secret of all: none (IAM database auth).</div>
+  <div class="foot"><span>05-secrets-keys/secrets-architecture.md</span><span>A4</span></div>
+</section>
+
+<!-- A5. Full LLD -->
+<section class="slide backup" style="padding-top:22px">
+  <p class="kicker" style="margin-bottom:4px">Backup A5 · Low-level design, full</p>
+  <img class="diagram-lg" src="../09-architecture/lld-diagram.svg" alt="Low-level design, full">
+  <div class="foot"><span>09-architecture/lld-diagram.svg</span><span>A5</span></div>
 </section>
 
 </body>

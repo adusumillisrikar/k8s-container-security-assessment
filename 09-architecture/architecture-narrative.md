@@ -41,6 +41,24 @@ Read it left to right: **how software gets in** (delivery zone), **where it runs
 | **Detection placement** | Falco and Fluent Bit as DaemonSets on every node; control-plane logs from EKS; GuardDuty alongside | Falco sees syscalls inside every pod on the node; audit logs see the API; GuardDuty adds AWS threat intel. All feed the security account. |
 | **Admission placement** | PSA (built into the API server) plus Kyverno webhooks | PSA can't be removed by a compromised cluster add-on; Kyverno adds the supply-chain checks PSA can't express. |
 
+## Shared responsibility: where the line sits on EKS, AKS and GKE
+
+On all three, the **provider** runs the control plane: API server, etcd, scheduler and controller manager, including their patching, availability, backups and the encryption of control-plane storage. On all three, **we** own everything that decides who gets in (identity mapping, RBAC), what runs (images, admission policy, Pod Security), what talks to what (NetworkPolicy, egress), secrets, workload cloud identity, whether audit logs are collected and kept, and when version upgrades happen within the support window.
+
+The line moves in the details, and the differences matter for this programme:
+
+| Area | EKS | AKS | GKE |
+|---|---|---|---|
+| Control-plane audit logs | Off until each log type is enabled (F-16) | Not collected until a diagnostic setting routes them (`kube-audit` / `kube-audit-admin`) | Admin Activity logs always on and can't be disabled; Data Access logs off by default |
+| Worker node OS | Managed node groups: AWS publishes AMIs, we roll them out (EKS Auto Mode or Fargate moves node patching to AWS) | Node image auto-upgrade channel (`NodeImage` by default on new clusters) | Standard: node auto-upgrade on by default. Autopilot: Google manages nodes entirely |
+| Default pod hardening | None beyond what we enforce | None beyond what we enforce | Autopilot blocks privileged pods by default; Standard doesn't |
+| Secrets at rest | Envelope-encrypted by default with an AWS-owned key (1.28+); customer-managed key optional (F-23) | Encrypted at rest by the platform; KMS etcd encryption with our key optional | Encrypted at rest by default; application-layer secrets encryption with Cloud KMS optional |
+| API endpoint | Public by default (F-15) | Public by default; private cluster or authorised IP ranges optional | External endpoint by default; private endpoint and authorised networks optional |
+| NetworkPolicy enforcement | Must be turned on in the VPC CNI (F-12) | Policy engine chosen when the cluster is created | Enforced by Dataplane V2 |
+| Control-plane SLA | Included | Only on the Standard or Premium tier; the Free tier has none | Included (higher for regional than zonal clusters) |
+
+**Design rule that follows:** build the baseline to the *weakest* default on every row, so it holds on whichever cloud a cluster lands on. That means enforcing Pod Security ourselves even where Autopilot would, explicitly enabling and shipping audit logs on EKS and AKS, requiring a customer-managed key for secrets on all three, private endpoints everywhere, and AKS on the Standard tier for production.
+
 ## Alternatives considered and rejected
 
 ### 1. Push-based deployment with a tightly scoped CI identity (rejected)
