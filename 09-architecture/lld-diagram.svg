@@ -95,7 +95,7 @@
   <text class="zl" x="502" y="137">PRIVATE APP SUBNETS · 10.20.0.0/22, 10.20.4.0/22</text>
 
   <rect class="tb" x="500" y="146" width="578" height="776" rx="12"/>
-  <text class="tbl" x="514" y="165">EKS CLUSTER prod-apps-1 · Kubernetes 1.33</text>
+  <text class="tbl" x="514" y="165">EKS CLUSTER prod-apps-1 · Kubernetes 1.36</text>
 
   <!-- control plane -->
   <rect class="box sec" x="514" y="176" width="550" height="112"/>

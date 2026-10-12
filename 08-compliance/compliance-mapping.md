@@ -30,16 +30,16 @@ For each finding:
 | **Evidence** | Daily JSON export of bindings plus diff against approved list (log archive, 1 year); pipeline gate history; Kyverno `PolicyReport`; quarterly access review sign-off by the platform owner. |
 | **Status** | Non-compliant → remediate before go-live (P0). No exception offered: there's no business need that a namespace-scoped Role can't meet. |
 
-### F-23: Secrets not envelope-encrypted with a customer-managed key
+### F-23: Secrets not encrypted with a customer-managed key
 
 | | |
 |---|---|
 | **Domain** | **Encryption** |
 | **Control objective** | Sensitive data at rest is encrypted with keys the agency controls; key use is logged; keys are rotated. |
-| **Public anchors** | CIS EKS 5.3.1 (Secrets encrypted with KMS CMK); NIST 800-53 SC-28 (protection at rest), SC-12 (key management); Security Hub `EKS.3` |
-| **Test** | Security Hub `EKS.3` (newer tier, continuous); `aws eks describe-cluster --query cluster.encryptionConfig` in the scheduled job (older tier); KMS key rotation enabled; CloudTrail shows `Decrypt` calls only from the EKS service role. |
-| **Evidence** | Security Hub finding history or dated `describe-cluster` output; KMS key policy export; key rotation status. |
-| **Status** | Non-compliant → remediate before go-live (cheap). Worth noting in the evidence pack: before the fix, data was still encrypted at rest with AWS-managed keys, so the gap was *key custody*, not plaintext data. That matters if the auditor asks whether there was an exposure. |
+| **Public anchors** | CIS EKS 5.3.1 (Secrets encrypted with KMS CMK); NIST 800-53 SC-28 (protection at rest), SC-12 (key management). Security Hub `EKS.3` was retired in August 2026, because EKS 1.28+ encrypts by default, and it never checked *whose* key was used |
+| **Test** | A custom AWS Config rule (newer tier, continuous) that checks `encryptionConfig` names a customer-managed key from the approved list; the same check via `aws eks describe-cluster --query cluster.encryptionConfig` in the scheduled job (older tier); KMS key rotation enabled; CloudTrail shows `Decrypt` calls only from the EKS service role. |
+| **Evidence** | Config rule history or dated `describe-cluster` output; KMS key policy export; key rotation status. |
+| **Status** | Non-compliant → remediate before go-live (cheap). Worth noting in the evidence pack: before the fix, Secrets were still envelope-encrypted by EKS with an AWS-owned key, so the gap was *key custody*, not plaintext data. That matters if the auditor asks whether there was an exposure. |
 
 ### F-16: Control-plane and audit logging disabled
 

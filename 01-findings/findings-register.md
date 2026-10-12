@@ -32,7 +32,7 @@ Location links: `kg:` = [kubernetes-goat@723a0db](https://github.com/madhuakula/
 | F-12 | No NetworkPolicy anywhere; flat pod network (and VPC CNI wouldn't enforce one today) | **High** | 3×3 | Network | P1 | 5 ed |
 | F-13 | Unauthenticated Redis holding sensitive data, reachable cluster-wide | **High** | 3×3 | Data / Network | P1 | 1 ed |
 | F-14 | Unauthenticated, plaintext in-cluster image registry (pull *and* push) | **High** | 3×3 | Supply chain | P1 | 1 ed |
-| F-15 | EKS API endpoint public with no CIDR restriction | **High** | 4×2 | Cluster exposure | P1 | 1 ed |
+| F-15 | EKS API endpoint public with no CIDR restriction; authentication left on legacy defaults | **High** | 4×2 | Cluster exposure | P1 | 1 ed |
 | F-16 | EKS control-plane / audit logging disabled | **High** | 3×2 ↑ | Logging | P0 | 0.5 ed |
 | F-17 | Image references unpinned (`latest` / no tag), personal Docker Hub namespace, no signatures | **High** | 3×2 ↑ | Supply chain | P1 | 3 ed |
 | F-18 | Lab host on EOL Ubuntu 16.04, IMDS defaults, SSH key access, unverified binary download | **High** | 3×3 | Node / OS hardening | P1 | 2 ed |
@@ -40,7 +40,7 @@ Location links: `kg:` = [kubernetes-goat@723a0db](https://github.com/madhuakula/
 | F-20 | Missing pod `securityContext` baseline across all workloads | Medium | 2×2 | Pod security | P1 | 3 ed |
 | F-21 | No resource limits on several workloads; no ResourceQuota / LimitRange | Medium | 2×3 | Resource governance | P1 | 2 ed |
 | F-22 | Node subnets auto-assign public IPs | Medium | 3×2 | Network / Exposure | P1 | 2 ed |
-| F-23 | No envelope encryption of Secrets with a customer-managed KMS key | Medium | 3×1 ↑ | Encryption | P1 | 0.5 ed |
+| F-23 | Secrets not encrypted with a customer-managed KMS key (EKS default uses an AWS-owned key) | Medium | 3×1 ↑ | Encryption | P1 | 0.5 ed |
 | F-24 | Dormant fetch-and-execute script inside `batch-check` image | Medium | 3×2 | Supply chain / Runtime | P1 | 0.5 ed |
 | F-25 | ECR repository: mutable tags, no scan-on-push, images pushed from a laptop | Medium | 3×2 | Supply chain | P1 | 1 ed |
 | F-26 | Base image hygiene: compilers in runtime images, EOL Redis 6, unverified downloads | Medium | 2×2 | Image hygiene | P2 | 3 ed |
@@ -184,12 +184,12 @@ Individual ratings understate how these combine. The three chains below drive th
 - **Remediation:** Decommission. All images come from ECR (or ACR/Artifact Registry later) with IAM-scoped pull, push only from CI, immutable tags, and signature verification at admission (F-17), so even a poisoned image wouldn't be admitted.
 - **Effort:** 1 ed (migrate any images still in use).
 
-### F-15: EKS API endpoint public with no CIDR restriction
-- **Location:** [tg: `terraform/aws/eks.tf:122-125`](https://github.com/bridgecrewio/terragoat/blob/729f8da62c6a85ce4af5ad3d123de97776d954c4/terraform/aws/eks.tf#L122-L125). `vpc_config` sets `endpoint_private_access = true` but leaves `endpoint_public_access` at its default (`true`) and `public_access_cidrs` at its default (`0.0.0.0/0`).
+### F-15: EKS API endpoint public with no CIDR restriction; authentication left on legacy defaults
+- **Location:** [tg: `terraform/aws/eks.tf:122-125`](https://github.com/bridgecrewio/terragoat/blob/729f8da62c6a85ce4af5ad3d123de97776d954c4/terraform/aws/eks.tf#L122-L125). `vpc_config` sets `endpoint_private_access = true` but leaves `endpoint_public_access` at its default (`true`) and `public_access_cidrs` at its default (`0.0.0.0/0`). The `aws_eks_cluster` at [`:118-141`](https://github.com/bridgecrewio/terragoat/blob/729f8da62c6a85ce4af5ad3d123de97776d954c4/terraform/aws/eks.tf#L118-L141) also has no `access_config`, so a cluster created through the EKS API (as Terraform does) defaults to the legacy `CONFIG_MAP` authentication mode, with admin access for the creating IAM identity bootstrapped by default.
 - **Severity:** High (I4 × E2). Needs valid credentials, but any leaked kubeconfig or token works from anywhere on the internet, and the endpoint is exposed to credential stuffing and to any future API server vulnerability.
-- **Domain:** Cluster / API server exposure.
-- **Risk:** The cluster's control panel is reachable from the whole internet. A stolen login works from anywhere.
-- **Remediation:** `endpoint_public_access = false`; access via the private endpoint from GitLab runners in the VPC and from admin bastions / SSM. If public access must stay during migration, restrict `public_access_cidrs` to the agency egress ranges and time-box it. Authentication via EKS access entries mapped to the agency IdP, not static IAM users.
+- **Domain:** Cluster / API server exposure and authentication.
+- **Risk:** The cluster's control panel is reachable from the whole internet, so a stolen login works from anywhere. And who counts as an administrator is decided by a ConfigMap and by whichever account happened to run Terraform, not by anything reviewed in code.
+- **Remediation:** `endpoint_public_access = false`; access via the private endpoint from GitLab runners in the VPC and from admin bastions / SSM. If public access must stay during migration, restrict `public_access_cidrs` to the agency egress ranges and time-box it. Set `access_config { authentication_mode = "API"; bootstrap_cluster_creator_admin_permissions = false }` and grant access only through EKS access entries mapped to agency IdP roles, defined in Terraform and reviewed like the RBAC in F-01. No static IAM users.
 - **Effort:** 1 ed (plus confirming runner connectivity).
 
 ### F-16: EKS control-plane and audit logging disabled
@@ -212,6 +212,7 @@ Individual ratings understate how these combine. The three chains below drive th
 - **Location:** [kg: `platforms/aws-setup/aws-kind-ec2-cdk/aws_kind_ec2_cdk/aws_kind_ec2_cdk_stack.py:26`](https://github.com/madhuakula/kubernetes-goat/blob/723a0db478f050d173d23b4ce5044b65bce0bdd0/platforms/aws-setup/aws-kind-ec2-cdk/aws_kind_ec2_cdk/aws_kind_ec2_cdk_stack.py#L26) (Ubuntu 16.04 AMI from 2021; standard support ended April 2021); `:56-59` and `:98-105` (SSH on 22 with a key pair; no `require_imdsv2`, no SSM); [`.env:6`](https://github.com/madhuakula/kubernetes-goat/blob/723a0db478f050d173d23b4ce5044b65bce0bdd0/platforms/aws-setup/aws-kind-ec2-cdk/.env#L6) suggests `0.0.0.0/0` for the allowlist; [`user_data.sh:4-10`](https://github.com/madhuakula/kubernetes-goat/blob/723a0db478f050d173d23b4ce5044b65bce0bdd0/platforms/aws-setup/aws-kind-ec2-cdk/user_data.sh#L4-L10) downloads a binary with no checksum and runs setup as root.
 - **Severity:** High (I3 × E3; E4 if the `.env` suggestion is followed).
 - **Domain:** Node / OS hardening.
+- **Also:** no kernel-parameter (sysctl) hardening and no service minimisation. It's a stock image running Docker, snapd and SSH, so it can't align with the CIS host benchmark. Note that neither reference repo defines EKS worker nodes (terragoat's `eks.tf` has no node group), so node-level CIS alignment for the target state is designed in rather than evidenced here: kube-bench runs as a scheduled job against real nodes.
 - **Risk:** The server runs an operating system that stopped getting security fixes years ago, and is reached by SSH key, which is hard to audit or revoke.
 - **Remediation:** For EKS nodes: EKS-optimised Amazon Linux 2023 or Bottlerocket AMIs via managed node groups, replaced (not patched) on a monthly cadence; IMDSv2 required, hop limit 1; no SSH, use SSM Session Manager with session logging; CIS benchmark checked by kube-bench in the pipeline and on a schedule. For any lab host: same rules, plus checksum-verify every download.
 - **Effort:** 2 ed.
@@ -248,11 +249,11 @@ Individual ratings understate how these combine. The three chains below drive th
 - **Remediation:** Nodes in private subnets only; internet egress through NAT and an egress firewall (or proxy) with an allowlist; ingress only through ALB in public subnets. Follow the EKS Blueprints VPC layout.
 - **Effort:** 2 ed (cluster subnets can't be swapped in place on older EKS versions; may need a new node group).
 
-### F-23: No envelope encryption of Secrets with a customer-managed key
+### F-23: Secrets not encrypted with a customer-managed key
 - **Location:** [tg: `terraform/aws/eks.tf:118-141`](https://github.com/bridgecrewio/terragoat/blob/729f8da62c6a85ce4af5ad3d123de97776d954c4/terraform/aws/eks.tf#L118-L141): no `encryption_config { resources = ["secrets"] provider { key_arn = ... } }`.
-- **Severity:** Medium (I3 × E1, raised one tier). On its own the technical risk is low: AWS already encrypts the etcd volumes, and reaching etcd needs AWS-side access. Raised because government baselines expect customer-controlled keys for secrets at rest, and because it's cheap to fix: EKS supports enabling it on an existing cluster. Honest framing for the panel: this is mainly a key-custody and audit finding, not an exposure.
+- **Severity:** Medium (I3 × E1, raised one tier). On its own the technical risk is low: since Kubernetes 1.28, EKS envelope-encrypts all Kubernetes API data, Secrets included, by default with an AWS-owned key (which is why AWS retired the Security Hub check EKS.3 in August 2026). Raised because government baselines expect customer-controlled keys for secrets at rest, and because it's cheap to fix: EKS supports adding a customer-managed key to an existing cluster. Honest framing for the panel: this is a key-custody and audit finding, not an exposure.
 - **Domain:** Encryption at rest.
-- **Risk:** Secrets in the cluster's database are protected by Amazon's key, not ours, so we can't independently control or audit access to them.
+- **Risk:** Secrets in the cluster's database are encrypted, but with Amazon's key, not ours, so we can't independently control, rotate, audit or revoke access to them.
 - **Remediation:** Customer-managed KMS key with rotation, key policy limited to the EKS service role and break-glass admin, CloudTrail on key use. Note: once enabled it can't be disabled, so record that in the change.
 - **Effort:** 0.5 ed.
 
@@ -329,6 +330,6 @@ Individual ratings understate how these combine. The three chains below drive th
 See [`evidence/README.md`](evidence/README.md) for scanner versions, digests, how they were run, and the per-finding table. In short:
 
 - Scanners reliably caught configuration issues (privileged pods, missing limits, public endpoints, unpinned images).
-- None of them found the SSRF, the command injection, the unauthenticated Redis and registry, the secret left in a deleted image layer, the `.git` history shipped in an image, or the dormant download-and-run script. Those came from reading the code, and several are among the highest-impact findings.
+- No generic scanner found the command injection or the SSRF, and Semgrep's registry packs rated Flask debug mode only a warning. Three small organisation Semgrep rules now catch all three (tested). No scanner at all found the unauthenticated Redis and registry, the secret left in a deleted image layer, the `.git` history shipped in an image, or the dormant download-and-run script. Those came from reading the code, and several are among the highest-impact findings.
 - On the audit finding itself (F-01), Checkov reported nothing and Trivy rated it Medium. Only the organisation's own Conftest rule failed it outright.
 - Checkov found two infrastructure items (F-30, F-31) that the manual review missed.

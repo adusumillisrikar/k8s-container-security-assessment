@@ -46,10 +46,10 @@ flowchart LR
 | Stage | Tool | What it checks | Fail mode | Findings |
 |---|---|---|---|---|
 | secrets | **gitleaks** | Credentials in the diff and the MR's commit history | **Hard** | F-05, F-11 |
-| validate | **kubeconform** | Manifests valid against the target EKS version's schemas; catches removed APIs before an upgrade does | **Hard** | F-29 |
+| validate | **kubeconform** | Manifests (and CRDs) valid against the target EKS version's schemas, 1.36 today; catches removed APIs before an upgrade does | **Hard** | F-29 |
 | static | **Conftest (OPA)** | Org rules: no `cluster-admin` or `*` RBAC, no `escalate`/`bind`, no privileged/host namespaces/hostPath/runtime socket, digest-pinned images, no NodePort, nothing in `default`, no Secret values in Git | **Hard** on `deny`, soft on `warn` | F-01, F-02, F-03, F-04, F-08, F-10, F-11, F-17, F-27 |
 | static | **Checkov** | Terraform and K8s misconfiguration; hard-fail on a curated list (public EKS endpoint, control-plane logging, secrets encryption, ECR immutability/KMS, privileged, host PID/network, docker socket) | **Hard** on curated list, soft otherwise | F-15, F-16, F-23, F-25, F-02, F-03 |
-| static | **Semgrep** | Shell injection, SSRF, debug mode, unsafe deserialisation | **Hard** on ERROR | F-03, F-09, F-10 |
+| static | **Semgrep** | Registry packs, plus three organisation rules: shell command built from input, request data reaching a child process (SSRF), Flask debug mode | **Hard** on ERROR | F-03, F-09, F-10 |
 | static | **kube-score** | Reliability hygiene: probes, PDBs, anti-affinity | Soft | F-21 |
 | image | **Trivy** | OS and library CVEs; secrets in image layers | **Hard** on fixable Critical and any secret; soft on High | F-05, F-26 |
 | supply chain | **Syft** | CycloneDX SBOM of the *built image* | Must succeed | F-17 |
@@ -57,7 +57,7 @@ flowchart LR
 | release | **GitLab protected environment** | Named approvers before production | Blocking | All |
 | admission | **Kyverno + PSA** | Signature and attestation verified, registry allowlist, no `cluster-admin`, limits required, PSA `restricted` | **Enforce** | F-01, F-02, F-06, F-14, F-17, F-21 |
 
-**Why two policy engines (Conftest and Checkov)?** Checkov is a broad, maintained catalogue, but it's generic. Conftest holds *our* rules, written for *our* incidents, versioned in a central repo the app teams can't edit in the same MR. Having both is cheap; relying on a vendor catalogue alone is how a cluster-admin binding stays unflagged (see the coverage note in [`../01-findings/evidence/`](../01-findings/evidence/)).
+**Why two policy engines (Conftest and Checkov)?** Checkov is a broad, maintained catalogue, but it's generic. Conftest holds *our* rules, written for *our* incidents, versioned in a central repo the app teams can't edit in the same MR. Having both is cheap; relying on a vendor catalogue alone is how a cluster-admin binding stays unflagged (see the coverage note in [`../01-findings/evidence/`](../01-findings/evidence/)). Code scanning showed the same pattern: Semgrep's registry packs missed the command injection and the SSRF and rated Flask debug mode only a warning, so three organisation rules ([`policies/semgrep/org-rules.yaml`](policies/semgrep/org-rules.yaml)) now catch all three, and stay quiet on the corrected code. (tfsec isn't in the list: Aqua has moved its checks into Trivy and recommends migrating.)
 
 ## 4. Hard-fail vs soft-fail
 

@@ -30,15 +30,14 @@ stages:
 variables:
   # Tool images: digest-pinned, bumped only by Renovate MRs that a human reviews,
   # with a ~14-day cooldown on new releases (most malicious releases are caught
-  # within days). The Conftest, Checkov, kube-score and Trivy digests are the ones
-  # actually run for this assessment (01-findings/evidence/). The others weren't
-  # exercised here and are shown as placeholders.
-  GITLEAKS_IMAGE: "docker.io/zricethezav/gitleaks:v8.24.0@sha256:<digest>"
-  KUBECONFORM_IMAGE: "ghcr.io/yannh/kubeconform:v0.6.7@sha256:<digest>"
+  # within days). Every public tool digest below is the one actually run for this
+  # assessment (01-findings/evidence/). CI_TOOLS_IMAGE is internal and illustrative.
+  GITLEAKS_IMAGE: "docker.io/zricethezav/gitleaks:v8.30.1@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f"
+  KUBECONFORM_IMAGE: "ghcr.io/yannh/kubeconform:v0.8.0@sha256:faffaf43f95aa6425306e1ab8d6fcad72acb9049158f38e574c085ea1ec0f64e"
   CONFTEST_IMAGE: "docker.io/openpolicyagent/conftest:v0.70.1@sha256:82f23e0e1f3faf2f3798f4b1974676c1aed96b05c6656ec6820435c31867c532"
   CHECKOV_IMAGE: "docker.io/bridgecrew/checkov:3.3.19@sha256:d3e96adafdb315ca82e792ca8708c01adae85292800fb064c8b309b3d0cb7b80"
   KUBESCORE_IMAGE: "docker.io/zegl/kube-score:v1.20.0@sha256:ac4c43ad560af905d66f6bf57b0937c591332e6dbf2167c31193a13b4695ab97"
-  SEMGREP_IMAGE: "docker.io/semgrep/semgrep:1.100.0@sha256:<digest>"
+  SEMGREP_IMAGE: "docker.io/semgrep/semgrep:1.178.0@sha256:32e459968daabe7ab86968184a29109b9564aa00392401156f9788452b42786b"
   TRIVY_IMAGE: "docker.io/aquasec/trivy:0.74.0@sha256:62b1e65e8869bc4b4c6aa4fa2b21595256c7c2f6018a9d9ad61caf87187c1969"   # never 0.69.4-0.69.6 (malicious, Mar 2026)
   # Platform-built image (buildah, aws-cli, syft, cosign, crane, yq, git), every
   # binary checksum-verified at build time, rebuilt weekly, itself signed.
@@ -87,7 +86,13 @@ kubeconform:
   image: { name: $KUBECONFORM_IMAGE, entrypoint: [""] }
   script:
     # Rejects malformed YAML and APIs removed in the target EKS version (F-29).
-    - kubeconform -strict -summary -kubernetes-version 1.33.0 -ignore-missing-schemas $MANIFEST_DIR
+    # 1.36: current EKS standard-support version (1.33 left standard support in July 2026).
+    # CRDs (ExternalSecret, Kyverno policies) are validated from the CRDs catalog, not skipped.
+    - >
+      kubeconform -strict -summary -kubernetes-version 1.36.0
+      -schema-location default
+      -schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json'
+      $MANIFEST_DIR
   # HARD FAIL
 
 # --------------------------------------------------------- static-analysis
@@ -140,8 +145,13 @@ semgrep-sast:
   stage: static-analysis
   image: $SEMGREP_IMAGE
   script:
-    # Includes rules for shell injection (F-03), SSRF (F-09), Flask debug (F-10).
-    - semgrep scan --config p/ci --config p/command-injection --config p/flask --error --severity ERROR --junit-xml -o semgrep.xml
+    # Registry packs + organisation rules. In testing, the registry packs missed the shell
+    # injection (F-03) and the SSRF (F-09) and rated Flask debug (F-10) only WARNING;
+    # the org rules catch all three (01-findings/evidence/semgrep-org-rules.txt).
+    - git clone --depth 1 --branch "$POLICY_REF" "https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.internal/platform/policies.git" .org-policies
+    - >
+      semgrep scan --metrics=off --config p/ci --config p/command-injection --config p/flask
+      --config .org-policies/semgrep/org-rules.yaml --error --severity ERROR --junit-xml -o semgrep.xml
   artifacts:
     when: always
     reports: { junit: semgrep.xml }

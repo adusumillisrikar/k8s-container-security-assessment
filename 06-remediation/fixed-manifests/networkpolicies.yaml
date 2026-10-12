@@ -3,6 +3,10 @@
 # and GKE (Dataplane V2). Design: 04-network-mesh/zero-trust-design.md.
 #
 # Slice shown: internal-proxy (internal-api, the SSRF finding) and cache-store (Redis).
+# Target-state assumptions: internal-api and info-app run as separate Deployments
+# (goat runs both containers in one pod, so the debug app shares the API's network
+# namespace; see threat model T9), labelled app: internal-api / app: info-app, and
+# metadata-db moves to its own namespace. The cache-store client is an example.
 # ------------------------------------------------------------------ baseline
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy

@@ -5,6 +5,8 @@
 
 Both are hand-written SVG, so they diff cleanly in Git and render on GitHub without a drawing tool.
 
+`payments-api` in the LLD is a representative citizen-facing service from the programme scenario, not a kubernetes-goat workload: goat has no realistic path from ingress to a data store. The worked, tested NetworkPolicies are for goat's `internal-proxy` slice ([`fixed-manifests/networkpolicies.yaml`](../06-remediation/fixed-manifests/networkpolicies.yaml)); the policy names in the LLD table are their target-state equivalents.
+
 ## HLD: how to read it
 
 Read it left to right: **how software gets in** (delivery zone), **where it runs** (production account), **where the evidence goes** (security account), and **who's outside** (internet).

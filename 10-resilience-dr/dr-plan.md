@@ -46,6 +46,8 @@ The design keeps state *out* of the cluster wherever possible. Databases are RDS
 
 ## 4. Named RTO / RPO: `payments-api` (citizen payments)
 
+`payments-api` is the representative citizen-facing service from the LLD (a scenario workload, not a kubernetes-goat one), chosen because it has the strictest recovery needs: money and a database.
+
 | Failure | **RPO** | **RTO** | What the architecture needs to meet it |
 |---|---|---|---|
 | Pod or node | 0 | < 1 min | ≥ 3 replicas, PDB `minAvailable: 2`, readiness probes, topology spread across nodes |

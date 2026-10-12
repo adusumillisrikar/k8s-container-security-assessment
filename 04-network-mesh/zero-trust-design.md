@@ -85,7 +85,7 @@ The panel brief asks for both sides. Here they are for *this* estate: about 18 E
 
 **The case for a mesh**
 - **mTLS between every service**, with identity tied to the workload rather than an IP. If the programme's standard requires encryption in transit *inside* the cluster, a mesh is the cleanest way to meet it uniformly.
-- **L7 authorization:** "only the `orders` service account may call `POST /payments`", which NetworkPolicy can't express.
+- **L7 authorisation:** "only the `orders` service account may call `POST /payments`", which NetworkPolicy can't express.
 - Consistent telemetry (who called whom, latency, error rate) without changing application code.
 - Uniform security across EKS, AKS and GKE once they exist.
 
