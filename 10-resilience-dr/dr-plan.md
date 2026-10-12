@@ -56,7 +56,7 @@ The design keeps state *out* of the cluster wherever possible. Databases are RDS
 | Data corruption | **≤ 5 min** | **≤ 4 hours** | RDS PITR (transaction logs shipped about every 5 minutes); tested restore procedure; app able to point at a restored instance through config in Git |
 | Region loss | see below | see below | |
 
-**Region loss is a data-residency decision first, not a technical one.** Singapore has one AWS region. A cross-region standby would put citizen data outside Singapore, which some data classifications won't allow. So:
+**Region loss is a data-residency decision first, not a technical one.** Where citizen data must stay in-country and the country has only one AWS region, a cross-region standby would put that data offshore, which some data classifications won't allow. So:
 - **If residency rules allow an approved second region:** RPO ≈ 1 minute and RTO ≈ 8 hours, using a cross-region RDS read replica, ECR and Secrets Manager replication, multi-region KMS keys, and a pilot-light cluster built by Terraform on demand. Cost is roughly the replica plus storage.
 - **If they don't:** resilience stops at three AZs in one region. A full-region outage is then a **documented, accepted risk** owned by the system owner, with a manual "citizens are told to use the alternative channel" business continuity plan. That's a legitimate answer, as long as it's written down and signed rather than assumed.
 
