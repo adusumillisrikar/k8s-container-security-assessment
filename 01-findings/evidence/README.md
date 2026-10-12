@@ -36,7 +36,7 @@ The 2026 Trivy and KICS Docker Hub compromises showed that a security scanner is
 | Falco | 0.45.0 | `falcosecurity/falco@sha256:788f1129c542171813083d4afc61b16730a47dde8c23d9c39370acef996349b6` |
 | gitleaks | v8.30.1 | `zricethezav/gitleaks@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f` |
 | Semgrep | 1.178.0 | `semgrep/semgrep@sha256:32e459968daabe7ab86968184a29109b9564aa00392401156f9788452b42786b` |
-| kubeconform | v0.8.0 | `ghcr.io/yannh/kubeconform@sha256:faffaf43f95aa6425306e1ab8d6fcad72acb9049158f38e574c085ea1ec0f64e` |
+| kubeconform | v0.8.0 | `ghcr.io/yannh/kubeconform@sha256:faffaf43f95aa6425306e1ab8d6fcad72acb9049158f38e574c085ea1ec0f64e` (the example pipeline uses the same release's `-alpine` image, `sha256:6b90a5f23d846140ce0194fe050b1995e546eba938f3a6bf10c039dd5e24588f`, because GitLab needs a shell) |
 | kube-bench | v0.16.0 | `aquasec/kube-bench@sha256:75506f222d1eb6ce2a751a5533bdc0a3b54c898e2e49e7751d0ee22cfb862679` (tag unchanged since release; no published advisories) |
 | falcoctl | 0.14.2 | `falcosecurity/falcoctl@sha256:90ba9627886e8f26b746fa52465d755b28ee49b76eb1d047a0fefd8cadb21907` (plugin signatures verified on install) |
 
@@ -50,7 +50,7 @@ The 2026 Trivy and KICS Docker Hub compromises showed that a security scanner is
 | 4 | Admission control: Kyverno policies vs goat | 13 violations including the `cluster-admin` binding, privileged/host access, NodePort, default namespace, registry, limits | [kyverno-goat.txt](kyverno-goat.txt) |
 | 5 | Admission control: Kyverno vs fixed manifests | **0 failures**, 9 passes | [kyverno-fixed.txt](kyverno-fixed.txt) |
 | 6 | Conftest vs all goat manifests | 60 hard failures, 48 warnings across F-01, F-02, F-03, F-04/08, F-10, F-11, F-17, F-20, F-27 | [conftest-goat.txt](conftest-goat.txt) |
-| 7 | Conftest vs fixed manifests | **374/374 passed, 0 warnings** | [conftest-fixed.txt](conftest-fixed.txt) |
+| 7 | Conftest vs fixed manifests | **396/396 passed, 0 warnings** | [conftest-fixed.txt](conftest-fixed.txt) |
 | 8 | Live Pod Security: fixed manifests in `restricted` namespaces | Admitted (pods created; `ErrImagePull` only because images are placeholders). Confirms the unprivileged-ping fix for health-check passes `restricted` | [psa-rbac-live-test.txt](psa-rbac-live-test.txt) |
 | 9 | Live Pod Security: goat's original deployments in the same namespaces | Warning on apply; **pods refused** (`FailedCreate ... violates PodSecurity "restricted:latest"`) | [psa-rbac-live-test.txt](psa-rbac-live-test.txt) |
 | 10 | Live RBAC: F-01 before/after | Before: superadmin SA has `*.*`. After: CI identity can patch Deployments in its own namespace only; can't read Secrets, `exec`, or create ClusterRoleBindings | [psa-rbac-live-test.txt](psa-rbac-live-test.txt) |
@@ -62,6 +62,7 @@ The 2026 Trivy and KICS Docker Hub compromises showed that a security scanner is
 | 16 | kubeconform: fixed manifests and Kyverno policies vs Kubernetes 1.36 schemas (CRDs from the CRDs catalog) | **28/28 valid**, 0 skipped | [kubeconform-fixed.txt](kubeconform-fixed.txt) |
 | 17 | kube-bench on a clean kind cluster (CIS Kubernetes 1.12) | 63 PASS, 12 FAIL, 56 WARN. Interpreted below: most FAILs are control-plane checks that AWS owns on EKS | [kube-bench-kind.txt](kube-bench-kind.txt) |
 | 18 | Kyverno cluster-admin rule against four cases, including EKS's own `eks:addon-cluster-admin` binding | goat binding **blocked**; EKS's own binding **allowed**; EKS binding with an extra subject **blocked**; ordinary `view` binding allowed | [kyverno-cluster-admin-cases.txt](kyverno-cluster-admin-cases.txt) |
+| 19 | Conftest internet-egress rule (F-12): a NetworkPolicy opening `0.0.0.0/0`, with and without the platform-security approval annotation | Unapproved **blocked**; approved passes | [conftest-egress-cases.txt](conftest-egress-cases.txt) |
 
 ## What testing changed in the submission
 

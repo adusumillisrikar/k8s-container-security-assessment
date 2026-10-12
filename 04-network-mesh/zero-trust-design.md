@@ -64,7 +64,7 @@ Teams then add *allow* policies per flow, in their own repo next to the workload
 | Within a namespace | Owning team | MR to the app repo; standard review |
 | Cross-namespace | Both namespace owners | MR; CODEOWNERS on the policy file includes the destination team |
 | To a data store (RDS, ElastiCache, Redis) | Data owner + platform | MR; must name the specific client pods by label, never `podSelector: {}` |
-| To the internet | Platform security | MR adding the domain to the egress allowlist (§5) with justification and data classification; Conftest blocks `ipBlock: 0.0.0.0/0` in app repos |
+| To the internet | Platform security | MR adding the domain to the egress allowlist (§5) with justification and data classification; Conftest blocks `ipBlock: 0.0.0.0/0` unless platform security has added the approval annotation (`security.platform/egress-approval`) |
 | Temporary (debugging, migration) | Platform security | Same, plus an `expires` annotation; a nightly job lists expired policies and the owner gets a ticket |
 
 The request template asks five things: source, destination, port/protocol, why, and what data crosses it. Most requests are approved in the MR within a day, so the process doesn't become a reason for teams to request wide-open rules.

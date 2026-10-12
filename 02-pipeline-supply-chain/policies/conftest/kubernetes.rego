@@ -143,6 +143,19 @@ deny contains msg if {
 	msg := sprintf("[F-27] %s deploys to the default namespace.", [name])
 }
 
+# ------------------------------------------ Internet egress (F-12)
+
+# Internet egress is a reviewed exception (egress firewall allowlist), not something
+# an app repo can grant itself. Platform security approves it by annotating the policy.
+deny contains msg if {
+	input.kind == "NetworkPolicy"
+	some rule in input.spec.egress
+	some peer in rule.to
+	peer.ipBlock.cidr in {"0.0.0.0/0", "::/0"}
+	not input.metadata.annotations["security.platform/egress-approval"]
+	msg := sprintf("[F-12] %s allows egress to the whole internet. Request it through the egress allowlist; platform security adds the approval annotation.", [name])
+}
+
 # ------------------------------------------- Secrets in Git (F-11)
 
 deny contains msg if {

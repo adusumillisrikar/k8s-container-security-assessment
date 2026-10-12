@@ -33,7 +33,7 @@ Each control comes from a design already in this pack, not a one-off. They're la
 - **Default-deny NetworkPolicy**, then exactly:
   - ingress from the internal ALB subnets on the app port only;
   - egress to its database (RDS, TLS) on 5432 only;
-  - egress to the vendor licence server on 443 only: `0.0.0.0/0` except private and link-local ranges, so it leaves via **AWS Network Firewall** with **one domain allowlisted** (the licence host). Nothing else on the internet is reachable.
+  - egress to the vendor licence server on 443 only: `0.0.0.0/0` except private and link-local ranges (carrying the platform-security approval annotation the pipeline requires), so it leaves via **AWS Network Firewall** with **one domain allowlisted** (the licence host). Nothing else on the internet is reachable.
 - **IMDSv2 hop limit 1** on that node group, so the container can't reach node credentials.
 - If it's internet-facing: **AWS WAF** in front, with managed rule groups and, where a CVE is web-exploitable, a specific rule as a **virtual patch**.
 
@@ -46,7 +46,7 @@ The vendor image never changes between vendor releases, so its normal behaviour 
   - any binary executed that isn't in the image (drop-and-execute);
   - any outbound connection not to the DB or the licence host (backstop for the firewall);
   - writes outside the known writable directories.
-- Because false positives here are close to zero after the two-week baseline, this is the one namespace where I'd recommend **automated response in phase 1**: on drop-and-execute, label the pod `quarantine=true` (pre-staged deny-all policy, Module 3 Phase 2). The ReplicaSet starts a clean pod from the signed image and the bad one is kept for forensics.
+- Because false positives here are close to zero after the two-week baseline, this is the one namespace where I'd recommend **automated response in phase 1**: on drop-and-execute, remove the pod's `app` label and add `quarantine=true` (Module 3, Phase 2). The ReplicaSet starts a clean pod from the signed image, and the bad one, now selected by no allow policy, is kept for forensics.
 
 ### Control 4: Data and identity (Module 5)
 

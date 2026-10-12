@@ -47,7 +47,7 @@ flowchart LR
 |---|---|---|---|---|
 | secrets | **gitleaks** | Credentials in the diff and the MR's commit history | **Hard** | F-05, F-11 |
 | validate | **kubeconform** | Manifests (and CRDs) valid against the target EKS version's schemas, 1.36 today; catches removed APIs before an upgrade does | **Hard** | F-29 |
-| static | **Conftest (OPA)** | Org rules: no `cluster-admin` or `*` RBAC, no `escalate`/`bind`, no privileged/host namespaces/hostPath/runtime socket, digest-pinned images, no NodePort, nothing in `default`, no Secret values in Git | **Hard** on `deny`, soft on `warn` | F-01, F-02, F-03, F-04, F-08, F-10, F-11, F-17, F-27 |
+| static | **Conftest (OPA)** | Org rules: no `cluster-admin` or `*` RBAC, no `escalate`/`bind`, no privileged/host namespaces/hostPath/runtime socket, digest-pinned images, no NodePort, nothing in `default`, no Secret values in Git, no internet egress without platform-security approval | **Hard** on `deny`, soft on `warn` | F-01, F-02, F-03, F-04, F-08, F-10, F-11, F-17, F-27 |
 | static | **Checkov** | Terraform and K8s misconfiguration; hard-fail on a curated list (public EKS endpoint, control-plane logging, secrets encryption, ECR immutability/KMS, privileged, host PID/network, docker socket) | **Hard** on curated list, soft otherwise | F-15, F-16, F-23, F-25, F-02, F-03 |
 | static | **Semgrep** | Registry packs, plus three organisation rules: shell command built from input, request data reaching a child process (SSRF), Flask debug mode | **Hard** on ERROR | F-03, F-09, F-10 |
 | static | **kube-score** | Reliability hygiene: probes, PDBs, anti-affinity | Soft | F-21 |

@@ -26,7 +26,7 @@ The estate is mostly citizen-facing web services (internet-exposed, unpredictabl
 | 5 | **Control-plane abuse** (audit) | New `cluster-admin`/wildcard binding; `list secrets` by a non-controller identity; anonymous requests; new `MutatingWebhookConfiguration` | The audit-finding scenario. Also attacker persistence. | F-01, F-04 |
 | 6 | **Unexpected egress** | Outbound connection to a destination outside the namespace's allowlist | Exfiltration and command-and-control. Partially prevented by default-deny (Module 4); this detects attempts. | F-12 |
 
-Custom rules for categories 3 and 5 that aren't in the Falco defaults are in [`falco-rules-custom.yaml`](falco-rules-custom.yaml).
+Custom rules for categories 3, 4 and 5 that aren't in the Falco defaults are in [`falco-rules-custom.yaml`](falco-rules-custom.yaml).
 
 ## 3. Telemetry: what, where, how long
 

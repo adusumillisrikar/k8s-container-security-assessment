@@ -117,7 +117,7 @@ Individual ratings understate how these combine. The three chains below drive th
 - **Severity:** High (I4 × E2). This is the root cause that let F-02, F-03 and F-07 be admitted at all. E2 because exploiting it needs deploy rights.
 - **Domain:** Admission control / configuration baseline.
 - **Risk:** The cluster accepts any application configuration, however dangerous. The one safety rule in the repo covers a single action in a single namespace, which can give false comfort in an audit.
-- **Remediation:** Two layers. (1) PSA labels on every namespace, built into Kubernetes so they work the same on EKS, AKS and GKE: application namespaces enforce `baseline` from go-live (it already blocks privileged pods, host namespaces and `hostPath`) with `restricted` in warn/audit, then enforce `restricted` on the same 60-day date the pipeline's soft gates turn hard; platform namespaces get a documented exception list. (2) Kyverno for what PSA can't express: image signature verification, registry allowlist, no `cluster-admin` bindings, no `:latest`, required limits. Rules that block an attacker path go from `Audit` to `Enforce` after one week; rules that need image changes (non-root, requests and limits) follow the same 60-day ratchet. Policies in [`02-pipeline-supply-chain/policies/`](../02-pipeline-supply-chain/policies/).
+- **Remediation:** Two layers. (1) PSA labels on every namespace, built into Kubernetes so they work the same on EKS, AKS and GKE: application namespaces enforce `baseline` from go-live (it already blocks privileged pods, host namespaces and `hostPath`) with `restricted` in warn/audit, then enforce `restricted` on the same 60-day date the pipeline's soft gates turn hard; platform namespaces get a documented exception list. (2) Kyverno for what PSA can't express: image signature verification, registry allowlist, no `cluster-admin` bindings, tags resolved to digests at admission, required limits. Rules that block an attacker path go from `Audit` to `Enforce` after one week; rules that need image changes (non-root, requests and limits) follow the same 60-day ratchet. Policies in [`02-pipeline-supply-chain/policies/`](../02-pipeline-supply-chain/policies/).
 - **Effort:** 3 ed (platform), plus per-team fix-up absorbed by F-20.
 
 ### F-07: Privileged DaemonSet runs an attack-toolkit image on every node
@@ -133,7 +133,7 @@ Individual ratings understate how these combine. The three chains below drive th
 - **Severity:** High (I3 × E3). Anyone reaching the web shell can list every Secret in `big-monolith` using the pod's own token.
 - **Domain:** RBAC.
 - **Risk:** The app has permission to read every password in its area, and it exposes an open terminal, so anyone who finds the terminal gets all of them.
-- **Remediation:** Replace `*` with the specific resources the app reads (most apps need none). If one secret is needed, mount that one secret; don't grant API read. Set `automountServiceAccountToken: false` unless the app calls the API. Remove `gotty`. Policy gate: deny Roles with `resources: ["*"]` or `secrets` + `list`.
+- **Remediation:** Replace `*` with the specific resources the app reads (most apps need none). If one secret is needed, mount that one secret; don't grant API read. Set `automountServiceAccountToken: false` unless the app calls the API. Remove `gotty`. Policy gate: deny `*` in Roles (hard fail); warn on `list`/`watch` of Secrets, since some platform controllers legitimately need it.
 - **Effort:** 1 ed.
 
 ### F-09: SSRF in `internal-api` reaches internal metadata service
@@ -262,7 +262,7 @@ Individual ratings understate how these combine. The three chains below drive th
 - **Severity:** Medium (I3 × E2).
 - **Domain:** Supply chain / runtime detection.
 - **Risk:** The package contains a hidden "download and run whatever is at this address" command. Whoever controls that address decides what runs in our cluster.
-- **Remediation:** Only admit images built by our CI from reviewed Dockerfiles (signature verification, F-17). Scan image history for `curl|sh` patterns. Runtime: Falco rules for "network tool launched in container" and "binary executed from download" (Module 3). Egress default-deny (F-12) stops the download even if the script runs.
+- **Remediation:** Only admit images built by our CI from reviewed Dockerfiles (signature verification, F-17). Scan image history for `curl|sh` patterns. Runtime: Falco's default *Drop and execute new binary in container* rule and our *Download Piped To Shell In Container* rule (Module 3). Egress default-deny (F-12) stops the download even if the script runs.
 - **Effort:** 0.5 ed.
 
 ### F-25: ECR repository: mutable tags, no scan-on-push, laptop pushes

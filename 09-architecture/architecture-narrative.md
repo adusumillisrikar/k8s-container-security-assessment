@@ -3,7 +3,7 @@
 - **HLD:** [`hld-diagram.svg`](hld-diagram.svg) ([PNG](hld-diagram.png)): system context, for a governance audience.
 - **LLD:** [`lld-diagram.svg`](lld-diagram.svg) ([PNG](lld-diagram.png)): one workload's path from citizen request to database, at a level an engineer could build from.
 
-Both are hand-written SVG, so they diff cleanly in Git and render on GitHub without a drawing tool.
+Both are written as SVG code rather than exported from a drawing tool, so they diff cleanly in Git and render on GitHub.
 
 `payments-api` in the LLD is a representative citizen-facing service from the programme scenario, not a kubernetes-goat workload: goat has no realistic path from ingress to a data store. The worked, tested NetworkPolicies are for goat's `internal-proxy` slice ([`fixed-manifests/networkpolicies.yaml`](../06-remediation/fixed-manifests/networkpolicies.yaml)); the policy names in the LLD table are their target-state equivalents.
 
@@ -30,14 +30,14 @@ Read it left to right: **how software gets in** (delivery zone), **where it runs
 | Area | Decision | Why |
 |---|---|---|
 | **Ingress** | ALB with `target-type: ip`, TLS terminated at the ALB and **re-encrypted** to the pod on 8443 using a cert-manager internal CA | Traffic inside the VPC is still encrypted end to end for a citizen-data service, without needing a mesh. |
-| **Node group** | Bottlerocket AMI, IMDSv2 required with hop limit 1, no SSH, node role reduced to worker policy + ECR pull-only | Bottlerocket is a minimal, read-only OS designed for containers, so there's less to harden for the CIS node checks (F-18). The hop limit is what stops chain C (F-09 → F-19). |
+| **Node group** | Bottlerocket AMI, IMDSv2 required with hop limit 1, no SSH, node role reduced to the worker and ECR pull-only policies; the VPC CNI gets its own IAM role (IRSA or Pod Identity), as AWS recommends | Bottlerocket is a minimal, read-only OS designed for containers, so there's less to harden for the CIS node checks (F-18). The hop limit is what stops chain C (F-09 → F-19). |
 | **Pod** | PSA `restricted`, non-root, read-only filesystem, all capabilities dropped, seccomp `RuntimeDefault`, no SA token | Closes F-02, F-03, F-20, F-27 for this workload. |
 | **Workload identity** | EKS **Pod Identity**: role `payments-api-prod` with exactly one permission, `rds-db:connect` for one DB user | The app needs no password at all for the database (IAM auth) and no other AWS access. |
 | **Secrets** | ESO with a **per-namespace** SecretStore and role scoped to `/prod/payments/*`; mounted as files on tmpfs | Prevents cross-team secret reads (Module 5); files rotate without restarts. |
 | **Encryption at rest** | Separate customer-managed KMS keys for etcd secrets, Secrets Manager, RDS, EBS and the signing key | Separate keys give separate blast radius and separate audit trails; key admins can't use keys. |
 | **Network policy** | Default-deny in and out; the table on the LLD lists every allowed flow, with port and the policy name that allows it | Anything not in the table is dropped. That table *is* the review artefact for network changes. |
-| **Data** | RDS: private subnets, SG allows 5432 only from the node group SG, `rds.force_ssl=1`, PITR and cross-region backup copy | SG and NetworkPolicy together: SG says "which nodes", NetworkPolicy says "which pods on those nodes". |
-| **Pipeline placement** | Runners in a separate CI VPC joined by Transit Gateway, routed only to the ECR endpoint (flow F) | The CI network has no route to the EKS API at all, which enforces flow 3 of the HLD at the network layer. |
+| **Data** | RDS: private subnets, SG allows 5432 only from the node group SG, `rds.force_ssl=1`, PITR, and a backup copy to the separate backup account in-region (a second-region copy only if residency allows, Module 12) | SG and NetworkPolicy together: SG says "which nodes", NetworkPolicy says "which pods on those nodes". |
+| **Pipeline placement** | Runners in a separate CI VPC joined by Transit Gateway; the only route from the CI VPC into the workload VPC is the ECR endpoint (flow F) | The CI network has no route to the EKS API at all, which enforces flow 3 of the HLD at the network layer. |
 | **Detection placement** | Falco and Fluent Bit as DaemonSets on every node; control-plane logs from EKS; GuardDuty alongside | Falco sees syscalls inside every pod on the node; audit logs see the API; GuardDuty adds AWS threat intel. All feed the security account. |
 | **Admission placement** | PSA (built into the API server) plus Kyverno webhooks | PSA is built into the API server, so it keeps working if the Kyverno webhook is down or removed; changing a namespace's level needs RBAC on namespaces, which only the platform team holds. Kyverno adds the supply-chain checks PSA can't express. |
 

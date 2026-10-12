@@ -1,0 +1,10 @@
+# Expected: FAIL [F-12]. An app repo opening internet egress for itself.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: { name: allow-internet, namespace: payments }
+spec:
+  podSelector: { matchLabels: { app: payments-api } }
+  policyTypes: [Egress]
+  egress:
+    - to: [ { ipBlock: { cidr: 0.0.0.0/0, except: [10.0.0.0/8, 169.254.0.0/16] } } ]
+      ports: [ { protocol: TCP, port: 443 } ]

@@ -35,8 +35,8 @@ Most findings in this review are misconfigurations, not CVEs. CVSS scores a flaw
 
 ## Adjustments (one tier at most, always explained)
 
-- **Up one tier** when a finding is a detective-control gap that would hide other Critical/High findings (e.g. no audit log), or when the exact pattern has been actively exploited in the wild recently (e.g. mutable image tags, after the 2026 Trivy and KICS Docker Hub compromises).
-- **Down one tier** when a compensating control already in place materially limits the finding (e.g. AWS already encrypts the etcd volume, so missing envelope encryption is a key-custody problem more than an exposure).
+- **Up one tier** when a finding is a detective-control gap that would hide other Critical/High findings (e.g. no audit log), or when the exact pattern has been actively exploited in the wild recently (e.g. mutable image tags, after the 2026 Trivy and KICS Docker Hub compromises), or when a government baseline mandates the control whatever its exploitability (e.g. customer-managed keys for secrets at rest).
+- **Down one tier** when a compensating control already in place materially limits the finding (e.g. a vulnerable service that is only reachable through an enforced network allowlist). No finding in this register needed it.
 
 ## Fix window
 

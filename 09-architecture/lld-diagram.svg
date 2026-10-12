@@ -136,11 +136,11 @@
   <text class="npl" x="850" y="348">ns external-secrets</text>
   <rect class="box sec" x="850" y="358" width="190" height="108"/>
   <text class="h" x="862" y="378">ESO controller</text>
-  <text class="t" x="862" y="397">SecretStore in citizen-payments</text>
-  <text class="t" x="862" y="413">→ role eso-citizen-payments:</text>
-  <text class="m" x="862" y="430">secretsmanager:GetSecret</text>
-  <text class="m" x="862" y="445">Value on /prod/payments/*</text>
-  <text class="t" x="862" y="460">refresh 1h → K8s Secret</text>
+  <text class="t" x="862" y="395">SecretStore in citizen-payments</text>
+  <text class="t" x="862" y="410">→ role eso-citizen-payments:</text>
+  <text class="m" x="862" y="425">GetSecretValue on</text>
+  <text class="m" x="862" y="439">/prod/payments/* +</text>
+  <text class="m" x="862" y="453">kms:Decrypt via SM</text>
 
   <rect class="np" x="838" y="486" width="214" height="144" rx="10"/>
   <text class="npl" x="850" y="504">ns argocd</text>
@@ -157,7 +157,7 @@
   <text class="t" x="540" y="682">• Falco (modern eBPF) → Falcosidekick → SIEM   • Fluent Bit → CloudWatch Logs</text>
   <text class="t" x="540" y="700">• VPC CNI + network policy agent (eBPF)   • Pod Identity agent 169.254.170.23:80</text>
   <text class="t" x="540" y="718">Node: IMDSv2 required, hop limit 1 · no SSH (SSM only) · EBS encrypted (KMS)</text>
-  <text class="t" x="540" y="736">Node role: AmazonEKSWorkerNodePolicy + ECR pull-only. Nothing else.</text>
+  <text class="t" x="540" y="736">Node role: worker + ECR pull-only; VPC CNI has its own IAM role.</text>
 
   <!-- cots node group -->
   <rect class="box off" x="514" y="772" width="550" height="54"/>
@@ -190,7 +190,7 @@
   <text class="t" x="1128" y="323">Storage, snapshots and</text>
   <text class="t" x="1128" y="340">backups: KMS rds-prod</text>
   <text class="t" x="1128" y="361">PITR 35 days; AWS Backup</text>
-  <text class="t" x="1128" y="378">copy to DR region</text>
+  <text class="t" x="1128" y="378">copy to backup account</text>
   <text class="t" x="1128" y="399">DB audit log → log archive</text>
   <rect class="lock" x="1262" y="172" width="46" height="20" rx="4"/><text class="lockt" x="1285" y="186">KMS</text>
 
@@ -227,9 +227,10 @@
   <text class="m" x="1380" y="322">secretsmanager-prod</text>
   <text class="m" x="1380" y="338">rds-prod · ebs-prod</text>
   <text class="m" x="1380" y="354">ci-image-signing</text>
-  <text class="t" x="1380" y="376">Admins ≠ users; rotation</text>
-  <text class="t" x="1380" y="393">on; deletion alarmed</text>
-  <text class="t" x="1380" y="414">Every use in CloudTrail</text>
+  <text class="t" x="1380" y="376">Admins ≠ users</text>
+  <text class="t" x="1380" y="393">Symmetric keys auto-rotate</text>
+  <text class="t" x="1380" y="410">Deletion alarmed</text>
+  <text class="t" x="1380" y="430">Every use in CloudTrail</text>
 
   <rect class="box dat" x="1366" y="474" width="206" height="128"/>
   <text class="h" x="1380" y="498">ECR</text>
@@ -263,11 +264,11 @@
   <text class="h" x="44" y="512">GitLab runners</text>
   <text class="t" x="44" y="532">Ephemeral, unprivileged</text>
   <text class="t" x="44" y="552">OIDC → role gitlab-ci-push:</text>
-  <text class="m" x="44" y="570">ecr:PutImage</text>
+  <text class="m" x="44" y="570">ECR push actions</text>
   <text class="m" x="44" y="586">  (payments-api repo)</text>
   <text class="m" x="44" y="602">kms:Sign</text>
   <text class="m" x="44" y="618">  (ci-image-signing)</text>
-  <text class="t" x="44" y="640">Routes: ECR endpoint only</text>
+  <text class="t" x="44" y="640">Into workload VPC: ECR only</text>
   <text class="t" x="44" y="658" fill="#B42318" font-weight="700">✕ No route to the EKS API</text>
   <text class="t" x="44" y="676" fill="#B42318" font-weight="700">✕ No Kubernetes credentials</text>
   <rect class="box dev" x="30" y="706" width="194" height="150"/>
