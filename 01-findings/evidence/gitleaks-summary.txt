@@ -1,7 +1,7 @@
 # gitleaks v8.30.1 (offline, --redact)
 
-## 1. This repository, full history up to 74676eb
-28 commits scanned. no leaks found
+## 1. This repository, full history up to 11500ae
+34 commits scanned. no leaks found
 
 ## 2. kubernetes-goat @723a0db working tree (rule and location only; values redacted)
 generic-api-key	infrastructure/users-repo/Dockerfile:4
