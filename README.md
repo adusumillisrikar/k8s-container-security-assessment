@@ -1,6 +1,6 @@
 # DevSecOps Assessment: Track 1, Kubernetes & Container Security
 
-Security review and target-state design for a government programme's Kubernetes estate (about 18 EKS workloads today, with AKS and GKE on the roadmap), done against a public, intentionally vulnerable reference repository.
+Security review and target-state design for a Kubernetes estate (EKS today, with AKS and GKE on the roadmap), done against a public, intentionally vulnerable reference repository. No real environment was accessed; every finding comes from the public repositories listed below.
 
 ## Executive summary
 

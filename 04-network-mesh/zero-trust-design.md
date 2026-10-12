@@ -85,7 +85,7 @@ The request template asks five things: source, destination, port/protocol, why, 
 
 ## 6. Service mesh: justified here?
 
-The panel brief asks for both sides. Here they are for *this* estate: about 18 EKS workloads, mostly stateless citizen-facing services, a team that containerised in a hurry, one COTS image we can't modify, and a hard go-live date.
+The panel brief asks for both sides. Here they are for *this* estate: a small number of EKS workloads, mostly stateless citizen-facing services, a team that containerised in a hurry, one COTS image we can't modify, and a hard go-live date.
 
 **The case for a mesh**
 - **mTLS between every service**, with identity tied to the workload rather than an IP. If the programme's standard requires encryption in transit *inside* the cluster, a mesh is the cleanest way to meet it uniformly.
