@@ -106,7 +106,18 @@ The SBOM says *what* is in the image. The signature says *we* approved it. Prove
 
 ## 9. Proof this catches the incident
 
-Conftest run against kubernetes-goat's actual `scenarios/insecure-rbac/setup.yaml` with the policy in this folder. Output and the exact command are in [`../01-findings/evidence/`](../01-findings/evidence/).
+Tested, not just designed. Full output and the script are in [`../01-findings/evidence/`](../01-findings/evidence/).
+
+| Tool, against kubernetes-goat's real `scenarios/insecure-rbac/setup.yaml` | Result |
+|---|---|
+| **Conftest with this folder's policy** (pre-merge gate) | `FAIL ... [F-01] ClusterRoleBinding/superadmin binds cluster-admin`: **blocks the merge** |
+| **Kyverno with this folder's policy** (admission) | `cluster-admin bindings are not allowed (F-01)`: **blocks the apply** |
+| Checkov 3.3.19 (generic catalogue) | **No finding.** Its RBAC checks read Role contents, and `cluster-admin` never appears in the manifest |
+| Trivy 0.74.0 (generic catalogue) | `KSV-0111`, rated **Medium**: passes a typical "fail on High/Critical" gate |
+
+That's the case for an organisation-owned policy in one table: the two generic scanners would have let the audit finding through, and the rule written for our own incident stops it at both merge and admission.
+
+Testing also caught a bug in my own admission policy: with `background: true`, Kyverno silently skipped the `cluster-admin` rule (subject-based exclusions aren't allowed in background scans). It's now admission-only. Policies get tested like code, with known-bad and known-good manifests, in the policy repo's own pipeline.
 
 ## 10. Securing the pipeline itself
 
@@ -114,8 +125,9 @@ The pipeline is now the most privileged thing in the delivery path, so:
 
 - **Runners:** ephemeral Kubernetes runners, unprivileged, no Docker-in-Docker (builds use rootless buildah). Separate runner pool, tagged, for protected branches so MR code from any branch never runs where signing credentials are reachable.
 - **Credentials:** no static cloud keys. GitLab OIDC `id_tokens` → short-lived role; trust policy pinned to project path and protected ref.
-- **Tool images pinned by digest**, updated only by Renovate MRs that a human reviews. In March 2026 the `aquasec/trivy` `latest` and `0.69.4-0.69.6` tags served a credential stealer for about three days, and in April the `checkmarx/kics` tags did the same. A pipeline pulling `trivy:latest` would have handed its CI secrets to an attacker *while running a security scan*. Digest pinning plus no long-lived secrets in CI means that class of attack gets little.
-- **Policies** are in a central repo with CODEOWNERS = security; app pipelines pull them at a pinned ref.
+- **Tool images pinned by digest**, updated only by Renovate MRs that a human reviews, with a **~14-day cooldown** before any new release is adopted. In March 2026 the `aquasec/trivy` `latest` and `0.69.4-0.69.6` tags served a credential stealer for about three days, and in April the `checkmarx/kics` tags did the same. A pipeline pulling `trivy:latest` would have handed its CI secrets to an attacker *while running a security scan*. Digest pinning plus no long-lived secrets in CI means that class of attack gets little.
+- **Policies** are in a central repo with CODEOWNERS = security; app pipelines pull them at a pinned ref. The policy repo has its own pipeline that runs every policy against known-bad and known-good manifests (as in `tools/run-scans.sh`).
+- **Known upgrade item:** Kyverno 1.19 deprecates `kyverno.io/v1 ClusterPolicy` in favour of CEL-based `ValidatingPolicy`. The policies here work today; migrating them is planned work, not a go-live blocker.
 - **Branch protection:** main is protected, MRs need approval, force-push disabled, and pipeline configuration changes need a security CODEOWNER review.
 
 ## 11. Other clouds

@@ -28,16 +28,18 @@ stages:
   - deploy-production
 
 variables:
-  # Tool images: digest-pinned, bumped only by Renovate MRs that a human reviews.
-  # Digests below are illustrative placeholders; the evidence/ folder records the
-  # digests actually verified and used for this assessment.
+  # Tool images: digest-pinned, bumped only by Renovate MRs that a human reviews,
+  # with a ~14-day cooldown on new releases (most malicious releases are caught
+  # within days). The Conftest, Checkov, kube-score and Trivy digests are the ones
+  # actually run for this assessment (01-findings/evidence/). The others weren't
+  # exercised here and are shown as placeholders.
   GITLEAKS_IMAGE: "docker.io/zricethezav/gitleaks:v8.24.0@sha256:<digest>"
   KUBECONFORM_IMAGE: "ghcr.io/yannh/kubeconform:v0.6.7@sha256:<digest>"
-  CONFTEST_IMAGE: "docker.io/openpolicyagent/conftest:v0.56.0@sha256:<digest>"
-  CHECKOV_IMAGE: "docker.io/bridgecrew/checkov:3.2.400@sha256:<digest>"
-  KUBESCORE_IMAGE: "docker.io/zegl/kube-score:v1.19.0@sha256:<digest>"
+  CONFTEST_IMAGE: "docker.io/openpolicyagent/conftest:v0.70.1@sha256:82f23e0e1f3faf2f3798f4b1974676c1aed96b05c6656ec6820435c31867c532"
+  CHECKOV_IMAGE: "docker.io/bridgecrew/checkov:3.3.19@sha256:d3e96adafdb315ca82e792ca8708c01adae85292800fb064c8b309b3d0cb7b80"
+  KUBESCORE_IMAGE: "docker.io/zegl/kube-score:v1.20.0@sha256:ac4c43ad560af905d66f6bf57b0937c591332e6dbf2167c31193a13b4695ab97"
   SEMGREP_IMAGE: "docker.io/semgrep/semgrep:1.100.0@sha256:<digest>"
-  TRIVY_IMAGE: "docker.io/aquasec/trivy:0.69.3@sha256:<digest>"   # 0.69.4-0.69.6 were malicious
+  TRIVY_IMAGE: "docker.io/aquasec/trivy:0.74.0@sha256:62b1e65e8869bc4b4c6aa4fa2b21595256c7c2f6018a9d9ad61caf87187c1969"   # never 0.69.4-0.69.6 (malicious, Mar 2026)
   # Platform-built image (buildah, aws-cli, syft, cosign, crane, yq, git), every
   # binary checksum-verified at build time, rebuilt weekly, itself signed.
   CI_TOOLS_IMAGE: "111122223333.dkr.ecr.ap-southeast-1.amazonaws.com/platform/ci-tools@sha256:<digest>"
@@ -110,16 +112,21 @@ checkov-iac:
     # Hard-fail on a curated list of high-impact checks; everything else soft.
     - >
       checkov -d . --framework terraform kubernetes helm
-      --hard-fail-on CKV_AWS_39,CKV_AWS_38,CKV_AWS_37,CKV_AWS_58,CKV_AWS_51,CKV_AWS_136,CKV_K8S_16,CKV_K8S_17,CKV_K8S_19,CKV_K8S_20,CKV_K8S_27,CKV_K8S_155
+      --hard-fail-on CKV_AWS_39,CKV_AWS_38,CKV_AWS_37,CKV_AWS_58,CKV_AWS_51,CKV_AWS_136,CKV_AWS_163,CKV_AWS_130,CKV2_AWS_11,CKV_K8S_16,CKV_K8S_17,CKV_K8S_19,CKV_K8S_20,CKV_K8S_27,CKV_K8S_49,CKV2_K8S_5
       --soft-fail
       --output cli --output junitxml --output-file-path console,checkov.xml
   artifacts:
     when: always
     reports: { junit: checkov.xml }
+  # All IDs verified against Checkov 3.3.19 output (01-findings/evidence/):
   # CKV_AWS_39/38 public EKS endpoint (F-15), CKV_AWS_37 control-plane logging (F-16),
-  # CKV_AWS_58 secrets encryption (F-23), CKV_AWS_51/136 ECR immutable/KMS (F-25),
+  # CKV_AWS_58 secrets encryption (F-23), CKV_AWS_51/136/163 ECR immutable/KMS/scan (F-25),
+  # CKV_AWS_130 public IPs on subnets (F-22), CKV2_AWS_11 VPC flow logs (F-30),
   # CKV_K8S_16/17/19/20 privileged/hostPID/hostNetwork/privesc (F-02),
-  # CKV_K8S_27 docker socket (F-03), CKV_K8S_155 cluster-admin binding (F-01).
+  # CKV_K8S_27 docker socket (F-03), CKV_K8S_49 wildcard roles and CKV2_K8S_5
+  # read-all-secrets (F-04/F-08).
+  # NOTE: no Checkov check flags a binding to the built-in cluster-admin role (verified:
+  # zero results on goat's insecure-rbac/setup.yaml). F-01 is caught by conftest-policy.
 
 kube-score:
   stage: static-analysis
