@@ -22,6 +22,8 @@ The review found **31 issues: 4 Critical, 14 High, 11 Medium, 2 Low** ([findings
 | Default-deny networking + per-workload cloud identity | One compromised app can't reach the others or the cloud account | [4](04-network-mesh/zero-trust-design.md), [5](05-secrets-keys/secrets-architecture.md) |
 | Audit logging + runtime detection to a tamper-proof archive | Misuse raises an alert, and the evidence survives | [3](03-runtime-security/runtime-detection-ir-plan.md) |
 
+**Already in this repo:** corrected, tested manifests and code for the top three blockers ([Module 6](06-remediation/remediation-advisory.md)) and the admission policies that close F-06 ([Module 2](02-pipeline-supply-chain/pipeline-design.md)). The other six blockers have step-by-step fixes and effort estimates in the [findings register](01-findings/findings-register.md).
+
 **One decision for the panel:** the COTS product that the vendor won't rebuild can go live with compensating controls at a **Medium** residual risk. That acceptance should be signed by the **system owner**, endorsed by the ITSO-equivalent, valid for 6 months, with a funded exit plan ([Module 7](06-remediation/compensating-controls.md)). A second, smaller decision is in [Module 12](10-resilience-dr/dr-plan.md#4-named-rto--rpo-payments-api-citizen-payments): whether data-residency rules allow a second-region DR copy.
 
 ## The first 90 days
@@ -43,6 +45,8 @@ Measured by: blockers closed with evidence, share of namespaces at default-deny 
 | **"What good looks like"** baseline for remediation and diagrams | [aws-ia/terraform-aws-eks-blueprints](https://github.com/aws-ia/terraform-aws-eks-blueprints) | referenced, not reviewed |
 
 **Why this combination:** kubernetes-goat covers the cluster and workload layers well (RBAC, pod security, secrets, network, supply chain), but it contains no Terraform. Its only provisioning code is an AWS CDK stack for a lab VM. The brief asks for findings across Terraform/cluster provisioning too, so two files from terragoat provide the EKS control-plane and registry findings (public endpoint, authentication, logging, secrets encryption key, ECR). Every finding cites `file:line` at the pinned commit, so the evidence stays valid if upstream changes.
+
+**Credit and licences:** kubernetes-goat is © 2020 Madhu Akula, under the [MIT licence](https://github.com/madhuakula/kubernetes-goat/blob/723a0db478f050d173d23b4ce5044b65bce0bdd0/LICENSE). The corrected manifests in `06-remediation/fixed-manifests/` are adapted from its scenarios, and short excerpts are quoted in the findings. terragoat is under the [Apache 2.0 licence](https://github.com/bridgecrewio/terragoat/blob/729f8da62c6a85ce4af5ad3d123de97776d954c4/LICENSE) and is cited by file and line.
 
 ## How the modules fit together
 
