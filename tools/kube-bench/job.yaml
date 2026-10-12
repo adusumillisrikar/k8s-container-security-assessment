@@ -1,0 +1,64 @@
+# kube-bench as a one-off Job, based on upstream job.yaml (aquasecurity/kube-bench v0.16.0),
+# with the image pinned by digest, all host mounts read-only, one read-only capability, and
+# no service-account token. Used by tools/kube-bench-kind.sh on a throwaway kind cluster.
+#
+# In the target state the same Job runs on a schedule against real EKS nodes with
+# --benchmark eks-1.8.0, and results go to the SIEM (Module 3) and compliance
+# evidence (Module 9).
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: kube-bench
+  namespace: default
+spec:
+  backoffLimit: 0
+  template:
+    spec:
+      hostPID: true            # needed to read the kubelet / API server process flags
+      restartPolicy: Never
+      automountServiceAccountToken: false
+      tolerations:
+        - key: node-role.kubernetes.io/control-plane
+          operator: Exists
+          effect: NoSchedule
+      containers:
+        - name: kube-bench
+          image: docker.io/aquasec/kube-bench@sha256:75506f222d1eb6ce2a751a5533bdc0a3b54c898e2e49e7751d0ee22cfb862679  # v0.16.0
+          # kube-bench has no version mapping beyond Kubernetes 1.34 yet, so the
+          # newest generic CIS benchmark is selected explicitly.
+          command: ["kube-bench", "run", "--benchmark", "cis-1.12",
+                    "--targets", "master,node,etcd,controlplane,policies"]
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+              # Read-only bypass of file permissions, so it can inspect root-only
+              # config directories. Can't write or change ownership.
+              add: ["DAC_READ_SEARCH"]
+          volumeMounts:
+            - { name: var-lib-etcd, mountPath: /var/lib/etcd, readOnly: true }
+            - { name: var-lib-kubelet, mountPath: /var/lib/kubelet, readOnly: true }
+            - { name: var-lib-kube-scheduler, mountPath: /var/lib/kube-scheduler, readOnly: true }
+            - { name: var-lib-kube-controller-manager, mountPath: /var/lib/kube-controller-manager, readOnly: true }
+            - { name: etc-systemd, mountPath: /etc/systemd, readOnly: true }
+            - { name: lib-systemd, mountPath: /lib/systemd/, readOnly: true }
+            - { name: srv-kubernetes, mountPath: /srv/kubernetes/, readOnly: true }
+            - { name: etc-kubernetes, mountPath: /etc/kubernetes, readOnly: true }
+            - { name: usr-bin, mountPath: /usr/local/mount-from-host/bin, readOnly: true }
+            - { name: etc-cni-netd, mountPath: /etc/cni/net.d/, readOnly: true }
+            - { name: opt-cni-bin, mountPath: /opt/cni/bin/, readOnly: true }
+            - { name: tmp, mountPath: /tmp }
+      volumes:
+        - { name: var-lib-etcd, hostPath: { path: /var/lib/etcd } }
+        - { name: var-lib-kubelet, hostPath: { path: /var/lib/kubelet } }
+        - { name: var-lib-kube-scheduler, hostPath: { path: /var/lib/kube-scheduler } }
+        - { name: var-lib-kube-controller-manager, hostPath: { path: /var/lib/kube-controller-manager } }
+        - { name: etc-systemd, hostPath: { path: /etc/systemd } }
+        - { name: lib-systemd, hostPath: { path: /lib/systemd } }
+        - { name: srv-kubernetes, hostPath: { path: /srv/kubernetes } }
+        - { name: etc-kubernetes, hostPath: { path: /etc/kubernetes } }
+        - { name: usr-bin, hostPath: { path: /usr/bin } }
+        - { name: etc-cni-netd, hostPath: { path: /etc/cni/net.d/ } }
+        - { name: opt-cni-bin, hostPath: { path: /opt/cni/bin/ } }
+        - { name: tmp, emptyDir: { sizeLimit: 64Mi } }

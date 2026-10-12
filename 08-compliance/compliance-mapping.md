@@ -15,7 +15,7 @@ For each finding:
 
 **Two landing zone tiers, two evidence models.** The newer tier has continuous compliance monitoring (AWS Config and Security Hub), so most evidence below is a standing control result that's refreshed automatically. The older VPC-per-environment tier doesn't, so the same checks run as a scheduled pipeline job that writes a dated evidence file to the log archive. Same tests, same evidence format, different collection. When the older tier is migrated, the scheduled job is retired.
 
-> CIS references use the CIS Amazon EKS Benchmark v1.x numbering, and Security Hub references use AWS Foundational Security Best Practices control IDs. Both should be confirmed against the versions the programme has adopted.
+> CIS references were checked against the CIS Amazon EKS Benchmark v1.8.0 control text (as shipped in kube-bench v0.16.0). Security Hub references use AWS Foundational Security Best Practices control IDs. Both should be confirmed against the versions the programme has adopted.
 
 ## 2. Five findings mapped
 

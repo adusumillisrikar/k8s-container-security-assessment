@@ -7,6 +7,7 @@ Everything here was produced by two scripts in [`tools/`](../../tools/). Anyone 
 | [`tools/run-scans.sh`](../../tools/run-scans.sh) | Runs Conftest, Checkov, kube-score, Trivy and the Kyverno CLI against kubernetes-goat `723a0db`, terragoat `729f8da` (`eks.tf`, `ecr.tf`), and this repo's fixed manifests |
 | [`tools/psa-rbac-test.sh`](../../tools/psa-rbac-test.sh) | Creates a throwaway local kind cluster, checks the Module 6 claims live (Pod Security and RBAC before/after), then deletes the cluster |
 | [`tools/validate-falco.sh`](../../tools/validate-falco.sh) | Validates the custom Falco rules (Module 3) with Falco 0.45.0 and the signature-verified k8saudit/json plugins, offline |
+| [`tools/kube-bench-kind.sh`](../../tools/kube-bench-kind.sh) | Runs kube-bench (CIS Kubernetes Benchmark 1.12) as a pinned, read-only Job on a clean, throwaway kind cluster, then deletes it. A method demonstration, not EKS evidence |
 | [`tools/run-online-checks.sh`](../../tools/run-online-checks.sh) | The two checks that need network access: kubeconform (downloads schemas) and Semgrep registry packs (downloads rules). Inputs read-only, no credentials, telemetry off |
 
 Run on 2026-10-12.
@@ -36,6 +37,7 @@ The 2026 Trivy and KICS Docker Hub compromises showed that a security scanner is
 | gitleaks | v8.30.1 | `zricethezav/gitleaks@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f` |
 | Semgrep | 1.178.0 | `semgrep/semgrep@sha256:32e459968daabe7ab86968184a29109b9564aa00392401156f9788452b42786b` |
 | kubeconform | v0.8.0 | `ghcr.io/yannh/kubeconform@sha256:faffaf43f95aa6425306e1ab8d6fcad72acb9049158f38e574c085ea1ec0f64e` |
+| kube-bench | v0.16.0 | `aquasec/kube-bench@sha256:75506f222d1eb6ce2a751a5533bdc0a3b54c898e2e49e7751d0ee22cfb862679` (tag unchanged since release; no published advisories) |
 | falcoctl | 0.14.2 | `falcosecurity/falcoctl@sha256:90ba9627886e8f26b746fa52465d755b28ee49b76eb1d047a0fefd8cadb21907` (plugin signatures verified on install) |
 
 ## Headline results
@@ -58,6 +60,7 @@ The 2026 Trivy and KICS Docker Hub compromises showed that a security scanner is
 | 14 | Semgrep **organisation rules** (`policies/semgrep/org-rules.yaml`) vs goat, and vs the corrected code from the remediation advisory | **All three caught** (F-03, F-09, F-10), all blocking. **0 findings** on the corrected code | [semgrep-org-rules.txt](semgrep-org-rules.txt) |
 | 15 | gitleaks vs this repo's full history, and vs the goat tree | This repo: **no leaks**. Goat: 13 hits on the committed Secret manifests and the `ENV API_KEY` line; misses the deleted-layer secret, the `.git` inside the tarball and the Redis/metadata seed files | [gitleaks-summary.txt](gitleaks-summary.txt) |
 | 16 | kubeconform: fixed manifests and Kyverno policies vs Kubernetes 1.36 schemas (CRDs from the CRDs catalog) | **28/28 valid**, 0 skipped | [kubeconform-fixed.txt](kubeconform-fixed.txt) |
+| 17 | kube-bench on a clean kind cluster (CIS Kubernetes 1.12) | 63 PASS, 12 FAIL, 56 WARN. Interpreted below: most FAILs are control-plane checks that AWS owns on EKS | [kube-bench-kind.txt](kube-bench-kind.txt) |
 
 ## What testing changed in the submission
 
@@ -120,7 +123,15 @@ Testing found real problems in my own work. They've been fixed, and they're list
 | F-11 Secret values in Git | n/a | n/a | ✓ | ✗ |
 | F-13 Redis seed secret | n/a | n/a | ✗ | ✗ |
 
-**Not run:** kube-bench. Neither reference repo defines EKS worker nodes, and a kind node isn't representative of an EKS node, so its results would describe kind rather than the target state. In the design it runs as a scheduled job against real nodes (F-18).
+**kube-bench: run, but read with care.** Neither reference repo defines EKS worker nodes, so there was nothing representative to benchmark. It was run on a clean kind cluster to demonstrate the method, and the results are useful mainly for showing where the managed-Kubernetes responsibility line sits:
+
+| kube-bench result on kind | On EKS | Where it lands in this submission |
+|---|---|---|
+| 10 FAILs on API server, scheduler and controller-manager flags (audit-log flags, profiling, kubelet CA) and 1 on etcd directory ownership | **AWS's side.** The control plane is managed; there are no flags or files for us to set. kube-bench's EKS benchmark (`eks-1.8.0`) doesn't check them | The customer-side equivalent is configuration through the EKS API: audit logging (F-16), endpoint access (F-15), envelope encryption (F-23) |
+| 2 FAILs on kubelet file permissions (4.1.1, 4.1.9) | **Our side.** Worker nodes are ours | Scheduled kube-bench Job with `--benchmark eks-1.8.0` against real nodes; Bottlerocket/AL2023 EKS AMIs are the baseline (F-18) |
+| 34 WARNs in "policies" (RBAC, Pod Security, NetworkPolicy, secrets), all marked *Manual* | **Our side** | Automated by this design: Conftest pre-merge, Kyverno + PSA at admission (Module 2), default-deny (Module 4) |
+
+Two limits worth knowing: kube-bench has no version mapping beyond Kubernetes 1.34 yet (the benchmark was selected explicitly), and it does **not** check kernel parameters or OS services. Those belong to the operating-system CIS benchmark (CIS Bottlerocket or CIS Amazon Linux 2023), assessed on the node image rather than through Kubernetes.
 
 **What this shows:**
 - **Scanners are good at configuration and bad at intent.** They reliably catch privileged pods, missing limits and public endpoints. No generic scanner found the SSRF or the command injection (organisation Semgrep rules now do), and none at all found the unauthenticated Redis and registry, the secret hidden in a deleted image layer, the `.git` history shipped inside an image, or the dormant download-and-run script. Those are among the highest-impact findings, and they came from reading the code.
